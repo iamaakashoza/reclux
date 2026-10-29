@@ -2018,6 +2018,48 @@ Copies of both pages are in `store/site/`.
 - Commits use your GitHub **no-reply address**, so your real email is not shown.
 - **No license file yet.** Without one, others may read the code but have no right to reuse it. Pick one when you decide (MIT is the common simple choice).
 - Mistake found and fixed: my first three small repos (`reclux-probe`, `reclux-privacy`, `reclux-install`) had your real email in their commit. I rewrote them to the no-reply address. GitHub may still serve the old commit by its exact ID for a while.
+- Later: you deleted `reclux-probe` yourself on GitHub. Confirmed gone (page returns 404).
+
+---
+
+## 29. Windows installer (.exe), no stores (done) 💾
+
+You decided: **no store publishing**. Reclux is shared as a Windows installer.
+
+### 29.1 What the .exe does
+```
+ Reclux-Setup-0.1.0.exe  (2.2 MB, no admin needed)
+   1. Copies Reclux to  C:\Users\<you>\AppData\Local\Reclux\extension
+   2. Finish page: tick the browsers you have (Chrome, Brave, Edge, Opera are found by itself)
+   3. Each ticked browser opens a 4-step guide with Copy buttons:
+        open the extensions page → Developer mode on → Load unpacked → paste the folder
+   4. The Reclux welcome wizard opens
+   + Start menu: "Reclux setup guide"   + Uninstall in Windows Settings > Apps
+```
+- **Why not fully automatic:** browsers block programs from adding extensions, and even refuse to open their own extensions page when a program asks (tested). The only automatic route is company policy settings, which we agreed not to use.
+- **Same folder every time**, so an update keeps the extension's identity and your saved settings. To update: run the new .exe, then press reload on Reclux (or restart the browser).
+
+### 29.2 Tested on this PC
+| Check | Result |
+|---|---|
+| Silent install: files, Start menu shortcut, uninstall entry | ✅ |
+| Finds Chrome, Brave, Edge (Windows registry) and Opera (its folder) | ✅ all 4 |
+| Installed copy loads and records (Edge): start, pause, stop, keep-awake | ✅ |
+| Guide page shows the right browser, address and folder; Copy works | ✅ Edge, Opera, Chrome |
+| Guide page accessibility (axe) | **0 problems** in all 3 |
+| Silent uninstall removes folder, shortcut and entry | ✅ |
+| The installer's own windows (clicking through by hand) | ❌ not tested by me. Please run it |
+
+### 29.3 Things users will see
+- **"Windows protected your PC"** the first time (the .exe is not code-signed; a certificate costs money every year). Click **More info → Run anyway**.
+- Chrome may remind about **developer-mode extensions**. That is normal for Load unpacked.
+- **No automatic updates.** Each new version is a new .exe.
+- **Firefox is not included** (it needs Mozilla signing).
+
+### 29.4 Files
+- `installer/reclux.iss` (installer recipe), `installer/install-guide.html`, `installer/reclux.ico`
+- Build: `npm run installer` → `.output/Reclux-Setup-0.1.0.exe`
+- The install page (`reclux-install`) still talks about stores. It needs an update if you want to offer the .exe there.
 
 ---
 
