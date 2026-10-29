@@ -187,6 +187,17 @@ kbd { font-family: var(--mono); font-size: 0.85em; padding: 0.1rem 0.4rem; borde
 .hash { font-family: var(--mono); font-size: 0.75rem; overflow-wrap: anywhere; color: var(--ink-2); }
 @media (min-width: 1000px) { .install-grid { grid-template-columns: 1.25fr 1fr; } .dl-card { position: sticky; top: 5.5rem; } }
 
+/* Extension by hand (.zip) */
+.parts.two { margin-bottom: 2.5rem; }
+@media (min-width: 720px) { .parts.two { grid-template-columns: repeat(2, 1fr); } }
+.ext-flow { margin-bottom: 2.5rem; }
+.ext-grid { display: grid; gap: 3rem; margin-top: 3rem; }
+.col-title { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 1rem; }
+.steps h4 { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.015em; }
+.small { font-size: 0.9375rem; margin-top: 1rem; }
+td kbd { white-space: nowrap; }
+@media (min-width: 1000px) { .ext-grid { grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); } }
+
 /* Tables */
 .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); }
 table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; min-width: 36rem; }

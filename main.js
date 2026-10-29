@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     note.hidden = false;
     note.textContent = /Android|iPhone|iPad|iPod/.test(ua) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(ua))
       ? 'Reclux runs on desktop computers. Open this page on a Windows PC to install it.'
-      : 'The setup file is for Windows. On Mac or Linux, the extension can be built from the source code on GitHub.';
+      : 'The setup file is for Windows. On Mac or Linux, use the .zip further down this page.';
   }
 
   // Close the mobile menu after choosing a section.

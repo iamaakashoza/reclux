@@ -29,6 +29,7 @@
       <a href="#parts">How it fits</a>
       <a href="#features">Features</a>
       <a href="#install">Install</a>
+      <a href="#extension">.zip</a>
       <a href="#privacy">Privacy</a>
       <a href="#faq">FAQ</a>
     </nav>
@@ -41,6 +42,7 @@
         <a href="#parts">How it fits</a>
         <a href="#features">Features</a>
         <a href="#install">Install</a>
+        <a href="#extension">.zip</a>
         <a href="#privacy">Privacy</a>
         <a href="#faq">FAQ</a>
       </nav>
@@ -336,6 +338,105 @@
   </div>
 </section>
 
+<!-- EXTENSION BY HAND -->
+<section id="extension" aria-labelledby="extension-title">
+  <div class="wrap">
+    <div class="head" data-reveal>
+      <p class="label">The extension, by hand</p>
+      <h2 id="extension-title">Rather use the <span class="serif">.zip?</span></h2>
+      <p>Skip the setup wizard and add the extension yourself, in about a minute. This also works on Mac and Linux. Is it the same in every browser? Almost: there are two kinds.</p>
+    </div>
+
+    <ol class="parts two">
+      <li class="part" data-reveal>
+        <header><h3>Chrome, Brave, Edge, Opera</h3><span class="num">Same</span></header>
+        <dl>
+          <dt>The file</dt><dd>One .zip for all four browsers.</dd>
+          <dt>The steps</dt><dd>Identical. Only the extensions address and the place of the Developer mode switch change.</dd>
+          <dt>How long it stays</dt><dd>Until you remove it, through restarts.</dd>
+        </dl>
+        <a class="btn btn-line" href="download/reclux-0.1.0-chrome.zip" download>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download .zip · 118 KB
+        </a>
+        <p class="hash">SHA-256 6bdf4ac555714183bffb5f528a24dd4ba767d98cee09ba34d6c84b3c8f3e4692</p>
+      </li>
+      <li class="part" data-reveal data-i="1">
+        <header><h3>Firefox</h3><span class="num">Different</span></header>
+        <dl>
+          <dt>The file</dt><dd>Its own .zip, built for Firefox 140 or newer.</dd>
+          <dt>The steps</dt><dd>No unzipping and no Developer mode. You add it from a debugging page.</dd>
+          <dt>How long it stays</dt><dd>Until Firefox closes. Firefox keeps only add-ons signed by Mozilla, so you add it again each time.</dd>
+        </dl>
+        <a class="btn btn-line" href="download/reclux-0.1.0-firefox.zip" download>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download .zip · 118 KB
+        </a>
+        <p class="hash">SHA-256 3ece621fc247cef797076f78fba53de582aa3ec25e2b833bbe7bddf55db97175</p>
+      </li>
+    </ol>
+
+    <figure class="flow art draw ext-flow" data-reveal aria-hidden="true">
+      <svg viewBox="0 0 1000 218">
+        <text x="2" y="14" font-size="10" class="t-muted">CHROME · BRAVE · EDGE · OPERA</text>
+        <g><rect class="h" x="2" y="26" width="196" height="60" rx="30" pathLength="1"/><text x="100" y="52" font-size="13" text-anchor="middle">.zip file</text><text x="100" y="70" font-size="10" text-anchor="middle" class="t-muted">chrome build</text></g>
+        <path class="red ln" d="M204 56 H 262" pathLength="1"/><path class="red ln" d="M256 50 L 264 56 L 256 62" pathLength="1"/>
+        <g><rect class="h" x="268" y="26" width="196" height="60" rx="30" pathLength="1"/><text x="366" y="52" font-size="13" text-anchor="middle">Extract</text><text x="366" y="70" font-size="10" text-anchor="middle" class="t-muted">to a folder you keep</text></g>
+        <path class="red ln" d="M470 56 H 528" pathLength="1"/><path class="red ln" d="M522 50 L 530 56 L 522 62" pathLength="1"/>
+        <g><rect class="h" x="534" y="26" width="196" height="60" rx="30" pathLength="1"/><text x="632" y="52" font-size="13" text-anchor="middle">Load unpacked</text><text x="632" y="70" font-size="10" text-anchor="middle" class="t-muted">Developer mode on</text></g>
+        <path class="red ln" d="M736 56 H 794" pathLength="1"/><path class="red ln" d="M788 50 L 796 56 L 788 62" pathLength="1"/>
+        <g><rect class="h" x="800" y="26" width="196" height="60" rx="30" pathLength="1"/><circle class="dot pulse" cx="834" cy="56" r="5"/><text x="910" y="52" font-size="13" text-anchor="middle">Reclux</text><text x="910" y="70" font-size="10" text-anchor="middle" class="t-muted">stays installed</text></g>
+
+        <text x="2" y="142" font-size="10" class="t-muted">FIREFOX</text>
+        <g><rect class="h" x="2" y="154" width="196" height="60" rx="30" pathLength="1"/><text x="100" y="180" font-size="13" text-anchor="middle">.zip file</text><text x="100" y="198" font-size="10" text-anchor="middle" class="t-muted">firefox build</text></g>
+        <path class="red ln" d="M204 184 H 262" pathLength="1"/><path class="red ln" d="M256 178 L 264 184 L 256 190" pathLength="1"/>
+        <g><rect class="h" x="268" y="154" width="196" height="60" rx="30" pathLength="1"/><text x="366" y="180" font-size="13" text-anchor="middle">Keep it zipped</text><text x="366" y="198" font-size="10" text-anchor="middle" class="t-muted">no extracting</text></g>
+        <path class="red ln" d="M470 184 H 528" pathLength="1"/><path class="red ln" d="M522 178 L 530 184 L 522 190" pathLength="1"/>
+        <g><rect class="h" x="534" y="154" width="196" height="60" rx="30" pathLength="1"/><text x="632" y="180" font-size="13" text-anchor="middle">Temporary Add-on</text><text x="632" y="198" font-size="10" text-anchor="middle" class="t-muted">about:debugging</text></g>
+        <path class="red ln" d="M736 184 H 794" pathLength="1"/><path class="red ln" d="M788 178 L 796 184 L 788 190" pathLength="1"/>
+        <g><rect class="h" x="800" y="154" width="196" height="60" rx="30" pathLength="1"/><circle class="dot" cx="834" cy="184" r="5"/><text x="910" y="180" font-size="13" text-anchor="middle">Reclux</text><text x="910" y="198" font-size="10" text-anchor="middle" class="t-muted">until Firefox closes</text></g>
+      </svg>
+    </figure>
+
+    <div class="table-scroll" data-reveal tabindex="0" role="region" aria-label="Where to add Reclux in each browser">
+      <table>
+        <caption>Each browser at a glance</caption>
+        <thead><tr><th scope="col">Browser</th><th scope="col">Type this address</th><th scope="col">Developer mode switch</th><th scope="col">Then click</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Chrome</th><td><kbd>chrome://extensions</kbd></td><td>Top right</td><td>Load unpacked</td></tr>
+          <tr><th scope="row">Brave</th><td><kbd>brave://extensions</kbd></td><td>Top right</td><td>Load unpacked</td></tr>
+          <tr><th scope="row">Edge</th><td><kbd>edge://extensions</kbd></td><td>Left panel, near the bottom. In a narrow window, open the menu at the top left first</td><td>Load unpacked</td></tr>
+          <tr><th scope="row">Opera</th><td><kbd>opera://extensions</kbd></td><td>Top right</td><td>Load unpacked</td></tr>
+          <tr><th scope="row">Firefox</th><td><kbd>about:debugging#/runtime/this-firefox</kbd></td><td>Not needed</td><td>Load Temporary Add-on…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ext-grid">
+      <div data-reveal>
+        <h3 class="col-title">Chrome, Brave, Edge, Opera</h3>
+        <ol class="steps">
+          <li><div><h4>Download and extract</h4><p>Right-click <span class="mono">reclux-0.1.0-chrome.zip</span>, choose <strong>Extract All</strong>, then move the folder somewhere it can stay, such as Documents. Browsers can’t add a .zip directly.</p></div></li>
+          <li><div><h4>Open the extensions page</h4><p>Type the address from the table into the address bar, for example <kbd>brave://extensions</kbd>, and press Enter.</p></div></li>
+          <li><div><h4>Turn on Developer mode</h4><p>Find the switch in the place the table shows. Three new buttons appear.</p></div></li>
+          <li><div><h4>Click Load unpacked</h4><p>Choose the extracted folder, the one with <span class="mono">manifest.json</span> inside, and click <strong>Select Folder</strong>.</p><p class="note"><strong>Keep that folder.</strong> The browser reads Reclux from it every time. If you move or delete it, Reclux stops working.</p></div></li>
+          <li><div><h4>Pin it</h4><p>The welcome wizard opens. Click the puzzle icon in the toolbar, then the pin next to Reclux.</p></div></li>
+        </ol>
+        <p class="muted small">To update: extract the new .zip over the same folder, then press reload on Reclux in the extensions page.</p>
+      </div>
+      <div data-reveal data-i="1">
+        <h3 class="col-title">Firefox</h3>
+        <ol class="steps">
+          <li><div><h4>Download the Firefox .zip</h4><p>Leave <span class="mono">reclux-0.1.0-firefox.zip</span> as it is. Don’t extract it.</p></div></li>
+          <li><div><h4>Open the debugging page</h4><p>Type <kbd>about:debugging#/runtime/this-firefox</kbd> into the address bar and press Enter.</p></div></li>
+          <li><div><h4>Click Load Temporary Add-on…</h4><p>Choose the .zip file. The welcome wizard opens, and Reclux appears under the puzzle icon in the toolbar.</p><p class="note"><strong>Firefox removes it when it closes.</strong> Repeat steps 2 and 3 each time you want to record. Your saved videos are not affected.</p></div></li>
+        </ol>
+        <p class="muted small">In Firefox, recordings with sound save as WebM, and computer sound (system audio) is not available.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- QUALITY TABLE -->
 <section id="sizes" aria-labelledby="sizes-title">
   <div class="wrap">
@@ -435,8 +536,8 @@
           <tr><th scope="row">Brave</th><td class="yes">Yes</td><td>Through the setup wizard. The low-disk warning is off, because Brave hides the real free space for privacy</td></tr>
           <tr><th scope="row">Edge</th><td class="yes">Yes</td><td>Through the setup wizard</td></tr>
           <tr><th scope="row">Opera</th><td class="yes">Yes</td><td>Through the setup wizard</td></tr>
-          <tr><th scope="row">Firefox</th><td class="part-yes">Not in the installer</td><td>A Firefox version exists in the source code, but Firefox only installs add-ons signed by Mozilla. With sound it saves WebM, and system audio is not available</td></tr>
-          <tr><th scope="row">Mac and Linux</th><td class="part-yes">Not tested</td><td>The extension should work in the same browsers; the installer is Windows only</td></tr>
+          <tr><th scope="row">Firefox</th><td class="part-yes">Temporary</td><td>Add it with the <a href="#extension">Firefox .zip</a>. Firefox removes it when it closes, because it keeps only add-ons signed by Mozilla. With sound it saves WebM, and system audio is not available</td></tr>
+          <tr><th scope="row">Mac and Linux</th><td class="part-yes">Not tested</td><td>The installer is Windows only. Use the <a href="#extension">.zip</a> in the same browsers</td></tr>
           <tr><th scope="row">iPad, iPhone, Android</th><td class="no">No</td><td>Their browsers can’t run this kind of extension or record the screen</td></tr>
         </tbody>
       </table>
@@ -477,7 +578,8 @@
       <details><summary>What happens if my browser or PC crashes?</summary><p>The video is saved in small pieces as you record. Next time you open Reclux, it offers to recover the recording. At most about a second is lost.</p></details>
       <details><summary>Why does Windows warn me about the setup file?</summary><p>The file is not signed with a paid certificate, so Windows does not recognise it yet. Click More info, then Run anyway. You can check the file with the SHA-256 shown in the download box.</p></details>
       <details><summary>Why do I need Developer mode?</summary><p>Browsers only add extensions from their own stores automatically. Reclux is not in a store, so you add it once with Load unpacked, which needs Developer mode.</p></details>
-      <details><summary>Can I use it in Firefox?</summary><p>Not from the installer. Firefox only installs add-ons signed by Mozilla. The Firefox version is in the source code for later.</p></details>
+      <details><summary>Can I use it in Firefox?</summary><p>Yes, for one session at a time. Add the <a href="#extension">Firefox .zip</a> from <kbd>about:debugging</kbd>. Firefox keeps only add-ons signed by Mozilla, so it removes Reclux when it closes.</p></details>
+      <details><summary>Can I skip the setup wizard?</summary><p>Yes. Download the <a href="#extension">.zip</a> and add it yourself. Chrome, Brave, Edge and Opera use the same .zip and the same steps.</p></details>
       <details><summary>How do I update or uninstall?</summary><p>To update, run the new setup file and press reload on Reclux in the extensions page. To uninstall, use Windows Settings › Apps › Reclux, then remove Reclux from your browser.</p></details>
       <details><summary>Is the code public?</summary><p>Yes. You can read all of it on <a href="https://github.com/iamaakashoza/reclux">GitHub</a>.</p></details>
     </div>
