@@ -2010,6 +2010,17 @@ Copies of both pages are in `store/site/`.
 
 ---
 
+## 28. Source code on GitHub (done) 🐙
+
+- **Repo (public):** https://github.com/iamaakashoza/reclux  (branch `main`, 57 files)
+- Includes: all code, `README.md` with build steps, this report, and the `store/` kit.
+- Left out on purpose: `docs/` (Phase 1 screenshots), `spike/` (iPad probe), build output and `node_modules`. They stay on your PC (`docs/` and `spike/` are in `.gitignore`).
+- Commits use your GitHub **no-reply address**, so your real email is not shown.
+- **No license file yet.** Without one, others may read the code but have no right to reuse it. Pick one when you decide (MIT is the common simple choice).
+- Mistake found and fixed: my first three small repos (`reclux-probe`, `reclux-privacy`, `reclux-install`) had your real email in their commit. I rewrote them to the no-reply address. GitHub may still serve the old commit by its exact ID for a while.
+
+---
+
 ## Sources
 
 **Primary / official (✅)**
