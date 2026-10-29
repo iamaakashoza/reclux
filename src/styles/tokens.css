@@ -1,0 +1,155 @@
+/* Reclux design tokens + base reset.
+   Rules: system fonts only (offline), 4px spacing grid, WCAG AA contrast,
+   44px tap targets (48px on touch). Change values here, not in components. */
+
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces + text */
+  --c-bg: #ffffff;
+  --c-surface: #f6f7f9;
+  --c-surface-2: #eceff3;
+  --c-border: #dde1e7;
+  --c-text: #14171f;
+  --c-text-muted: #5b6472;
+
+  /* Brand: "record red". White text on it = 4.9:1 */
+  --c-accent: #d7263d;
+  --c-accent-hover: #bf1f35;
+  --c-accent-text: #c01e34;
+  --c-on-accent: #ffffff;
+  --c-focus: #2f6feb;
+
+  /* Status */
+  --c-ok: #1a7f4b;
+  --c-warn: #7a5000;
+  --c-warn-bg: #fff4d6;
+  --c-info: #1f5fbf;
+  --c-info-bg: #e8f0fd;
+  --c-error: #9b1c2c;
+  --c-error-bg: #fde8ea;
+
+  /* Space (4px grid) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+
+  /* Shape */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-pill: 999px;
+
+  /* Type */
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Consolas, monospace;
+  --t-xs: 0.75rem;
+  --t-sm: 0.875rem;
+  --t-md: 1rem;
+  --t-lg: 1.25rem;
+  --t-xl: 1.75rem;
+  --t-timer: 2.25rem;
+
+  /* Touch */
+  --tap: 44px;
+
+  --shadow: 0 1px 2px rgb(20 23 31 / 8%), 0 4px 16px rgb(20 23 31 / 8%);
+  --ease: 150ms ease-out;
+}
+
+@media (pointer: coarse) {
+  :root {
+    --tap: 48px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --c-bg: #0f1217;
+    --c-surface: #171b22;
+    --c-surface-2: #212731;
+    --c-border: #2c333e;
+    --c-text: #eef0f4;
+    --c-text-muted: #9aa3b2;
+    --c-accent-text: #ff6b7a;
+    --c-focus: #6aa0ff;
+    --c-ok: #5fd397;
+    --c-warn: #f2c14e;
+    --c-warn-bg: #2d2410;
+    --c-info: #8ab4ff;
+    --c-info-bg: #14233f;
+    --c-error: #ff8a96;
+    --c-error-bg: #331519;
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 30%);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --c-bg: #0f1217;
+  --c-surface: #171b22;
+  --c-surface-2: #212731;
+  --c-border: #2c333e;
+  --c-text: #eef0f4;
+  --c-text-muted: #9aa3b2;
+  --c-accent-text: #ff6b7a;
+  --c-focus: #6aa0ff;
+  --c-ok: #5fd397;
+  --c-warn: #f2c14e;
+  --c-warn-bg: #2d2410;
+  --c-info: #8ab4ff;
+  --c-info-bg: #14233f;
+  --c-error: #ff8a96;
+  --c-error-bg: #331519;
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 30%);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--c-bg);
+  color: var(--c-text);
+  font: 400 var(--t-md) / 1.5 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+/* [data-ring]: focus the app moved by itself (e.g. to Cancel). Browsers hide the ring then after a mouse click, so draw it anyway. */
+:focus-visible,
+[data-ring]:focus {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

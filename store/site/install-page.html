@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reclux: offline screen recorder</title>
+<meta name="description" content="Record your screen with sound. No account, no upload. Works offline in Chrome, Brave, Edge, Opera and Firefox.">
+<style>
+  :root { color-scheme: light dark; --accent: #D7263D; --accent-ink: #ffffff; --bg: #ffffff; --fg: #14181f; --muted: #566070; --line: #d9dde3; --soft: #f4f6f8; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0f1318; --fg: #e8ecf1; --muted: #a0a9b7; --line: #2b323c; --soft: #171c23; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 400 1rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 56rem; margin: 0 auto; padding: 0 1rem 4rem; }
+  header { padding: 1.25rem 0; }
+  .brand { display: flex; align-items: center; gap: .6rem; font-size: 1.4rem; font-weight: 800; margin: 0; }
+  .brand::before { content: ""; width: .85rem; height: .85rem; border-radius: 50%; background: var(--accent); }
+  .hero { padding: 2.5rem 0 2rem; text-align: center; }
+  .hero h1 { font-size: clamp(2rem, 6vw, 3.25rem); line-height: 1.1; margin: 0 0 1rem; letter-spacing: -.02em; }
+  .hero p { max-width: 36rem; margin: 0 auto 1.5rem; color: var(--muted); font-size: 1.15rem; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 3.25rem; padding: 0 1.75rem; border-radius: .75rem; background: var(--accent); color: var(--accent-ink); font: 700 1.1rem system-ui; text-decoration: none; border: 0; cursor: pointer; }
+  .btn[aria-disabled="true"] { background: var(--soft); color: var(--muted); border: 1px solid var(--line); cursor: not-allowed; }
+  .btn:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid #2f6feb; outline-offset: 2px; }
+  .note { margin: .9rem auto 0; max-width: 34rem; color: var(--muted); font-size: .95rem; }
+  .status { margin: 1.5rem auto 0; max-width: 34rem; padding: .8rem 1rem; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: .5rem; background: var(--soft); text-align: left; }
+  h2 { font-size: 1.4rem; margin: 2.5rem 0 1rem; }
+  .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); padding: 0; margin: 0; list-style: none; }
+  .card { padding: 1.1rem 1.25rem; border: 1px solid var(--line); border-radius: .75rem; background: var(--soft); }
+  .card h3 { margin: 0 0 .25rem; font-size: 1.05rem; }
+  .card p { margin: 0 0 .75rem; color: var(--muted); font-size: .95rem; }
+  .card .btn { min-height: 2.75rem; font-size: 1rem; padding: 0 1.25rem; }
+  ol.steps { display: grid; gap: 1rem; padding: 0; margin: 0; list-style: none; counter-reset: s; }
+  ol.steps li { counter-increment: s; display: flex; gap: 1rem; align-items: flex-start; }
+  ol.steps li::before { content: counter(s); flex: none; display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; }
+  ul.feat { display: grid; gap: .6rem; padding-left: 1.2rem; margin: 0; }
+  details { border-bottom: 1px solid var(--line); }
+  summary { cursor: pointer; padding: 1rem 0; font-weight: 600; min-height: 2.75rem; }
+  details p { margin: 0 0 1rem; color: var(--muted); }
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--line); color: var(--muted); font-size: .95rem; }
+  a { color: var(--accent); }
+  @media (prefers-color-scheme: dark) { a { color: #ff6b81; } }
+  a.btn { color: var(--accent-ink); }
+  a.btn[aria-disabled="true"] { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <header><p class="brand">Reclux</p></header>
+
+  <section class="hero" aria-labelledby="h">
+    <h1 id="h">Record your screen.<br>Keep it on your computer.</h1>
+    <p>Reclux records your screen with sound. No account. No upload. It even works with the internet off.</p>
+    <a id="main-btn" class="btn" href="#browsers" aria-disabled="true">Add Reclux</a>
+    <p id="main-note" class="note"></p>
+    <p id="soon" class="status" hidden><strong>Coming soon.</strong> Reclux is waiting for the browser stores to approve it. The buttons on this page turn on when it is ready.</p>
+  </section>
+
+  <section aria-labelledby="b">
+    <h2 id="b">Choose your browser</h2>
+    <ul class="grid" id="browsers">
+      <li class="card" data-store="chrome"><h3>Chrome, Brave and Edge</h3><p>One extension for all three, from the Chrome Web Store.</p><a class="btn" data-btn href="#" aria-disabled="true">Add to browser</a></li>
+      <li class="card" data-store="opera"><h3>Opera</h3><p>From the Opera add-ons store.</p><a class="btn" data-btn href="#" aria-disabled="true">Add to Opera</a></li>
+      <li class="card" data-store="firefox"><h3>Firefox</h3><p>From Firefox Add-ons. With sound, recordings are saved as WebM.</p><a class="btn" data-btn href="#" aria-disabled="true">Add to Firefox</a></li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="s">
+    <h2 id="s">Three steps</h2>
+    <ol class="steps">
+      <li><span><strong>Add Reclux</strong> to your browser from the button above.</span></li>
+      <li><span><strong>A short welcome guide opens.</strong> Pick your quality and sound, once.</span></li>
+      <li><span><strong>Press Start recording.</strong> When you stop, press <strong>Save file</strong> and choose any folder or drive.</span></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="f">
+    <h2 id="f">What you get</h2>
+    <ul class="feat">
+      <li>Record the whole screen, one window, or one tab</li>
+      <li>Microphone and system sound, with a Mute button</li>
+      <li>720p and 1080p at 30, 50 or 60 frames per second</li>
+      <li>Pause and Resume. Saves as MP4 or WebM</li>
+      <li>Long recordings, written to disk as you go. Tested for 2 hours</li>
+      <li>If the browser crashes, Reclux offers to recover your recording</li>
+      <li>Warns you when the computer is too slow or the disk is nearly full</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="q">
+    <h2 id="q">Questions</h2>
+    <details><summary>Is it free?</summary><p>Yes. There is no account and nothing to pay.</p></details>
+    <details><summary>Where is my recording kept?</summary><p>On your own computer. While you record, it is written to the browser's private storage on your drive. When you press Save file, you choose the folder or drive. Nothing is ever uploaded.</p></details>
+    <details><summary>Does it need the internet?</summary><p>No. Reclux makes no network requests at all.</p></details>
+    <details><summary>Does it work on iPad, iPhone or Android?</summary><p>Not yet. Those browsers do not allow this kind of extension to record the screen. Reclux is for desktop computers. It is tested on Windows. Mac and Linux should work in the same browsers, but are not tested yet.</p></details>
+    <details><summary>Does it edit videos?</summary><p>No. Reclux records and saves. It does not trim or edit.</p></details>
+  </section>
+
+  <footer>
+    <a href="https://iamaakashoza.github.io/reclux-privacy/">Privacy policy</a>
+    <span> · Reclux collects no data.</span>
+  </footer>
+</main>
+
+<script>
+  // After the stores approve Reclux, paste each store link here. A button stays off until its link is filled in.
+  const STORES = { chrome: '', opera: '', firefox: '' };
+
+  const ua = navigator.userAgent;
+  const mobile = /Android|iPhone|iPad|iPod/i.test(ua) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(ua));
+  const firefox = /Firefox\//.test(ua);
+  const opera = /OPR\//.test(ua);
+  const edge = /Edg\//.test(ua);
+
+  const setBtn = (el, url, label) => {
+    if (label) el.textContent = label;
+    if (url) { el.href = url; el.removeAttribute('aria-disabled'); el.removeAttribute('role'); }
+    else { el.href = '#browsers'; el.setAttribute('aria-disabled', 'true'); }
+  };
+
+  document.querySelectorAll('[data-store]').forEach((card) => setBtn(card.querySelector('[data-btn]'), STORES[card.dataset.store]));
+
+  const ready = Object.values(STORES).some(Boolean);
+  document.getElementById('soon').hidden = ready;
+
+  const main = document.getElementById('main-btn');
+  const note = document.getElementById('main-note');
+  const asyncBrave = navigator.brave && navigator.brave.isBrave ? navigator.brave.isBrave() : Promise.resolve(false);
+
+  asyncBrave.then((brave) => {
+    if (mobile) {
+      setBtn(main, '', 'Not on phones or tablets yet');
+      note.textContent = 'Open this page on a desktop computer to add Reclux.';
+      return;
+    }
+    const which = firefox ? 'firefox' : opera ? 'opera' : 'chrome';
+    const name = firefox ? 'Firefox' : opera ? 'Opera' : brave ? 'Brave' : edge ? 'Edge' : 'Chrome';
+    setBtn(main, STORES[which], `Add to ${name}`);
+    note.textContent = which === 'chrome' && (brave || edge) ? `${name} installs extensions from the Chrome Web Store. Accept the prompt if ${name} asks.` : '';
+  });
+</script>
+</body>
+</html>
