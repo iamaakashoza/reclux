@@ -2063,6 +2063,47 @@ You decided: **no store publishing**. Reclux is shared as a Windows installer.
 
 ---
 
+## 30. Landing page, live on Netlify (done) 🌐
+
+**Live:** https://reclux.netlify.app  ·  **Source:** branch `website` in the `reclux` repo (kept apart from the extension code on `main`)
+
+### 30.1 Branches
+```
+ reclux repo
+ ├── main      → the extension, installer recipe, report, store kit
+ └── website   → only the landing page  ──► Netlify deploys it on every push (about 10 s)
+```
+
+### 30.2 Design
+- Direction: editorial, hairline lines, warm paper and ink, brand red as the only accent. Light and dark follow the visitor's setting.
+- Fonts (newest picks on Google Fonts, **self-hosted** so the page calls no font servers): **Google Sans Flex** (text), **Instrument Serif** italic (accent words), **Geist Mono** (labels, numbers).
+- Inspiration checked first: Cap and Screen Studio (short benefit headline, one platform download button with requirements under it, per-feature sections, FAQ that answers objections).
+- Illustrations: hand-drawn hairline SVGs (no "hairline" skill is installed, so I drew them). They draw themselves on scroll.
+- Motion: sections rise in on scroll, the hero timer counts, the record dot pulses, sound bars move. All of it turns off with "reduce motion".
+
+### 30.3 What the page covers
+Hero with download · key facts (0 network requests, 2 h tested, under 1 s lost on a crash, 4 browsers) · **"Four parts, one job each"**: setup wizard vs browser guide vs welcome wizard vs extension · features · a recording start to finish · install steps with the Windows warning · download card (version, size, requirements, install folder, update, uninstall, SHA-256) · quality and file-size table · privacy (where the video goes, permissions table) · browser support · limits · FAQ · final call to action.
+
+### 30.4 Tested
+| Check | Result |
+|---|---|
+| Sizes 1440 / 1024 / 768 / 375, light and dark | no sideways scroll ✅ |
+| Accessibility checker (axe), desktop and phone | **0 problems** ✅ |
+| Console errors on the live site | none ✅ |
+| Servers contacted by the page | only reclux.netlify.app ✅ |
+| Live download matches the SHA-256 on the page | ✅ |
+| Push to `website` → live | about 10 s ✅ |
+
+### 30.5 Things I changed after going live
+- Netlify made the project **Private** at first (visitors got a login page). I switched it to **Public**.
+- Netlify adds a **"Powered by Netlify"** badge to free-plan sites, and says it cannot be hidden on that plan. My strict security policy was blocking it, so I loosened it just enough (`unsafe-inline`) and changed the privacy line to say Netlify adds its badge.
+- Found a Chromium quirk: lines selected by `[pathLength]` did not redraw when their section appeared, so the hero curve stayed invisible. Fixed by marking those lines with a class.
+
+### 30.6 Each new version
+Replace `download/Reclux-Setup-<version>.exe` on the `website` branch and update the version, size and SHA-256 in `index.html`, then push.
+
+---
+
 ## Sources
 
 **Primary / official (✅)**
