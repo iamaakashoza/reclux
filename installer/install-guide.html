@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Add Reclux to your browser</title>
+<style>
+  :root { color-scheme: light dark; --accent: #D7263D; --bg: #fff; --fg: #14181f; --muted: #566070; --line: #d9dde3; --soft: #f4f6f8; --ok: #1a7f37; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0f1318; --fg: #e8ecf1; --muted: #a0a9b7; --line: #2b323c; --soft: #171c23; --ok: #4ac26b; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 400 1rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 44rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
+  h1 { display: flex; align-items: center; gap: .6rem; font-size: 1.8rem; margin: 0 0 .25rem; }
+  h1::before { content: ""; width: .85rem; height: .85rem; border-radius: 50%; background: var(--accent); }
+  .lead { color: var(--muted); margin: 0 0 1.5rem; }
+  ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; counter-reset: s; }
+  li { counter-increment: s; display: grid; grid-template-columns: 2.25rem 1fr; gap: .9rem; padding: 1rem 1.1rem; border: 1px solid var(--line); border-radius: .75rem; background: var(--soft); }
+  li::before { content: counter(s); display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; }
+  h2 { font-size: 1.05rem; margin: 0 0 .25rem; }
+  p { margin: 0 0 .5rem; }
+  .copy { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-top: .4rem; }
+  code { padding: .45rem .6rem; border: 1px solid var(--line); border-radius: .4rem; background: var(--bg); font: 600 .95rem ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+  button { min-height: 2.75rem; padding: 0 1rem; border: 0; border-radius: .5rem; background: var(--accent); color: #fff; font: 700 .95rem system-ui; cursor: pointer; }
+  button:focus-visible { outline: 3px solid #2f6feb; outline-offset: 2px; }
+  .done { color: var(--ok); font-weight: 700; }
+  .note { margin-top: 1.5rem; padding: .9rem 1rem; border-left: 4px solid var(--accent); background: var(--soft); border-radius: .5rem; }
+  .small { color: var(--muted); font-size: .9rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Add Reclux to <span id="browser">your browser</span></h1>
+  <p class="lead">Four quick steps. You only do this once per browser.</p>
+  <ol>
+    <li><div>
+      <h2>Open the extensions page</h2>
+      <p>Copy this address, paste it into the address bar at the top of this window, and press Enter.</p>
+      <div class="copy"><code id="ext-url">chrome://extensions</code><button data-copy="ext-url">Copy</button><span class="done" aria-live="polite"></span></div>
+    </div></li>
+    <li><div>
+      <h2>Turn on Developer mode</h2>
+      <p>Find the <strong>Developer mode</strong> switch on the extensions page (<span id="dev-where">top right</span>) and turn it on.</p>
+    </div></li>
+    <li><div>
+      <h2>Click “Load unpacked”</h2>
+      <p>A window opens to choose a folder. Copy this folder, paste it into the folder box at the top of that window, press Enter, then click <strong>Select Folder</strong>.</p>
+      <div class="copy"><code id="folder">…</code><button data-copy="folder">Copy</button><span class="done" aria-live="polite"></span></div>
+    </div></li>
+    <li><div>
+      <h2>Done</h2>
+      <p>The Reclux welcome guide opens by itself. Then pin Reclux: click the puzzle icon in the toolbar, then the pin next to Reclux.</p>
+    </div></li>
+  </ol>
+
+  <p class="note"><strong>Installing a newer version?</strong> Skip the steps. Open the extensions page and click the reload arrow on Reclux, or restart the browser.</p>
+  <p class="small">Keep the Reclux folder where it is. If it is deleted, the extension stops working. Reclux works offline and never uploads anything.</p>
+</main>
+<script>
+  // The guide sits next to the extension folder, so the folder path comes from this page's own address.
+  const here = decodeURIComponent(location.pathname).replace(/^\/([A-Za-z]:)/, '$1').replace(/\//g, '\\');
+  document.getElementById('folder').textContent = here.replace(/\\[^\\]*$/, '\\extension');
+
+  const ua = navigator.userAgent;
+  const set = (name, url, where) => {
+    document.getElementById('browser').textContent = name;
+    document.getElementById('ext-url').textContent = url;
+    if (where) document.getElementById('dev-where').textContent = where;
+  };
+  if (/OPR\//.test(ua)) set('Opera', 'opera://extensions', 'top right of the page');
+  else if (/Edg\//.test(ua)) set('Edge', 'edge://extensions', 'on the left side');
+  else (navigator.brave?.isBrave?.() ?? Promise.resolve(false)).then((b) => set(b ? 'Brave' : 'Chrome', b ? 'brave://extensions' : 'chrome://extensions'));
+
+  document.querySelectorAll('[data-copy]').forEach((btn) => btn.addEventListener('click', async () => {
+    const text = document.getElementById(btn.dataset.copy).textContent;
+    const done = btn.nextElementSibling;
+    try { await navigator.clipboard.writeText(text); done.textContent = 'Copied'; }
+    catch { getSelection().selectAllChildren(document.getElementById(btn.dataset.copy)); done.textContent = 'Press Ctrl+C'; }
+  }));
+</script>
+</body>
+</html>
