@@ -6,13 +6,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Reveal sections and draw the hairline illustrations as they scroll into view.
   const targets = document.querySelectorAll('[data-reveal], .draw');
+  const finish = (el) => { if (el.classList.contains('draw')) setTimeout(() => el.classList.add('done'), calm ? 0 : 1500); };
   if (calm || !('IntersectionObserver' in window)) {
-    targets.forEach((el) => el.classList.add('in'));
+    targets.forEach((el) => { el.classList.add('in'); finish(el); });
   } else {
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => {
         if (!e.isIntersecting) return;
         e.target.classList.add('in');
+        finish(e.target);
         io.unobserve(e.target);
       }),
       { rootMargin: '0px 0px -8% 0px', threshold: 0.08 },

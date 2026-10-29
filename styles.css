@@ -286,3 +286,5 @@ footer a:hover { color: var(--ink); }
 .privacy caption { color: color-mix(in srgb, var(--paper) 72%, transparent); }
 @media (prefers-color-scheme: dark) { .privacy caption { color: #4a4a52; } }
 .table-scroll:focus-visible { outline-offset: 2px; }
+/* After drawing, drop the dash trick so lines are always complete (non-scaling strokes can leave gaps). */
+.js .draw.done :is(path, line, polyline)[pathLength] { stroke-dasharray: none; transition: none; }
