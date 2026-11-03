@@ -10,15 +10,21 @@
 <section class="bar" aria-label="Recording controls">
   <div class="top">
     <span class="status" role="status">
-      <span class="dot" class:paused></span>{session.finishing ? 'Finishing the file…' : paused ? 'Paused' : 'Recording'}
+      <span class="dot" class:paused></span>{session.finishing ? `Finishing the file… ${Math.round(session.finishShare * 100)}%` : paused ? 'Paused' : 'Recording'}
     </span>
     <time class="timer" role="timer" aria-label="Elapsed time">{fmtTime(session.elapsed)}</time>
     <ul>
       <li>Asked: {preset.label}</li>
       {#if session.actual}<li>Browser reports: {session.actual}</li>{/if}
+      <li title="The saved file always plays at this rate.">File: {preset.fps} fps locked</li>
       {#if session.fps !== null}
-        <li title="Frames that really arrive each second. A still screen sends few frames, which is normal.">
-          {session.fps === 0 ? 'Screen is still' : `Measured: ${session.fps} fps`}
+        <li title="How many frames each second show a new picture from your screen. The rest repeat the last picture. A still screen sends few, which is normal. Tab and Window send more than Entire screen.">
+          {session.fps === 0 ? 'Screen is still' : `New pictures: ${session.fps}/s`}
+        </li>
+      {/if}
+      {#if session.ducked !== null}
+        <li class:on={session.ducked} title="While you speak, system sound in the recording drops to 48%. What you hear on your speakers stays the same, so listen to the saved file.">
+          {session.ducked ? 'Voice heard · Music in file: 48%' : 'Music in file: 100%'}
         </li>
       {/if}
       {#if session.cpu !== null}<li title="How busy the processor is, on average.">CPU {session.cpu}%</li>{/if}
@@ -99,6 +105,10 @@
     font-size: var(--t-xs);
     font-weight: 600;
     color: var(--c-text-muted);
+  }
+  li.on {
+    background: var(--c-accent);
+    color: var(--c-on-accent);
   }
   .actions {
     display: grid;

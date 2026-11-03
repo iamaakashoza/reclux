@@ -68,7 +68,6 @@ function audioFrames(track: MediaStreamTrack): ReadableStream<Frame> {
 }
 
 class TrackProcessor {
-  static isPolyfill = true;
   readable: ReadableStream<Frame>;
   constructor({ track }: { track: MediaStreamTrack }) {
     this.readable = track.kind === 'video' ? videoFrames(track) : audioFrames(track);
@@ -76,6 +75,8 @@ class TrackProcessor {
 }
 
 const g = globalThis as unknown as { MediaStreamTrackProcessor?: unknown };
-if (!g.MediaStreamTrackProcessor && typeof VideoFrame !== 'undefined' && typeof AudioData !== 'undefined') {
+/** True where the stand-in is in use (Firefox). */
+export const isPolyfill = !g.MediaStreamTrackProcessor;
+if (isPolyfill && typeof VideoFrame !== 'undefined' && typeof AudioData !== 'undefined') {
   g.MediaStreamTrackProcessor = TrackProcessor;
 }

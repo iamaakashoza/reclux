@@ -15,6 +15,7 @@
     void session.presetId;
     void refreshDisk();
   });
+  const isFirefox = navigator.userAgent.includes('Firefox/');
   const need = $derived(fmtSize(sizeMB(preset, MAX_SECONDS)));
   const SOURCES = [
     { value: 'tab', label: 'Tab', icon: 'tab' },
@@ -25,6 +26,11 @@
 
 <div class="panel">
   <Segmented legend="What to record" name="source" options={SOURCES} bind:value={session.source} />
+  {#if session.source === 'screen' && !isFirefox}
+    <p class="hint">Smoothest motion: Tab or Window. Browsers send fewer new pictures from an entire screen.</p>
+  {:else if session.source === 'tab' && !isFirefox}
+    <p class="hint"><strong>Open the tab you want to record first.</strong> The browser lists your other tabs, but not this Reclux tab.</p>
+  {/if}
 
   <div class="field">
     <label for="quality">Quality</label>
@@ -48,7 +54,12 @@
   <div class="field">
     <span class="label">Audio</span>
     <Toggle icon="mic" label="Microphone" bind:checked={session.mic} />
-    <Toggle icon="speaker" label="System audio" bind:checked={session.system} />
+    <Toggle
+      icon="speaker"
+      label="System audio"
+      hint={session.system ? 'Your browser asks too. Keep its audio switch on.' : undefined}
+      bind:checked={session.system}
+    />
   </div>
 
   {#if session.lowDisk}
@@ -82,12 +93,9 @@
     font-weight: 600;
   }
   select {
-    min-height: var(--tap);
-    padding: 0 var(--s-3);
     border: 1px solid var(--c-border);
     border-radius: var(--r-md);
-    background: var(--c-surface);
-    cursor: pointer;
+    background-color: var(--c-surface);
   }
   .hint {
     font-size: var(--t-xs);

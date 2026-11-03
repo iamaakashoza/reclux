@@ -168,12 +168,13 @@
 
         {#if session.struggling}
           <Banner kind="warn" title="Your computer is struggling">
-            {#if session.fps !== null}
-              Only about {session.fps} frames per second are arriving (you asked for {wantFps}).
+            {#if session.losing || session.fps === null}
+              Frames are being skipped because the computer cannot encode them fast enough. Motion may look choppy.
+              {#if session.ext === 'webm'}MP4 is much lighter, so try it next time.{/if}
             {:else}
-              Frames are being dropped.
+              Your screen is sending about {session.fps} new pictures a second, and the file repeats them to fill {wantFps}.
+              Motion will look like {session.fps} fps. Recording a Tab or Window is usually much smoother.
             {/if}
-            Motion may look choppy.
             {#snippet actions()}
               {#if wantFps > 30}<Button onclick={lowerFps}>Switch to 30 fps</Button>{/if}
               <Button variant="ghost" onclick={keepAsIs}>Keep</Button>

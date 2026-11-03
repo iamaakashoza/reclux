@@ -45,6 +45,9 @@
     font-size: var(--t-sm);
     font-weight: 600;
   }
+  .text :global(svg) {
+    flex: none; /* a long hint must not squash the icon */
+  }
   small {
     display: block;
     font-weight: 400;

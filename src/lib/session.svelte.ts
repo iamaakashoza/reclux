@@ -1,11 +1,12 @@
 // Recording controller: real capture, written straight to disk, driving the screens.
 import { openCapture, type Capture, type Format } from './capture';
-import { HIGH_CPU, LOW_FPS_RATIO, STRUGGLE_SECONDS, startMonitor, type Reading } from './monitor';
+import { HIGH_CPU, LOST_RATIO, LOW_FPS_MIN_PRESET, LOW_FPS_RATIO, STRUGGLE_SECONDS, startMonitor, type Reading } from './monitor';
 import { keepAwake } from './awake';
 import { STOP_FREE, freeBytes } from './disk';
 import { MAX_SECONDS, findPreset, fmtSize, sizeMB } from './presets';
 import { startRecorder, type Recorder } from './recorder';
 import { loadSettings, saveSettings } from './settings';
+import { isPolyfill } from './track-processor';
 import { findUnsaved, getStored, holdStored, markSaved, removeStored, type Stored } from './store';
 import { untrack } from 'svelte';
 
@@ -27,6 +28,7 @@ export const session = $state({
   fileName: '', // name of the file in private storage
   saved: false,
   finishing: false,
+  finishShare: 0, // 0 to 1, while the file is being finished
   notices: [] as string[],
   error: '',
   // Unsaved recordings found from an earlier session
@@ -35,6 +37,8 @@ export const session = $state({
   fps: null as number | null,
   cpu: null as number | null,
   struggling: false,
+  losing: false, // the warning is about frames really missing from the file
+  ducked: null as boolean | null, // system sound is dipped for speech right now (null = ducking is not in use)
   ignoreStruggle: false,
   // Free space for recordings (null = browser cannot tell). lowDisk = less than a full 2 hours would need.
   free: null as number | null,
@@ -104,23 +108,25 @@ const runClock = () => {
   every(250, tick);
 };
 
-// Struggling = few frames AND a busy CPU, several seconds in a row.
-// Once shown, the warning stays until the user answers it.
+// Struggling = frames really missing from the file, or (at 50/60 fps only) few new pictures on a busy CPU.
+// Either must last several seconds. Once shown, the warning stays until the user answers it.
 function onReading(r: Reading) {
-  session.fps = Math.round(r.fps);
+  session.fps = r.fps === null ? null : Math.round(r.fps);
   session.cpu = r.cpu;
   if (session.phase !== 'recording') {
     recent = [];
     return;
   }
   recent = [...recent, r].slice(-STRUGGLE_SECONDS);
+  if (session.ignoreStruggle || recent.length < STRUGGLE_SECONDS) return;
   const want = findPreset(session.presetId).fps;
-  if (
-    !session.ignoreStruggle &&
-    recent.length === STRUGGLE_SECONDS &&
-    recent.every((x) => x.cpu !== null && x.cpu >= HIGH_CPU && x.fps < want * LOW_FPS_RATIO)
-  ) {
+  const losing = recent.every((x) => x.lost > want * LOST_RATIO);
+  const starved =
+    want >= LOW_FPS_MIN_PRESET &&
+    recent.every((x) => x.cpu !== null && x.cpu >= HIGH_CPU && x.fps !== null && x.fps < want * LOW_FPS_RATIO);
+  if (losing || starved) {
     session.struggling = true;
+    session.losing = losing;
   }
 }
 
@@ -129,7 +135,9 @@ export async function lowerFps() {
   const next = findPreset(`${findPreset(session.presetId).height}p30`);
   session.presetId = next.id;
   session.struggling = false;
+  session.losing = false;
   recent = [];
+  rec?.setFps(30);
   await cap?.setFps(30).catch(() => {
     session.notices = [...session.notices, 'The browser would not lower the frame rate while recording.'];
   });
@@ -140,6 +148,7 @@ export async function lowerFps() {
 export function keepAsIs() {
   session.ignoreStruggle = true;
   session.struggling = false;
+  session.losing = false;
 }
 
 function endMonitor() {
@@ -154,11 +163,11 @@ export async function start() {
   busy = true;
   session.error = '';
   session.notices = [];
-  Object.assign(session, { fps: null, cpu: null, struggling: false, ignoreStruggle: false });
+  Object.assign(session, { fps: null, cpu: null, struggling: false, losing: false, ignoreStruggle: false, finishShare: 0 });
   recent = [];
   const preset = findPreset(session.presetId);
   try {
-    cap = await openCapture(preset, SURFACE[session.source], session.mic, session.system);
+    cap = await openCapture(preset, SURFACE[session.source], session.mic, session.system, (d) => (session.ducked = d));
   } catch (e) {
     if ((e as DOMException).name === 'NotAllowedError') {
       session.notices = ['Screen sharing was cancelled or blocked.'];
@@ -172,6 +181,7 @@ export async function start() {
 
   session.notices = [...cap.notices];
   session.actual = cap.actual;
+  session.ducked = cap.ducks ? false : null;
   cap.video.addEventListener('ended', stop); // user clicked the browser's "Stop sharing"
 
   activeMs = 0;
@@ -216,9 +226,13 @@ async function begin() {
   if (rec.ext !== session.format) {
     session.notices = [...session.notices, `${session.format.toUpperCase()} is not available here. Saving as ${rec.ext.toUpperCase()}.`];
   }
+  // WebM without a hardware encoder often cannot keep up. Say so before it shows.
+  if (rec.ext === 'webm' && !rec.hardware) {
+    session.notices = [...session.notices, 'WebM has no hardware encoder here, so frames may be skipped. MP4 is much lighter.'];
+  }
   session.ext = rec.ext;
   cap!.setMuted(session.muted);
-  stopMonitor = startMonitor(cap!.video, onReading);
+  stopMonitor = startMonitor(rec.stats, !isPolyfill, onReading);
   diskTimer = setInterval(checkDisk, 10_000);
   keepAwake(true);
   session.phase = 'recording';
@@ -249,7 +263,7 @@ export async function stop() {
     stopTimer();
     endMonitor();
     try {
-      const file = await rec.stop();
+      const file = await rec.stop((share) => (session.finishShare = share));
       show(file);
     } catch (e) {
       session.error ||= `Could not finish the file: ${(e as Error).message}. What was recorded so far is kept. Use "Recover it" below.`;
@@ -310,6 +324,8 @@ export function reset() {
     fps: null,
     cpu: null,
     struggling: false,
+    losing: false,
+    ducked: null,
   });
   void refreshRecoverable();
 }

@@ -24,6 +24,13 @@ export async function removeStored(name: string) {
   localStorage.removeItem(savedKey(name));
 }
 
+/** Puts a finished file in place of another, under that name. */
+export async function replaceStored(from: string, to: string) {
+  const handle = await (await dir()).getFileHandle(from);
+  // Chromium and Firefox have this, but the page type library does not list it yet.
+  await (handle as unknown as { move(name: string): Promise<void> }).move(to);
+}
+
 /** Mark this tab as the owner of the file. Returns a function that lets go. */
 export function holdStored(name: string): Promise<() => void> {
   return new Promise((resolve) => {
@@ -41,6 +48,11 @@ export async function findUnsaved(): Promise<Stored[]> {
   const out: Stored[] = [];
   for await (const [name, h] of entries) {
     if (h.kind !== 'file' || held.has(lockName(name))) continue;
+    // Half-written rebuild from a crash. The original recording is still there.
+    if (name.endsWith('.tmp')) {
+      await removeStored(name);
+      continue;
+    }
     if (localStorage.getItem(savedKey(name))) {
       await removeStored(name);
       continue;

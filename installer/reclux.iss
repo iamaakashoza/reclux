@@ -3,7 +3,7 @@
 ; Browsers do not let a program add an extension by itself, so the user clicks "Load unpacked" once.
 ; Build: npm run installer   (needs Inno Setup 6)
 
-#define AppVersion "0.1.0"
+#define AppVersion "0.2.0"
 
 [Setup]
 AppId={{8D3A6C1E-2B7F-4C55-9A31-7E0F5B2C9D40}

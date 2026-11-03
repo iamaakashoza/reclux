@@ -19,6 +19,8 @@ npm run installer       # Windows .exe via Inno Setup 6 (installer/reclux.iss)
 
 There is no test suite. Verify with `npm run check` plus a manual load of `.output/chrome-mv3` via "Load unpacked". Brave is the main test browser.
 
+When testing a recording automatically, do not use `--use-fake-device-for-media-stream`: it also replaces the screen with a fake 20 fps video. Report §31 lists what is and is not covered.
+
 ## Architecture
 
 Entrypoints (`src/entrypoints/`):
@@ -31,13 +33,14 @@ Popup and recorder share one origin, so settings pass through one `localStorage`
 
 Recording pipeline (`src/lib/`):
 - `session.svelte.ts` — the controller. A single `$state` object (`session`) drives every screen through `phase`: `idle → countdown → recording ⇄ paused → finished`. Also runs disk checks, the struggle monitor, keep-awake, and crash recovery.
-- `capture.ts` — `getDisplayMedia` + mic, mixed with an `AudioContext` created *before any await* (must stay inside the click gesture).
-- `recorder.ts` — WebCodecs encode via Mediabunny. MP4 = H.264+AAC as fragmented MP4; WebM = VP9+Opus. Falls back to the other format if the asked one can't encode. Output streams in 256 KB chunks.
-- `writer.worker.ts` — writes chunks into OPFS (`recordings/` dir) with a sync access handle, flushing every write, so a crash keeps everything already written. Nothing big is held in RAM — 2-hour 1080p60 recordings (~11 GB) are a requirement.
+- `capture.ts` — `getDisplayMedia` + mic, mixed with an `AudioContext` created *before any await* (must stay inside the click gesture). Also ducks system audio to 48% in the recording while the mic hears speech (the voice stays at 100%).
+- `recorder.ts` — WebCodecs encode via Mediabunny. MP4 = H.264+AAC (Opus where there is no AAC encoder, i.e. Firefox); WebM = VP9+Opus (VP8 in Firefox). Falls back to the other format if the asked one can't encode. Output streams in 256 KB chunks. A clock-driven pump repeats the newest picture so the file has a locked frame rate (report §31). MP4 is written fragmented for crash safety, then rebuilt as a regular MP4 on Stop, because Windows misreads a fragmented file's frame rate and length.
+- `writer.worker.ts` — writes chunks into OPFS (`recordings/` dir) with a sync access handle, flushing every write, so a crash keeps everything already written. Nothing big is held in RAM — 2-hour 1080p60 recordings (up to ~18 GB) are a requirement.
 - `store.ts` — OPFS file helpers. A live recording is marked by a Web Lock (`reclux:<name>`); unlocked, unsaved files are offered for recovery. Saved flags live in `localStorage`.
-- `monitor.ts` — "struggling" = low delivered fps **and** high CPU (`system.cpu`), since a still screen also gives low fps.
+- `monitor.ts` — once-a-second readings. "Struggling" = frames really skipped from the file (any fps), or at 50/60 fps only, few new pictures **and** high CPU (`system.cpu`), since a still screen also gives low fps.
 - `disk.ts` — free space = quota − usage (needs `unlimitedStorage`). Brave (fake 2 GB quota) and Firefox return `null`; code must treat `null` as "unknown", not "full".
-- `track-processor.ts` + `ticker.worker.ts` — polyfill for `MediaStreamTrackProcessor` on Firefox (hidden `<video>` read on a worker clock, since hidden-tab timers are throttled).
+- `track-processor.ts` — polyfill for `MediaStreamTrackProcessor` on Firefox (hidden `<video>` read on a worker clock, since hidden-tab timers are throttled).
+- `ticker.worker.ts` — that worker clock. Used anywhere a timer must keep running in a hidden tab (Firefox frames, the frame pump, ducking).
 - `awake.ts` — `chrome.power`; Chromium only.
 
 Browser differences live in `wxt.config.ts` (`system.cpu`/`power` omitted on Firefox, min Chrome 116, min Firefox 140) and in runtime feature checks — not separate code paths.

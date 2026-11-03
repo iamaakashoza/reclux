@@ -1,4 +1,5 @@
-// Quality presets. Bitrates are starting points from report.md §7; tune after real tests.
+// Quality presets. These bitrates are ceilings: raising them keeps text sharp next to moving video (report §32),
+// and hardware encoders use far less on normal content, so real files stay much smaller than the size shown.
 export interface Preset {
   id: string;
   label: string;
@@ -8,12 +9,12 @@ export interface Preset {
 }
 
 export const PRESETS: Preset[] = [
-  { id: '720p30', label: '720p · 30 fps', height: 720, fps: 30, mbps: 5 },
-  { id: '720p50', label: '720p · 50 fps', height: 720, fps: 50, mbps: 6.5 },
-  { id: '720p60', label: '720p · 60 fps', height: 720, fps: 60, mbps: 7.5 },
-  { id: '1080p30', label: '1080p · 30 fps', height: 1080, fps: 30, mbps: 8 },
-  { id: '1080p50', label: '1080p · 50 fps', height: 1080, fps: 50, mbps: 10 },
-  { id: '1080p60', label: '1080p · 60 fps', height: 1080, fps: 60, mbps: 12 },
+  { id: '720p30', label: '720p · 30 fps', height: 720, fps: 30, mbps: 9 },
+  { id: '720p50', label: '720p · 50 fps', height: 720, fps: 50, mbps: 11 },
+  { id: '720p60', label: '720p · 60 fps', height: 720, fps: 60, mbps: 13 },
+  { id: '1080p30', label: '1080p · 30 fps', height: 1080, fps: 30, mbps: 14 },
+  { id: '1080p50', label: '1080p · 50 fps', height: 1080, fps: 50, mbps: 17 },
+  { id: '1080p60', label: '1080p · 60 fps', height: 1080, fps: 60, mbps: 20 },
 ];
 
 export const DEFAULT_PRESET = PRESETS[3]!;

@@ -69,12 +69,9 @@
     font-weight: 600;
   }
   select {
-    min-height: var(--tap);
-    padding: 0 var(--s-3);
     border: 1px solid var(--c-border);
     border-radius: var(--r-md);
-    background: var(--c-surface);
-    cursor: pointer;
+    background-color: var(--c-surface);
   }
   .offline {
     display: flex;

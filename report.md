@@ -527,6 +527,7 @@ Starting bitrates I'd test. They borrow from YouTube-style upload guidance, from
 | 1080p · 60 | 12 Mbps | ~90 MB |
 
 - If we set no bitrate, Chrome defaults to about **2.5 Mbps** ✅. That looks blurry at 1080p. **We must set it ourselves.**
+- Update: these bitrates were raised to keep text sharp. See §32.1.
 
 ### Things that surprise people
 
@@ -2101,6 +2102,223 @@ Hero with download · key facts (0 network requests, 2 h tested, under 1 s lost 
 
 ### 30.6 Each new version
 Replace `download/Reclux-Setup-<version>.exe` on the `website` branch and update the version, size and SHA-256 in `index.html`, then push.
+
+---
+
+## 31. Frame rate, sound and Welcome screen fixes (done) 🎯
+
+Answers the owner's 3 Nov 2026 test list. Everything below was measured on the owner's PC, with the real built extension and the real screen, unless marked.
+
+**Test PC:** Lenovo 81W8, Intel i5-1035G1 (4 cores, 15 W laptop chip), Intel UHD Graphics, 20 GB RAM, 1080p 60 Hz screen.
+
+### 31.1 Why the file showed 15 to 18 fps: three separate causes
+
+| # | Cause | Who | Fix |
+|---|-------|-----|-----|
+| 1 | **Windows misreads a fragmented MP4.** It works out the frame rate from the first seconds, and shows no length | File format | Rebuild as a regular MP4 on Stop. Packets are copied, not re-encoded, so no quality loss |
+| 2 | **Two freezes at the start of every file:** about 0.8 s, then about 0.3 s, while the encoder starts up. Those first seconds are exactly what Windows reads | Reclux | Warm the encoder up on the first frame **before** the clock starts |
+| 3 | **Entire-screen capture only sends about 20 new pictures a second**, whatever is asked for | Browser | Cannot be changed from an extension. See 31.3 |
+
+**Old build against new, real screen, Brave:**
+
+| Preset | Old: Windows says | Old: real frames | New: Windows says | Gaps, old → new |
+|---|--:|--:|--:|--:|
+| 720p30 MP4 | 16.00 | 28.24/s | **30.000** | 2 → 0 |
+| 1080p30 MP4 | 14.00 | 28.04/s | **30.000** | 2 → 0 |
+| 1080p60 MP4 | 23.50 | 55.53/s | **60.000** | 2 → 0 |
+| 720p50 WebM | blank | 45.70/s | **50.000** | 2 → 0 |
+
+The owner reported 18.30 at 720p30 and 15 at 1080p30, so the old build reproduces the complaint.
+
+### 31.2 The new pipeline
+- Reclux no longer lets the library read the stream. A small **pump** in `recorder.ts` runs on a worker clock and writes one frame per tick at exactly the chosen rate, repeating the newest picture when no new one has arrived.
+- **A short stall** (under 1 s) is made up with repeats, so the timeline has no hole.
+- **A real overload** (over 1 s late) skips evenly and counts the skipped frames, so the warning tells the truth.
+- Only the newest picture is held, so memory stays flat.
+- The encoder is told `latencyMode: 'quality'`, which by the WebCodecs rules may not drop frames. Firefox keeps `realtime`.
+- Sound starts together with the first real frame.
+
+### 31.3 New pictures per second, the real limit
+Measured at 1080p, heavy motion, in Chrome, by counting frames as they arrive:
+
+| Record | Asked 30 | Asked 60 | CPU |
+|---|--:|--:|--:|
+| **Tab** | 30.1 | **59.9** | 38–51% |
+| **Window** | 29.5 | **57–59** | 43–63% |
+| **Entire screen** | about 20 | **about 23** | 33–48% |
+
+- Same PC and about the same CPU. So **the PC is capable**, and the limit is how browsers capture a whole screen.
+- 720p does not help on Entire screen (13–19 new pictures a second): the browser still grabs the full screen, then shrinks it.
+- Turning on the browser's `AllowWgcScreenCapturer` feature did not help (23 a second).
+- In a Window recording, 680 of 680 frames at 60 fps were different pictures.
+- **Honest wording:** on Entire screen the file is locked at the chosen rate, but motion looks like about 20 fps on this PC, because the rest are repeats. "Zero drops" in the true sense is only possible with Tab or Window here. The recorder page now says this, and the live chip reads "New pictures: N/s".
+
+### 31.4 Blur: the encoder, not the bitrate
+Scrolling small text, scored against the original. Higher is sharper; 40 dB and up looks clean.
+
+| Encoder | Bitrate | Score | Speed |
+|---|--:|--:|--:|
+| H.264 hardware, 1080p30 | 8 Mbps | 40.7 dB | 33–38 fps* |
+| H.264 **software**, 1080p30 | 8 Mbps | **28 dB, clearly blurred** | 33 fps* |
+| H.264 software, 1080p30 | 16 Mbps | 46 dB | 33 fps* |
+| VP9 hardware, 1080p30 | 8 Mbps | 48 dB | 29 fps* |
+| VP9, 720p50, old setup (falls to software) | 6.5 Mbps | **33 dB** | **17 fps** |
+| VP9, 720p50, without the frame rate hint (hardware) | 6.5 Mbps | 46 dB | 26 fps* |
+
+\* Worst-case test frames copied from memory, so real recordings run faster: the real 1080p60 WebM run below held 60.
+
+Changes:
+- Ask for the **hardware encoder first**.
+- If only software H.264 exists, **double the bitrate**.
+- **Do not tell VP9 the frame rate:** told 50 or 60, this chip's VP9 is refused and slow software takes over. This matches the owner's blurry Opera WebM at 720p50.
+
+**Not reproduced:** the owner's "Chrome 1080p30 is blurred". On this PC, a frame of scrolling text was sharp in both the old and the new build. The software fallback is the only real cause found. If it still looks soft, it needs a sample file.
+
+### 31.5 Warnings
+- **Old rule:** fps under 70% and whole-PC CPU at 80% or more, for 5 s. Entire screen always gives few new pictures, so any busy moment fired it, even at 30 fps. That was **a bug in the rule, on top of a real browser limit**.
+- **New rule:**
+  - any frame rate: frames really skipped from the file (over 2%, for 5 s)
+  - 50/60 fps only: few new pictures and CPU at 80% or more, for 5 s
+- In the Chromium test runs, no warning appeared at 30 fps. At 50/60 fps it can still appear (it did once each in Opera at 720p50 and Edge at 1080p60).
+
+### 31.6 Sound
+- **The browser's "Also share audio" switch stays.** No page can tick it or skip it: it is a browser privacy rule. Reclux now asks for it (`systemAudio: 'include'`), hides it when System audio is off, and explains it under the toggle.
+- **Mic + system audio together:** both are mixed into the file, and system sound keeps playing on the speakers.
+- **Ducking:** while the mic hears speech, system sound in the recording drops to 75%, then returns to 100%. Measured in the file: 0.100 → 0.075 → 0.100, over and over. (Changed to 48% in §32.2.) It only changes the recording, not what you hear. The speech threshold is a starting guess.
+- **Sync:** sound stays within about 0.1 s of the picture, with no drift over 24 s.
+- **"System audio off, can still hear it for 3 s" (not reproduced):** with the switch off, no system audio reaches the recording, and Reclux never plays sound to the speakers. The only way in is the **microphone hearing the speakers**, so a notice now says so. Sync was ruled out as the cause. Owner's retest ✅: with the switch off and the mic on, no leftover sound is heard from the speakers, and they report it working. Closed. The original 3 s sound was never reproduced, so its cause stays unconfirmed.
+
+### 31.7 Firefox: a hidden problem found
+The owner reported Firefox as fine, with no warnings. But Firefox never counted frames, so it could not warn. The old build recorded **about 3.5–4 fps in WebM** on heavy motion, and Firefox fell back to WebM whenever there was sound, because it has no AAC encoder.
+
+Measured speed of Firefox's encoders at 1080p: VP9 5 fps, VP8 16 fps, H.264 26–42 fps.
+
+| Fix | Effect |
+|-----|--------|
+| **MP4 with sound uses Opus** instead of falling back to WebM | Firefox keeps fast H.264 |
+| Firefox's WebM uses **VP8**, not VP9 | About 3× faster |
+| Skipped frames are now counted | Real warnings at last |
+
+| Firefox, heavy motion, mic on | Old | New |
+|---|--:|--:|
+| 1080p30 | 3.46/s (WebM, no mic) | **26.91/s (MP4 + Opus)** |
+| 720p30 WebM | 3.99/s (no mic) | **30.000/s** |
+| 1080p60 | not measured | 47.06/s (MP4 + Opus) |
+
+Not perfectly locked at 1080p: Firefox stalled for about 1 s a few times. MP4 without sound reached 60.000 at 720p60. Firefox still has no system audio.
+
+### 31.8 What else was checked
+| Check | Result |
+|---|---|
+| Chrome 1080p 30/50/60 MP4 | locked, 0 gaps |
+| Edge 1080p 30/50/60 MP4 | locked, 0 gaps |
+| Opera 720p50 WebM, 720p60 MP4, 1080p30 MP4 | locked, 0 gaps |
+| Brave 720p60 MP4, 1080p50 WebM, 1080p60 WebM | locked, 0 gaps |
+| WebM frame rate on the Windows Details page | now shown (for example 50.000) |
+| MP4 length on the Windows Details page | now shown (it was blank) |
+| Pause and Resume | continuous file, no gap |
+| Still screen | starts normally, "Screen is still", 30.000 |
+| Crash in mid-recording | offered, opens, 30.000 |
+| 7 minutes, tab hidden, 1080p30 | 12,615 frames, 30.000, 0 gaps, no warning, browser memory flat at about 510–530 MB |
+| Rebuild speed on Stop | about 120 MB/s and 250 MB of memory (Node, 2 GB file). So about 1.5 minutes for a worst-case 11 GB file, with a % shown |
+
+**Testing mistake to avoid:** `--use-fake-device-for-media-stream` also replaces the screen with a fake 20 fps video. An early round of results used it and was thrown away.
+
+### 31.9 System requirements
+Measured on one PC only. The other rows are my estimates ⚠️.
+
+| | Minimum (estimate) | Tested and works |
+|---|---|---|
+| CPU | Intel 8th gen or Ryzen 2000, 4 cores | i5-1035G1 |
+| Graphics | Hardware H.264 (nearly all since about 2015) | Intel UHD |
+| RAM | 8 GB | 20 GB |
+| Free disk | 8 GB for 2 h at 1080p30, up to 11 GB at 1080p60, plus the same again while finishing an MP4 | |
+| Browser | Chrome/Brave 116+, Firefox 140+ | Chrome and Brave 156, Edge 156, Opera 139, Firefox 159 |
+
+### 31.10 Not tested
+- **Real system audio through the real browser picker.** Automated runs cannot tick the switch, so ducking and sync used simulated system sound through Reclux's real mixer.
+- **A real voice for ducking.** A simulated mic was used, and the real mic was never opened.
+- **2 hours on the new pipeline.** 7 minutes so far.
+- **Other PCs.** Everything ran on one laptop.
+- **Whether Windows Media Player plays Opus inside MP4** (Firefox files with sound). Windows reads the format correctly.
+- **A real 11 GB rebuild inside a browser.**
+
+### 31.11 Welcome screen
+- New save wording, as asked.
+- The permission card is now a tinted callout with a **Read/Close pill and an arrow**.
+- All dropdowns share one drawn arrow, in line with the text padding.
+- "How a recording works" is four small cards with looping **GSAP** animations. GSAP loads on the Welcome page only. Anyone with animations turned off sees the finished picture.
+
+---
+
+## 32. Sharper text and stronger ducking (done) 🔤
+
+Answers the owner's test results on §31: Tab recording works, but text looks pixelated; ducking was not heard; the Firefox file plays with sound in Windows Media Player (this settles that open item in §31.10).
+
+### 32.1 Pixelated text: the encoder, not the capture
+- **Ruled out, measured:** the capture does not resize. Tab (1920×842), Window (1920×1020) and Screen (1920×1080) all arrive at native size on this PC (1080p at 125% Windows scaling), whatever size is requested. A raw captured frame looks the same as a true screenshot.
+- **Found:** moving video on the page takes most of the bits, so the text beside it suffers. Text sharpness was scored with moving video on the same frame, on hardware H.264:
+
+| Setting | Text | Real bitrate |
+|---|--:|--:|
+| 1080p60, 12 Mbps variable (old) | 38.9 dB | 11.2 Mbps |
+| 1080p60, 12 Mbps constant | 41.9 dB | 11.9 Mbps |
+| 1080p60, 20 Mbps variable | 43.3 dB | 11.6 Mbps |
+| **1080p60, 20 Mbps constant (new)** | **46.2 dB** | 12.5 Mbps |
+| 1080p60, 30 Mbps constant | 46.2 dB | 12.6 Mbps |
+| 1080p30, 8 Mbps variable (old) | 41.5 dB | 5.6 Mbps |
+| **1080p30, 14 Mbps constant (new)** | **46.3 dB** | 6.3 Mbps |
+
+- This encoder levels off at about 12.6 Mbps in this test, so asking for more costs little and "constant" spends it better.
+
+| Preset | Old | New ceiling |
+|---|--:|--:|
+| 720p · 30 / 50 / 60 | 5 / 6.5 / 7.5 Mbps | 9 / 11 / 13 Mbps |
+| 1080p · 30 / 50 / 60 | 8 / 10 / 12 Mbps | 14 / 17 / 20 Mbps |
+
+- The 720p and 1080p50 values use the same ratio. Only 1080p30 and 1080p60 were scored.
+- This replaces the "double the bitrate for software H.264" rule in §31.4, since these ceilings already cover it (16 Mbps scored 46 dB there). Not scored at the new numbers.
+- Constant mode is for hardware H.264 only. WebM and software stay variable.
+- Hardware VP9 runs with no frame rate hint and assumes 30 fps, which doubled its real bitrate at 60 fps (asked 12 Mbps, got 24). Its bitrate is now scaled by 30 / fps.
+
+**Real recordings on the new settings (Brave, real screen):**
+
+| Content | Preset | Windows says | Gaps | Real bitrate |
+|---|---|--:|--:|--:|
+| Heavy motion | 1080p30 MP4 | 30.000 | 0 | 8.2 Mbps |
+| Heavy motion | 1080p60 MP4 | 60.000 | 0 | 10.9 Mbps |
+| Scrolling text | 1080p60 MP4 | 60.000 | 0 | 13.8 Mbps |
+| **Still screen** | 1080p60 MP4 | 60.000 | 0 | **0.67 Mbps** (constant mode does not pad here) |
+| Heavy motion | 1080p60 WebM | 60.000 | 0 | about 12 Mbps (file size) |
+
+**Owner's real test ✅:** text is sharp in the saved recording.
+
+**Sizes on the setup page rise**, since they show the ceiling: 1080p60 now says about 18 GB for 2 hours. This PC would use far less.
+
+**Risks and limits:**
+- Other brands of encoder may follow "constant" more strictly and write bigger files, up to the size shown. Not tested ⚠️.
+- H.264 stores colour at half resolution in the browser's encoders, so coloured text on a coloured background stays softer than black on white.
+- A player that shrinks the video also softens text. Judge sharpness at full size.
+
+### 32.2 Ducking
+The owner's first request ("up to 25%") was read as "lower by 25%", giving 75%. Their correction, now built:
+
+| Moment | System sound | Voice |
+|---|--:|--:|
+| Speaking | **48%** | 100% |
+| Stopped speaking | **back to 100%** | 100% |
+
+- **Detection changed.** One fixed level could miss a quiet laptop mic, or stay triggered when speakers leak into the mic. It now listens in the speech frequency range and compares against the recent background level. The numbers are starting guesses.
+- **New live chip:** "Music in file: 100%" changes to "Voice heard · Music in file: 48%". The dip happens only in the recording, and the chip makes it visible while recording.
+- **Measured in the file, with a simulated mic:**
+
+| Simulated mic | System sound in the file |
+|---|---|
+| Normal level | 0.100 → 0.048 → 0.100, repeating |
+| Very quiet | 0.100 → 0.048 → 0.100, repeating |
+| Normal, with steady speaker leak | 0.100 → 0.048 → 0.100, repeating |
+
+**Owner's real test ✅:** 2:10 recording, Entire screen, real voice on the real mic, music and a video playing, system audio through the real browser picker. Music and video dipped to 48% while speaking, heard in the saved file. This settles the first two open items in §31.10 for ducking. A/V sync on real system audio was not measured separately.
 
 ---
 

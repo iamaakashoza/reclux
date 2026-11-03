@@ -3,6 +3,7 @@
   import Banner from '../../lib/Banner.svelte';
   import Button from '../../lib/Button.svelte';
   import Icon from '../../lib/Icon.svelte';
+  import HowItWorks from './HowItWorks.svelte';
   import Segmented from '../../lib/Segmented.svelte';
   import Toggle from '../../lib/Toggle.svelte';
   import { PRESETS } from '../../lib/presets';
@@ -58,17 +59,27 @@
       <p class="lead">Record your screen with sound. Everything stays on this computer.</p>
       <ul class="points">
         <li><Icon name="shield" size={24} /><span><strong>No account, no upload.</strong> Your recordings are never sent anywhere.</span></li>
-        <li><Icon name="folder" size={24} /><span><strong>You choose where to save.</strong> Any folder or drive, such as D: or E:.</span></li>
+        <li><Icon name="folder" size={24} /><span><strong>You choose where to save</strong> (any folder, downloads, or drives such as D: or E:).</span></li>
         <li><Icon name="play" size={24} /><span><strong>Works offline.</strong> No internet needed, ever.</span></li>
       </ul>
-      <details>
-        <summary>Why does Reclux need permissions?</summary>
+      <details class="why">
+        <summary>
+          <span class="why-icon"><Icon name="shield" size={22} /></span>
+          <span class="why-text">
+            <strong>Why does Reclux need permission?</strong>
+            <small>Please read: what each permission does, and why Reclux asks for it.</small>
+          </span>
+          <span class="why-open">
+            <span class="closed-label">Read</span><span class="open-label">Close</span>
+            <Icon name="chevron" size={18} />
+          </span>
+        </summary>
         <ul class="perms">
-          <li><strong>Downloads:</strong> shows the “Save as” window, so you can pick the folder.</li>
-          <li><strong>Unlimited storage:</strong> keeps long recordings safely while you record.</li>
+          <li><Icon name="download" size={18} /><span><strong>Downloads:</strong> shows the “Save as” window, so you can pick the folder.</span></li>
+          <li><Icon name="folder" size={18} /><span><strong>Unlimited storage:</strong> keeps long recordings safely while you record.</span></li>
           {#if !isFirefox}
-            <li><strong>CPU:</strong> tells you if your computer is too slow to keep up.</li>
-            <li><strong>Power:</strong> keeps the computer awake while recording.</li>
+            <li><Icon name="sliders" size={18} /><span><strong>CPU:</strong> tells you if your computer is too slow to keep up.</span></li>
+            <li><Icon name="play" size={18} /><span><strong>Power:</strong> keeps the computer awake while recording.</span></li>
           {/if}
         </ul>
         <p class="small">Your browser always asks before Reclux can see your screen or microphone.</p>
@@ -83,7 +94,7 @@
           <select id="wiz-quality" bind:value={s.presetId}>
             {#each PRESETS as p (p.id)}<option value={p.id}>{p.label}</option>{/each}
           </select>
-          <p class="small">On a slower computer, 720p · 30 fps is the smoothest.</p>
+          <p class="small">The saved file always plays at the frame rate you choose.{#if !isFirefox}{' '}For the smoothest motion, record a Tab or Window: browsers send fewer new pictures from an entire screen.{/if}</p>
         </div>
         <div class="field">
           <label for="wiz-format">Format</label>
@@ -99,18 +110,13 @@
         </div>
         {#if isFirefox}
           <Banner kind="info" title="Firefox">
-            With sound, Firefox saves WebM instead of MP4. System audio is not available in Firefox.
+            Choose MP4: WebM is much slower to encode in Firefox. System audio is not available in Firefox.
           </Banner>
         {/if}
       </div>
     {:else if step === 2}
       <h2 id="step-title" tabindex="-1" bind:this={heading}>How a recording works</h2>
-      <ol class="how">
-        <li><span class="n">1</span><span><strong>Press Start recording.</strong> Your browser asks what to share: a tab, a window or the whole screen. Tick “Also share audio” to include system sound.</span></li>
-        <li><span class="n">2</span><span><strong>3 … 2 … 1, then it records.</strong> Switch to other tabs or apps as you like. It keeps recording.</span></li>
-        <li><span class="n">3</span><span><strong>Pause, Resume, Mute or Stop</strong> from the recorder page.</span></li>
-        <li><span class="n">4</span><span><strong>Press Save file.</strong> Choose any folder or drive.</span></li>
-      </ol>
+      <HowItWorks {isFirefox} />
       <Banner kind="warn" title="Always press Save file">
         Until you save, the video lives in the browser’s private storage on this computer. Clearing the browser’s data would delete it.
         If something goes wrong, Reclux offers to recover it next time.
@@ -256,21 +262,90 @@
     margin-top: 2px;
     color: var(--c-accent);
   }
-  details {
-    padding: var(--s-3);
-    border: 1px solid var(--c-border);
+  .why {
+    border: 1px solid var(--c-info);
     border-radius: var(--r-md);
+    background: var(--c-info-bg);
+    color: var(--c-text);
   }
-  summary {
-    cursor: pointer;
-    min-height: var(--tap);
+  .why summary {
     display: flex;
     align-items: center;
-    font-weight: 600;
+    gap: var(--s-3);
+    min-height: var(--tap);
+    padding: var(--s-3);
+    border-radius: var(--r-md);
+    cursor: pointer;
+    list-style: none; /* our own arrow replaces the small browser triangle */
+  }
+  .why summary::-webkit-details-marker {
+    display: none;
+  }
+  .why-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--r-sm);
+    background: var(--c-bg);
+    color: var(--c-info);
+  }
+  .why-text {
+    flex: 1;
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+  .why-text small {
+    font-size: var(--t-xs);
+    color: var(--c-text-muted);
+  }
+  .why-open {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-1);
+    flex: none;
+    padding: var(--s-1) var(--s-2) var(--s-1) var(--s-3);
+    border-radius: var(--r-pill);
+    background: var(--c-info);
+    color: var(--c-bg);
+    font-size: var(--t-xs);
+    font-weight: 700;
+    transition: background var(--ease);
+  }
+  .why summary:hover .why-open {
+    background: var(--c-text);
+  }
+  .why-open :global(svg) {
+    transition: transform var(--ease);
+  }
+  .why[open] .why-open :global(svg) {
+    transform: rotate(180deg);
+  }
+  .open-label,
+  .why[open] .closed-label {
+    display: none;
+  }
+  .why[open] .open-label {
+    display: inline;
   }
   .perms {
-    margin-top: var(--s-2);
+    padding: 0 var(--s-3);
     font-size: var(--t-sm);
+  }
+  .perms li {
+    display: flex;
+    gap: var(--s-2);
+    align-items: flex-start;
+  }
+  .perms :global(svg) {
+    flex: none;
+    margin-top: 1px;
+    color: var(--c-info);
+  }
+  .why > .small {
+    margin: var(--s-3);
   }
   .small {
     font-size: var(--t-xs);
@@ -291,32 +366,9 @@
     font-weight: 600;
   }
   select {
-    min-height: var(--tap);
-    padding: 0 var(--s-3);
     border: 1px solid var(--c-border);
     border-radius: var(--r-md);
-    background: var(--c-bg);
-    cursor: pointer;
-  }
-  .how {
-    display: grid;
-    gap: var(--s-3);
-  }
-  .how li {
-    display: flex;
-    gap: var(--s-3);
-    align-items: flex-start;
-  }
-  .n {
-    display: inline-grid;
-    place-items: center;
-    flex: none;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--c-accent);
-    color: #fff;
-    font-weight: 700;
+    background-color: var(--c-bg);
   }
   .end {
     display: flex;
