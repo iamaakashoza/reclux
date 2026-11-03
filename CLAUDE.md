@@ -14,7 +14,7 @@ npm run build           # -> .output/chrome-mv3 (Chrome, Brave, Edge, Opera)
 npm run build:firefox   # -> .output/firefox-mv3
 npm run zip / zip:firefox
 npm run check           # svelte-check type check — the only automated verification
-npm run installer       # Windows .exe via Inno Setup 6 (installer/reclux.iss)
+npm run installer       # parked: Windows .exe via Inno Setup 6 (installer/reclux.iss)
 ```
 
 There is no test suite. Verify with `npm run check` plus a manual load of `.output/chrome-mv3` via "Load unpacked". Brave is the main test browser.
@@ -45,13 +45,14 @@ Recording pipeline (`src/lib/`):
 
 Browser differences live in `wxt.config.ts` (`system.cpu`/`power` omitted on Firefox, min Chrome 116, min Firefox 140) and in runtime feature checks — not separate code paths.
 
-UI: shared components in `src/lib/*.svelte`, design tokens in `src/styles/tokens.css`.
+UI: shared components in `src/lib/*.svelte` (`Logo.svelte` is the logo), design tokens in `src/styles/tokens.css`.
 
 ## Other files
 
 - `report.md` — the research report and decision log (presets, bitrates, browser minimums, 2-hour rules). Code comments cite it as "report §N". Update it when decisions change.
-- `store/` — store listing, privacy policy, and the static landing/install pages (hosted on Netlify).
-- `installer/` — Inno Setup script; installs the unpacked extension to `%LOCALAPPDATA%\Reclux\extension` and opens `install-guide.html`.
+- `brand/` — logo master files (SVG), app icons and usage rules. `public/icon/` and `Logo.svelte` are copied from here.
+- `store/` — store listing, privacy policy and old static pages. The live website is on the `website` branch, which Netlify deploys on every push (report §30, §33).
+- `installer/` — parked: Inno Setup script for a Windows `.exe`. The owner wants the browser extension only for now, so the website does not offer it.
 - `docs/`, `spike/` are local-only (gitignored).
 
 ## Conventions

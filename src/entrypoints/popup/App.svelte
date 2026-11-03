@@ -1,6 +1,7 @@
 <script lang="ts">
   import Button from '../../lib/Button.svelte';
   import Icon from '../../lib/Icon.svelte';
+  import Logo from '../../lib/Logo.svelte';
   import Segmented from '../../lib/Segmented.svelte';
   import Toggle from '../../lib/Toggle.svelte';
   import { PRESETS } from '../../lib/presets';
@@ -24,7 +25,7 @@
 </script>
 
 <main>
-  <h1><span class="logo"></span> Reclux</h1>
+  <h1><Logo /></h1>
   <Segmented legend="What to record" name="source" options={SOURCES} bind:value={s.source} />
   <div class="field">
     <label for="quality">Quality</label>
@@ -53,12 +54,6 @@
     gap: var(--s-2);
     font-size: var(--t-lg);
     font-weight: 800;
-  }
-  .logo {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--c-accent);
   }
   .field {
     display: grid;

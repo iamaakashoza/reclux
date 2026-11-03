@@ -2376,3 +2376,47 @@ The owner's first request ("up to 25%") was read as "lower by 25%", giving 75%. 
 - ❓ Verified per-browser extension RAM — **only our own measurements can answer this**
 - ❓ Firefox `tabCapture` / `offscreen` status — relies on a third-party doc, not Mozilla
 - ❓ Whether WebM from `MediaRecorder` lacks seek/duration data. A well-known issue from memory, not confirmed in this research
+
+---
+
+## 33. Logo, and a new website for the extension only (not published yet) 🎨
+
+### 33.1 Logo
+- **Idea: Rec + Lux.** The bowl of the R is a lens holding the red record dot. The leg is a beam of light at exactly 45°.
+- **Research:** Logobook is a library of existing logos, not a generator, so it was used for study only (letter R, shapes). The mark is an original drawing.
+- **Compared:** four concepts at 16 to 170 px, in `brand/concepts/`. Only the solid R stayed readable as both "R" and "record" at 16 px.
+- **Before this,** the extension's icon was WXT's default green puzzle piece.
+- **Files:** `brand/` has SVG logo, mark and icon versions, PNG icons from 16 to 512 px, and usage rules.
+
+### 33.2 Extension (version 0.2.1)
+- New icons in `public/icon/`, and the logo in the popup, recorder and welcome pages (`Logo.svelte`).
+- Only the look changed: no recording code was touched. The recording results in §31 and §32 still apply.
+
+### 33.3 Scope change
+The owner asked to set aside the `.exe` installers for now and focus on the extension. The website no longer offers the `.exe`. The `installer/` folder is kept but parked.
+
+### 33.4 Website (branch `website`)
+- **Sections, as asked:** navigation, hero, feature cards, downloads, FAQ, footer. Everything else is removed.
+- **Inspiration checked in the owner's browser:** Raycast (red light on near-black, floating navigation) and Screen Studio (one bold centred message), plus Cursor and Anthropic. Linear and Runway were blocked or refused by the browser extension's site permissions.
+- **Design:** dark only, with brand red as the one accent. The hero light uses the same 45° as the R's leg, and comes from behind the recorder picture.
+- **Motion:** each feature card plays a short story that explains the feature. Nothing moves off screen, and "reduce motion" stops it all.
+- **Claims changed on purpose:** "tested for 2 hours" and "under 1 second lost in a crash" are gone, since neither has been re-measured on the §31 recording pipeline.
+- **Learn More tooltip:** opens on hover, keyboard focus or tap, closes with Esc, and flips downward when there is no room above.
+
+### 33.5 Tested
+| Check | Result |
+|---|---|
+| Sizes 1440, 1024, 768, 375, 320 | no sideways scroll, no tap target under 40 px ✅ |
+| Speed on this PC's Intel UHD graphics | 55 to 61 frames a second ✅ |
+| Contrast behind hero text, darkest case in one frame | 13:1 or better (target 4.5:1) ✅ |
+| Reduce motion | 0 animations running, all sections visible ✅ |
+| Netlify's security rules, served locally | no errors, light still runs ✅ |
+| Download files match the SHA-256 on the page | ✅ |
+| Chrome .zip: extracted and loaded as an unpacked extension | loads, welcome guide opens, shows 0.2.1 and the new logo ✅ |
+
+### 33.6 Not tested
+- 0.2.1 .zip by hand in Edge, Brave, Opera and Firefox.
+- Real phones and tablets (sizes were emulated in Chrome), and Safari.
+- The website on Netlify: nothing is published until the owner says so.
+
+**The owner's call:** the page says Firefox "paused for about a second a few times in our test". That is from one PC (§31.7).

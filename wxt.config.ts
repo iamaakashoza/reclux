@@ -5,7 +5,7 @@ export default defineConfig({
   srcDir: 'src',
   modules: ['@wxt-dev/module-svelte'],
   // The sources zip (needed by Firefox's add-on review) only needs the code, not our notes and store files.
-  zip: { excludeSources: ['report.md', 'docs/**', 'store/**', 'spike/**'] },
+  zip: { excludeSources: ['report.md', 'docs/**', 'store/**', 'spike/**', 'brand/**'] },
   manifest: ({ browser }) => ({
     name: 'Reclux',
     // Oldest Chrome/Brave that has everything Reclux needs (report §6). Brave 1.58 is Chromium 116.

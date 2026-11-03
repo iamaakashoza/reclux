@@ -4,6 +4,7 @@
   import ControlBar from '../../lib/ControlBar.svelte';
   import Finished from '../../lib/Finished.svelte';
   import Icon from '../../lib/Icon.svelte';
+  import Logo from '../../lib/Logo.svelte';
   import Library from '../../lib/Library.svelte';
   import SetupPanel from '../../lib/SetupPanel.svelte';
   import { MAX_SECONDS, WARN_SECONDS, findPreset } from '../../lib/presets';
@@ -88,7 +89,7 @@
 
 <div class="app">
   <header>
-    <h1 class="brand"><span class="logo"></span> Reclux</h1>
+    <h1 class="brand"><Logo /></h1>
     <span class="right">
       <a class="guide" href="/welcome.html">Setup guide</a>
       <span class="offline"><Icon name="shield" size={16} /> Works offline</span>
@@ -228,12 +229,6 @@
     font-size: var(--t-lg);
     font-weight: 800;
     letter-spacing: -0.01em;
-  }
-  .logo {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--c-accent);
   }
   .right {
     display: flex;

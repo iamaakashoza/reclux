@@ -13,13 +13,10 @@ npm run build:firefox   # Firefox (Manifest V3)       -> .output/firefox-mv3
 npm run zip             # store zip for Chrome
 npm run zip:firefox     # store zip for Firefox, plus the sources zip
 npm run check           # type check
-npm run installer       # Windows installer -> .output/Reclux-Setup-<version>.exe (needs Inno Setup 6)
 ```
 
-## Windows installer
+Reclux is shared as the extension .zip files. Steps for each browser are on [the website](https://reclux.netlify.app). The Windows installer in `installer/` is parked and not offered for now.
 
-`Reclux-Setup-<version>.exe` copies the extension to `%LOCALAPPDATA%\Reclux\extension` and opens a short guide in Chrome, Brave, Edge or Opera.
-Browsers do not let a program add an extension by itself, so the guide walks the user through Developer mode and Load unpacked (about 30 seconds per browser).
-No browser policies are changed. Uninstall from Windows Settings > Apps.
+Logo and brand files are in [brand/](brand/README.md).
 
 Built with WXT, Svelte 5 and TypeScript. The video library is [Mediabunny](https://mediabunny.dev) (an npm dependency, not copied code).

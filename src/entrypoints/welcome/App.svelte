@@ -3,6 +3,7 @@
   import Banner from '../../lib/Banner.svelte';
   import Button from '../../lib/Button.svelte';
   import Icon from '../../lib/Icon.svelte';
+  import Logo from '../../lib/Logo.svelte';
   import HowItWorks from './HowItWorks.svelte';
   import Segmented from '../../lib/Segmented.svelte';
   import Toggle from '../../lib/Toggle.svelte';
@@ -36,7 +37,7 @@
 
 <main>
   <header>
-    <h1 class="brand"><span class="logo"></span> Reclux</h1>
+    <h1 class="brand"><Logo height={28} /></h1>
     {#if step < STEPS.length - 1}
       <button class="skip" onclick={() => go(STEPS.length - 1)}>Skip setup</button>
     {/if}
@@ -160,12 +161,6 @@
     gap: var(--s-2);
     font-size: var(--t-xl);
     font-weight: 800;
-  }
-  .logo {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background: var(--c-accent);
   }
   .skip {
     min-height: var(--tap);
