@@ -10,7 +10,7 @@ import { isPolyfill } from './track-processor';
 import { findUnsaved, getStored, holdStored, markSaved, removeStored, type Stored } from './store';
 import { untrack } from 'svelte';
 
-export type Phase = 'idle' | 'countdown' | 'recording' | 'paused' | 'finished';
+type Phase = 'idle' | 'countdown' | 'recording' | 'paused' | 'finished';
 
 const SURFACE = { tab: 'browser', window: 'window', screen: 'monitor' } as const;
 
@@ -275,8 +275,6 @@ export async function stop() {
     session.finishing = false;
   } else if (session.phase === 'countdown') {
     reset();
-  } else if (!rec && live) {
-    session.phase = 'finished'; // design preview only
   }
 }
 
@@ -332,7 +330,6 @@ export function reset() {
 
 /** Opens a "Save as" window, so the user can pick any folder or drive (D:, E:…). */
 export async function save() {
-  if (!session.url) return;
   const clean = session.name.replace(/[\\/:*?"<>|]/g, '-').trim() || 'Reclux recording';
   const filename = `${clean}.${session.ext}`;
   try {
@@ -388,20 +385,3 @@ const durationOf = (url: string) =>
     v.onerror = () => resolve(0);
     v.src = url;
   });
-
-/** Design preview only: jump straight to a screen. Ignored during a real recording. */
-export function setPhase(p: Phase) {
-  if (rec || cap) return;
-  stopTimer();
-  session.count = 3;
-  if (p === 'idle') session.elapsed = 0;
-  else if (p !== 'countdown' && session.elapsed === 0) session.elapsed = 768;
-  previewElapsed(session.elapsed);
-  session.phase = p;
-}
-
-export function previewElapsed(seconds: number) {
-  if (rec || cap) return;
-  session.elapsed = seconds;
-  session.bytes = sizeMB(findPreset(session.presetId), seconds) * 1e6;
-}

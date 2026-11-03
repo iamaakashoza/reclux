@@ -13,19 +13,15 @@
 
   // The recording lives only in memory until saved, so ask before throwing it away.
   const leave = (question: string) => {
-    if (session.url && !session.saved && !confirm(question)) return;
+    if (!session.saved && !confirm(question)) return;
     reset();
   };
 </script>
 
 <section class="done" aria-label="Recording ready">
   <p class="ok"><Icon name="check" /> {session.saved ? 'Saved to your computer' : 'Recording ready. Not saved yet.'}</p>
-  {#if session.url}
-    <!-- svelte-ignore a11y_media_has_caption -->
-    <video class="video" src={session.url} controls></video>
-  {:else}
-    <div class="video"><Icon name="play" size={40} /></div>
-  {/if}
+  <!-- svelte-ignore a11y_media_has_caption -->
+  <video class="video" src={session.url} controls></video>
   <div class="meta">
     {#if renaming}
       <input
@@ -43,7 +39,7 @@
     </p>
   </div>
   <div class="actions">
-    <Button variant="primary" icon="download" onclick={save} disabled={!session.url}>
+    <Button variant="primary" icon="download" onclick={save}>
       {session.saved ? 'Save again' : 'Save file'}
     </Button>
     <Button icon="trash" onclick={() => leave('Discard this recording? It has not been saved.')}>Discard</Button>

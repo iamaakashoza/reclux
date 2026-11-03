@@ -2423,6 +2423,13 @@ Removed `web-ext`, `tslib` and `@tsconfig/svelte`, the backup save method, the u
 
 Re-tested: clean install, type check, both zip builds, 22 extension screen checks, and real recordings in Brave, Chrome, Edge, Opera and Firefox. Pressing Save file sent the right request to the browser each time, with the "Save as" window stubbed in the test.
 
+### 33.5c Removed for good
+`store/`, `installer/` and the design preview (bar, sample list, theme switch, `recorder.html#...` shortcuts) were deleted at the owner's request. Stores and the `.exe` are not planned. Older sections of this report still mention these files, and git history keeps them. Nothing in them reached people using Reclux.
+
+### 33.5d Seen while re-testing (not caused by the cleanup)
+- **Crash recovery keeps less than the code comment says.** In simulated crashes (page reload), the recovered file was about 1 to 3 seconds short, and the sound could stop up to about 2 seconds before the picture. A comment in `recorder.ts` still says "well under a second". The website makes no claim about this.
+- **Opera, one run in four:** with the CPU at 100% just after the browser started, the file had holes where frames were skipped. Three repeat runs matched.
+
 ### 33.6 Not tested
 - The real "Save as" window after this cleanup, and reload during `npm run dev` without `web-ext`.
 - 0.2.1 .zip by hand in Edge, Brave, Opera and Firefox.

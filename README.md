@@ -15,7 +15,7 @@ npm run zip:firefox     # store zip for Firefox, plus the sources zip
 npm run check           # type check
 ```
 
-Reclux is shared as the extension .zip files. Steps for each browser are on [the website](https://reclux.netlify.app). The Windows installer in `installer/` is parked and not offered for now.
+Reclux is shared as the extension .zip files. Steps for each browser are on [the website](https://reclux.netlify.app).
 
 Logo and brand files are in [brand/](brand/README.md).
 

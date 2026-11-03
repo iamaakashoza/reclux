@@ -5,7 +5,6 @@
   import Finished from '../../lib/Finished.svelte';
   import Icon from '../../lib/Icon.svelte';
   import Logo from '../../lib/Logo.svelte';
-  import Library from '../../lib/Library.svelte';
   import SetupPanel from '../../lib/SetupPanel.svelte';
   import { MAX_SECONDS, WARN_SECONDS, findPreset, fmtSize } from '../../lib/presets';
   import { LOW_FREE } from '../../lib/disk';
@@ -14,30 +13,18 @@
     discardRecoverable,
     keepAsIs,
     lowerFps,
-    previewElapsed,
     recover,
     refreshRecoverable,
     reset,
     session,
-    setPhase,
     start,
-    type Phase,
   } from '../../lib/session.svelte';
 
   // A crash or closed tab can leave a recording behind. Offer to get it back.
   onMount(refreshRecoverable);
 
-  const PHASES: { id: Phase; label: string }[] = [
-    { id: 'idle', label: 'Setup' },
-    { id: 'countdown', label: 'Countdown' },
-    { id: 'recording', label: 'Recording' },
-    { id: 'paused', label: 'Paused' },
-    { id: 'finished', label: 'Finished' },
-  ];
-
   const live = $derived(session.phase === 'recording' || session.phase === 'paused');
   const locked = $derived(session.phase !== 'idle');
-  const showLibrary = $derived(session.phase === 'idle' || session.phase === 'finished');
 
   // When the screen changes, move keyboard focus to its first button, so it is not lost when the old one disappears.
   const focusStage = () => {
@@ -60,28 +47,12 @@
 
   // Closing this tab would lose a live or unsaved recording, so the browser asks first.
   $effect(() => {
-    const guard = live || (session.phase === 'finished' && !!session.url && !session.saved);
+    const guard = live || (session.phase === 'finished' && !session.saved);
     if (!guard) return;
     const ask = (e: BeforeUnloadEvent) => e.preventDefault();
     window.addEventListener('beforeunload', ask);
     return () => window.removeEventListener('beforeunload', ask);
   });
-
-  // ponytail: design-preview bar and the sample library are for design review only. Open recorder.html#preview to see them; delete before release.
-  const showPreview = location.hash.includes('preview');
-  let theme = $state('system');
-  $effect(() => {
-    if (theme === 'system') delete document.documentElement.dataset.theme;
-    else document.documentElement.dataset.theme = theme;
-  });
-
-  // Open a screen directly, e.g. recorder.html#recording,dark,lowdisk
-  for (const t of location.hash.slice(1).split(',')) {
-    if (PHASES.some((p) => p.id === t)) setPhase(t as Phase);
-    else if (t === 'dark' || t === 'light') theme = t;
-    else if (t === 'lowdisk') session.lowDisk = true;
-    else if (t === 'slow') session.struggling = true;
-  }
 
   const wantFps = $derived(findPreset(session.presetId).fps);
 </script>
@@ -94,29 +65,6 @@
       <span class="offline"><Icon name="shield" size={16} /> Works offline</span>
     </span>
   </header>
-
-  {#if showPreview}
-  <aside class="preview" aria-label="Design preview controls">
-    <strong>Design preview</strong>
-    <div class="chips" role="group" aria-label="Jump to screen">
-      {#each PHASES as p (p.id)}
-        <button class:on={session.phase === p.id} onclick={() => setPhase(p.id)}>{p.label}</button>
-      {/each}
-    </div>
-    <label><input type="checkbox" bind:checked={session.lowDisk} /> Low disk</label>
-    <label><input type="checkbox" bind:checked={session.struggling} /> Slow computer</label>
-    <button onclick={() => previewElapsed(WARN_SECONDS)}>Jump to 1h45</button>
-    <button onclick={() => previewElapsed(MAX_SECONDS)}>Jump to 2h00</button>
-    <label>
-      Theme
-      <select bind:value={theme}>
-        <option value="system">System</option>
-        <option value="light">Light</option>
-        <option value="dark">Dark</option>
-      </select>
-    </label>
-  </aside>
-  {/if}
 
   <main class="layout">
     <section class="setup" class:locked inert={locked} aria-label="Recording setup">
@@ -203,9 +151,6 @@
       {/if}
     </section>
 
-    {#if showPreview && showLibrary}
-      <div class="library"><Library /></div>
-    {/if}
   </main>
 </div>
 
@@ -239,33 +184,6 @@
     gap: var(--s-2);
     font-size: var(--t-xs);
     color: var(--c-text-muted);
-  }
-  .preview {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--s-2) var(--s-3);
-    padding: var(--s-2) var(--s-4);
-    background: var(--c-surface-2);
-    font-size: var(--t-xs);
-  }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--s-1);
-  }
-  .preview button,
-  .preview select {
-    min-height: 32px;
-    padding: 0 var(--s-3);
-    border: 1px solid var(--c-border);
-    border-radius: var(--r-pill);
-    background: var(--c-bg);
-    cursor: pointer;
-  }
-  .preview button.on {
-    background: var(--c-text);
-    color: var(--c-bg);
   }
   .layout {
     display: grid;
@@ -310,9 +228,6 @@
   .count {
     font: 800 96px / 1 var(--font-mono);
     color: var(--c-text);
-  }
-  .library {
-    grid-column: 1 / -1;
   }
 
   /* Tablet portrait and up: two columns */
