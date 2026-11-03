@@ -17,6 +17,8 @@ npm run check           # type check
 
 Reclux is shared as the extension .zip files. Steps for each browser are on [the website](https://reclux.netlify.app).
 
+See what changed in each version in the [release notes](CHANGELOG.md).
+
 Logo and brand files are in [brand/](brand/README.md).
 
 Built with WXT, Svelte 5 and TypeScript. The video library is [Mediabunny](https://mediabunny.dev) (an npm dependency, not copied code).
