@@ -5,79 +5,280 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reclux Privacy Policy</title>
 <meta name="description" content="Reclux does not collect, send or sell any data. Everything stays on your device.">
+<meta name="theme-color" content="#0a0a0c">
+<meta property="og:title" content="Reclux Privacy Policy">
+<meta property="og:description" content="Reclux does not collect, send or sell any data. Everything stays on your device.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://reclux.netlify.app/og.png">
+<meta property="og:url" content="https://iamaakashoza.github.io/reclux-privacy/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://iamaakashoza.github.io/reclux-privacy/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="favicon-32.png" type="image/png">
+<link rel="preload" href="fonts/google-sans-flex.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-  :root { color-scheme: light dark; --accent: #D7263D; --muted: #5b6470; --line: #d9dde3; --bg: #ffffff; --fg: #14181f; --soft: #f4f6f8; }
-  @media (prefers-color-scheme: dark) { :root { --muted: #9aa4b2; --line: #2b323c; --bg: #0f1318; --fg: #e8ecf1; --soft: #171c23; } }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 400 1rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  main { max-width: 44rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
-  h1 { display: flex; align-items: center; gap: .6rem; font-size: 1.9rem; margin: 0 0 .25rem; }
-  h1::before { content: ""; width: .9rem; height: .9rem; border-radius: 50%; background: var(--accent); }
-  h2 { font-size: 1.25rem; margin: 2rem 0 .5rem; }
-  p, li { color: var(--fg); }
-  .meta { color: var(--muted); margin: 0 0 1.5rem; }
-  .short { padding: 1rem 1.25rem; border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: .5rem; background: var(--soft); }
-  table { width: 100%; border-collapse: collapse; font-size: .95rem; }
-  th, td { text-align: left; padding: .6rem .5rem; border-bottom: 1px solid var(--line); vertical-align: top; }
-  a { color: var(--accent); }
-  @media (prefers-color-scheme: dark) { a { color: #ff6b81; } }
+  /* Same brand as the landing page. Fonts are self-hosted, so this page makes no third-party requests. */
+  @font-face { font-family: 'Google Sans Flex'; src: url('fonts/google-sans-flex.woff2') format('woff2'); font-weight: 400 700; font-display: swap; }
+  @font-face { font-family: 'Instrument Serif'; src: url('fonts/instrument-serif-italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
+  @font-face { font-family: 'Geist Mono'; src: url('fonts/geist-mono.woff2') format('woff2'); font-weight: 400 500; font-display: swap; }
+
+  :root {
+    --bg: #0a0a0c; --bg-2: #101013; --card: #131316;
+    --ink: #f4f2ee; --ink-2: #aeadb5;
+    --line: rgba(255, 255, 255, 0.09); --line-2: rgba(255, 255, 255, 0.2);
+    --red: #d7263d; --red-hi: #ff6b7c;
+    --sans: 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --serif: 'Instrument Serif', Georgia, serif;
+    --mono: 'Geist Mono', ui-monospace, Consolas, monospace;
+    --gutter: clamp(1rem, 4vw, 2.5rem);
+    --r: 1.25rem;
+    --out: cubic-bezier(0.16, 1, 0.3, 1);
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 6rem; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 400 1.0625rem/1.65 var(--sans); overflow-x: clip; }
+  svg { display: block; max-width: 100%; }
+  h1, h2, p, ul { margin: 0; padding: 0; }
+  ul { list-style: none; }
+  a { color: inherit; text-underline-offset: 0.2em; }
+  :focus-visible { outline: 3px solid #6ea1ff; outline-offset: 3px; border-radius: 6px; }
+  ::selection { background: var(--red); color: #fff; }
+  .skip { position: absolute; left: 1rem; top: -5rem; z-index: 100; padding: 0.75rem 1rem; background: var(--ink); color: var(--bg); border-radius: 0.5rem; }
+  .skip:focus { top: 1rem; }
+  .wrap { width: min(100% - 2 * var(--gutter), 74rem); margin-inline: auto; }
+
+  /* Navigation: the same floating bar as the landing page */
+  .top { position: fixed; inset: 0.75rem 0 auto; z-index: 50; padding-inline: var(--gutter); pointer-events: none; }
+  .top-in { pointer-events: auto; display: flex; align-items: center; gap: 0.75rem; width: min(100%, 62rem); margin-inline: auto; padding: 0.5rem 0.5rem 0.5rem 1rem; border: 1px solid var(--line); border-radius: 1rem; background: rgba(16, 16, 19, 0.84); -webkit-backdrop-filter: blur(16px) saturate(1.4); backdrop-filter: blur(16px) saturate(1.4); }
+  .brand { display: block; margin-right: auto; padding-block: 0.6rem; color: var(--ink); border-radius: 4px; }
+  .brand svg { height: 1.5rem; width: calc(1.5rem * 4.57); }
+  .nav { display: none; gap: 0.25rem; }
+  .nav a { display: flex; align-items: center; min-height: 2.5rem; padding: 0.5rem 0.8rem; border-radius: 0.6rem; color: var(--ink-2); text-decoration: none; font-size: 0.95rem; transition: color 160ms, background-color 160ms; }
+  .nav a:hover { color: var(--ink); background: rgba(255, 255, 255, 0.07); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0 1rem; border-radius: 0.65rem; background: var(--red); color: #fff; font-weight: 600; font-size: 0.9rem; text-decoration: none; transition: background-color 160ms; }
+  .btn:hover { background: #bf1f35; }
+  .menu { position: relative; }
+  .menu summary { display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 0.65rem; cursor: pointer; list-style: none; }
+  .menu summary::-webkit-details-marker { display: none; }
+  .menu summary svg { width: 1.4rem; height: 1.4rem; }
+  .menu-panel { position: absolute; right: 0; top: calc(100% + 0.75rem); min-width: 11rem; padding: 0.4rem; display: grid; border: 1px solid var(--line-2); border-radius: 0.9rem; background: #16161a; }
+  .menu-panel a { padding: 0.75rem 0.9rem; border-radius: 0.6rem; text-decoration: none; }
+  .menu-panel a:hover { background: rgba(255, 255, 255, 0.08); }
+
+  /* Header: the logo's 45-degree light, kept still and quiet so the page reads as a document */
+  .head { position: relative; isolation: isolate; overflow: hidden; padding: clamp(7.5rem, 16vw, 10.5rem) 0 clamp(2.5rem, 6vw, 4.5rem); border-bottom: 1px solid var(--line); }
+  .beams { position: absolute; inset: -60% -20%; z-index: -1; background: repeating-linear-gradient(135deg, transparent 0 5rem, rgba(215, 38, 61, 0.6) 5rem 12rem, transparent 12rem 17rem, rgba(215, 38, 61, 0.3) 17rem 20rem, transparent 20rem 29rem); filter: blur(30px); -webkit-mask-image: radial-gradient(60% 55% at 68% 55%, #000, transparent); mask-image: radial-gradient(60% 55% at 68% 55%, #000, transparent); }
+  .label { font: 400 0.75rem var(--mono); color: var(--red-hi); text-transform: uppercase; letter-spacing: 0.14em; }
+  h1 { font-size: clamp(2.5rem, 7vw, 5rem); line-height: 1.04; font-weight: 600; letter-spacing: -0.035em; }
+  h1 em { font-family: var(--serif); font-weight: 400; letter-spacing: -0.02em; font-size: 1.07em; }
+  .meta { display: inline-block; margin-top: 1.25rem; padding: 0.3rem 0.8rem; border: 1px solid var(--line-2); border-radius: 99px; background: rgba(10, 10, 12, 0.7); font: 400 0.8125rem var(--mono); }
+
+  /* Page layout */
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; padding-block: clamp(2rem, 5vw, 4rem) clamp(3rem, 7vw, 5.5rem); }
+  .toc { display: none; }
+  .toc p { margin-bottom: 0.75rem; }
+  .toc a { display: flex; align-items: center; min-height: 2.25rem; padding: 0.3rem 0 0.3rem 0.85rem; line-height: 1.4; border-left: 1px solid var(--line-2); color: var(--ink-2); font-size: 0.925rem; text-decoration: none; transition: color 160ms, border-color 160ms; }
+  .toc a:hover { color: var(--ink); border-left-color: var(--red-hi); }
+  article { min-width: 0; max-width: 50rem; }
+  .short { display: flex; gap: 0.9rem; padding: clamp(1.1rem, 3vw, 1.6rem); border: 1px solid rgba(255, 107, 124, 0.38); border-radius: var(--r); background: rgba(215, 38, 61, 0.09); font-size: clamp(1.0625rem, 2vw, 1.25rem); line-height: 1.5; }
+  .short svg { flex: none; width: 1.6rem; height: 1.6rem; margin-top: 0.1rem; color: var(--red-hi); }
+  section { padding-top: clamp(2.25rem, 5vw, 3.25rem); }
+  h2 { margin-bottom: 0.9rem; font-size: clamp(1.4rem, 3vw, 1.85rem); line-height: 1.2; font-weight: 600; letter-spacing: -0.02em; }
+  section > p { color: #d8d6d4; }
+  section > p a { color: var(--ink); }
+
+  .table { border: 1px solid var(--line); border-radius: var(--r); background: var(--card); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.975rem; line-height: 1.55; }
+  th, td { padding: 0.85rem 1rem; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+  th { font: 400 0.75rem var(--mono); color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.08em; background: var(--bg-2); }
+  td { border-top: 1px solid var(--line); color: #d8d6d4; }
+  td:first-child { width: 42%; color: var(--ink); }
+  td strong { color: var(--ink); font-weight: 600; }
+  td.code { font: 400 0.8125rem/1.7 var(--mono); width: 1%; white-space: nowrap; overflow-wrap: normal; padding-right: 0.75rem; }
+
+  .list { display: grid; gap: 0.55rem; }
+  .list li { position: relative; padding: 0.7rem 1rem 0.7rem 2.75rem; border: 1px solid var(--line); border-radius: 0.85rem; background: var(--card); line-height: 1.5; color: #d8d6d4; }
+  .list li strong { color: var(--ink); font-weight: 600; }
+  .list li::before, .no li::after { content: ''; position: absolute; }
+  .list li::before { left: 1.05rem; top: 1.2rem; width: 0.6rem; height: 0.6rem; border-radius: 50%; background: var(--red); }
+  /* "Does not do": a small cross, drawn with two lines */
+  .no li::before, .no li::after { left: 1rem; top: 1.35rem; width: 0.95rem; height: 2px; border-radius: 2px; background: var(--red-hi); transform: rotate(45deg); }
+  .no li::after { transform: rotate(-45deg); }
+
+  footer { padding: 2.5rem 0 3rem; border-top: 1px solid var(--line); }
+  .foot { display: grid; gap: 1.25rem; }
+  .foot-brand p { margin-top: 0.4rem; color: var(--ink-2); max-width: 22rem; }
+  .foot-brand .brand { width: fit-content; }
+  footer nav { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; }
+  footer nav a { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--ink-2); text-decoration: none; transition: color 160ms; }
+  footer nav a:hover { color: var(--ink); }
+
+  @media (min-width: 48rem) {
+    .nav { display: flex; }
+    .menu { display: none; }
+    .foot { grid-template-columns: 1fr auto; align-items: start; }
+  }
+  @media (min-width: 64rem) {
+    .layout { grid-template-columns: 14rem minmax(0, 1fr); gap: 4rem; }
+    .toc { display: block; position: sticky; top: 6.5rem; align-self: start; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .rise { animation: rise 800ms var(--out) both; animation-delay: calc(var(--i, 0) * 70ms); }
+    @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+    .beams { animation: drift 16s ease-in-out infinite alternate; }
+    @keyframes drift { to { transform: translate3d(3rem, 3rem, 0); } }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
 </head>
 <body>
-<main>
-  <h1>Reclux Privacy Policy</h1>
-  <p class="meta">Last updated: 29 October 2026</p>
+<a class="skip" href="#main">Skip to content</a>
 
-  <p class="short"><strong>Short version:</strong> Reclux does not collect, send or sell any of your data. Everything stays on your device.</p>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logo" viewBox="20 16 438.68 96">
+    <path fill="currentColor" fill-rule="evenodd" d="M20 16H64A36 36 0 0 1 81.47 83.47L110 112H78L54 88H44V112H20ZM64 38a14 14 0 1 0 0 28a14 14 0 1 0 0-28Z"/>
+    <circle cx="64" cy="52" r="14" fill="#D7263D"/>
+    <path fill="currentColor" transform="translate(-3 0)" d="M158.22 114.35Q141.53 114.35 131.71 104.16Q121.89 93.97 121.89 77.81Q121.89 61.72 131.98 51.33Q142.07 40.94 158.69 40.94Q173.31 40.94 183.13 50.69Q192.95 60.45 192.95 76.87Q192.95 78.75 192.82 80.22Q192.68 81.7 192.28 84.11Q192.28 84.11 192.28 84.11Q192.28 84.11 192.28 84.11L131.61 84.18V68.83H172.97Q172.1 63.53 168.41 60.25Q164.73 56.96 158.63 56.96Q151.39 56.96 146.86 62.19Q142.34 67.42 142.34 76.8Q142.34 87.26 147.43 93.2Q152.53 99.13 161.24 99.13Q167.01 99.13 171.6 96.65Q176.19 94.17 179.94 89.47Q179.94 89.47 179.94 89.47Q179.94 89.47 179.94 89.47L191.01 99.73Q191.01 99.73 191.01 99.73Q191.01 99.73 191.01 99.73Q184.84 106.84 177.23 110.59Q169.62 114.35 158.22 114.35Z M236.26 114.35Q220.21 114.35 209.85 103.98Q199.49 93.62 199.49 77.54Q199.49 61.28 209.82 51.01Q220.14 40.74 236.36 40.74Q248.36 40.74 256.74 46.15Q265.12 51.56 269.25 61.92Q269.25 61.92 269.25 61.92Q269.25 61.92 269.25 61.92L251.92 68.53Q251.92 68.53 251.92 68.53Q251.92 68.53 251.92 68.53Q249.57 63.09 245.9 60.66Q242.23 58.23 236.93 58.23Q229.76 58.23 224.78 63.55Q219.81 68.86 219.81 77.42Q219.81 85.99 224.77 91.4Q229.74 96.82 236.87 96.82Q242.16 96.82 246.07 94.25Q249.97 91.69 252.25 86.46Q252.25 86.46 252.25 86.46Q252.25 86.46 252.25 86.46L269.78 91.82Q269.78 91.82 269.78 91.82Q269.78 91.82 269.78 91.82Q265.63 103.22 256.96 108.78Q248.3 114.35 236.26 114.35Z M279.31 112Q279.31 112 279.31 112Q279.31 112 279.31 112V16Q279.31 16 279.31 16Q279.31 16 279.31 16H300.26Q300.26 16 300.26 16Q300.26 16 300.26 16V112Q300.26 112 300.26 112Q300.26 112 300.26 112Z M340.22 114.35Q328.15 114.35 321.35 107.5Q314.55 100.65 314.55 88.1V43.08Q314.55 43.08 314.55 43.08Q314.55 43.08 314.55 43.08H335.49Q335.49 43.08 335.49 43.08Q335.49 43.08 335.49 43.08V84.85Q335.49 91.55 338.63 95.16Q341.76 98.76 347.47 98.76Q353.46 98.76 357.52 94.17Q361.57 89.58 361.57 82.87V43.08Q361.57 43.08 361.57 43.08Q361.57 43.08 361.57 43.08H382.52Q382.52 43.08 382.52 43.08Q382.52 43.08 382.52 43.08V112Q382.52 112 382.52 112Q382.52 112 382.52 112H362.81Q362.81 112 362.81 112Q362.81 112 362.81 112V93.4L372.33 102.92H362.34Q359.49 107.98 353.68 111.16Q347.86 114.35 340.22 114.35Z M439.01 112Q439.01 112 439.01 112Q439.01 112 439.01 112L419.4 81.16H417.22L390.31 43.08Q390.31 43.08 390.31 43.08Q390.31 43.08 390.31 43.08H413.37Q413.37 43.08 413.37 43.08Q413.37 43.08 413.37 43.08L433.01 73.52H435.09L462.57 112Q462.57 112 462.57 112Q462.57 112 462.57 112ZM389.5 112Q389.5 112 389.5 112Q389.5 112 389.5 112L417.69 72.35H421.38L440.38 43.08Q440.38 43.08 440.38 43.08Q440.38 43.08 440.38 43.08H462.27Q462.27 43.08 462.27 43.08Q462.27 43.08 462.27 43.08L434.48 81.5H431.03L410.95 112Q410.95 112 410.95 112Q410.95 112 410.95 112Z"/>
+  </symbol>
+</svg>
 
-  <h2>What Reclux handles</h2>
-  <table>
-    <thead><tr><th>What</th><th>Where it stays</th></tr></thead>
-    <tbody>
-      <tr><td>The picture of your screen, a window or a tab, and the microphone or system sound you choose to record</td><td>Written to your browser's private storage on your own computer, then to the folder you pick when you press <strong>Save file</strong></td></tr>
-      <tr><td>Your choices (what to record, quality, format, microphone on or off)</td><td>Saved in your browser's local storage on your own computer</td></tr>
-      <tr><td>Computer load (CPU use) and frames per second</td><td>Read while recording, only to show a warning. Not stored, not sent</td></tr>
-      <tr><td>Free disk space</td><td>Read while recording, only to show a warning. Not stored, not sent</td></tr>
-    </tbody>
-  </table>
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="https://reclux.netlify.app/" aria-label="Reclux home"><svg aria-hidden="true"><use href="#logo"/></svg></a>
+    <nav class="nav" aria-label="Main">
+      <a href="https://reclux.netlify.app/#features">Features</a>
+      <a href="https://reclux.netlify.app/#download">Download</a>
+      <a href="https://reclux.netlify.app/#faq">FAQ</a>
+    </nav>
+    <a class="btn" href="https://reclux.netlify.app/#download">Download</a>
+    <details class="menu">
+      <summary aria-label="Open menu">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </summary>
+      <nav class="menu-panel" aria-label="Main, small screens">
+        <a href="https://reclux.netlify.app/#features">Features</a>
+        <a href="https://reclux.netlify.app/#download">Download</a>
+        <a href="https://reclux.netlify.app/#faq">FAQ</a>
+      </nav>
+    </details>
+  </div>
+</header>
 
-  <h2>What Reclux does not do</h2>
-  <ul>
-    <li>No account or sign-in</li>
-    <li>No uploading of recordings or any other data</li>
-    <li>No analytics, ads, tracking or cookies</li>
-    <li>No third-party services</li>
-    <li>No network requests of any kind. It works with the internet switched off</li>
-  </ul>
+<main id="main">
+  <div class="head">
+    <div class="beams" aria-hidden="true"></div>
+    <div class="wrap">
+      <h1 class="rise">Reclux Privacy <em>Policy</em></h1>
+      <p class="meta rise" style="--i:1">Last updated: 29 October 2026</p>
+    </div>
+  </div>
 
-  <h2>Your permission, every time</h2>
-  <p>Your browser asks you before Reclux can capture the screen, a window, a tab or the microphone. Reclux only records while you have started a recording.</p>
+  <div class="wrap layout">
+    <nav class="toc" aria-labelledby="toc-title">
+      <p class="label" id="toc-title">On this page</p>
+      <a href="#handles">What Reclux handles</a>
+      <a href="#not">What Reclux does not do</a>
+      <a href="#ask">Your permission, every time</a>
+      <a href="#permissions">Why Reclux asks for its permissions</a>
+      <a href="#deleting">Deleting your data</a>
+      <a href="#children">Children</a>
+      <a href="#changes">Changes</a>
+      <a href="#contact">Contact</a>
+    </nav>
 
-  <h2>Why Reclux asks for its permissions</h2>
-  <table>
-    <thead><tr><th>Permission</th><th>Reason</th></tr></thead>
-    <tbody>
-      <tr><td>downloads</td><td>Shows the "Save as" window, so you can choose the folder or drive for the finished recording</td></tr>
-      <tr><td>unlimitedStorage</td><td>Lets a long recording be written to the browser's private storage while you record</td></tr>
-      <tr><td>system.cpu</td><td>Reads how busy the computer is, only to warn you that it is too slow to keep up (Chrome, Brave, Edge and Opera)</td></tr>
-      <tr><td>power</td><td>Keeps the computer awake while a recording is running (Chrome, Brave, Edge and Opera)</td></tr>
-    </tbody>
-  </table>
+    <article>
+      <div class="short rise" style="--i:2">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p><strong>Short version:</strong> Reclux does not collect, send or sell any of your data. Everything stays on your device.</p>
+      </div>
 
-  <h2>Deleting your data</h2>
-  <ul>
-    <li><strong>Unsaved recordings:</strong> press <strong>Discard</strong> or <strong>Delete</strong> in Reclux.</li>
-    <li><strong>Saved files:</strong> they are normal files in the folder you chose. Delete them like any other file.</li>
-    <li><strong>Settings:</strong> removed when you uninstall Reclux or clear the extension's data.</li>
-  </ul>
+      <section id="handles">
+        <h2>What Reclux handles</h2>
+        <div class="table">
+          <table>
+            <thead><tr><th scope="col">What</th><th scope="col">Where it stays</th></tr></thead>
+            <tbody>
+              <tr><td>The picture of your screen, a window or a tab, and the microphone or system sound you choose to record</td><td>Written to your browser's private storage on your own computer, then to the folder you pick when you press <strong>Save file</strong></td></tr>
+              <tr><td>Your choices (what to record, quality, format, microphone on or off)</td><td>Saved in your browser's local storage on your own computer</td></tr>
+              <tr><td>Computer load (CPU use) and frames per second</td><td>Read while recording, only to show a warning. Not stored, not sent</td></tr>
+              <tr><td>Free disk space</td><td>Read while recording, only to show a warning. Not stored, not sent</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-  <h2>Children</h2>
-  <p>Reclux is a general tool. It does not collect any data from anyone, including children.</p>
+      <section id="not">
+        <h2>What Reclux does not do</h2>
+        <ul class="list no">
+          <li>No account or sign-in</li>
+          <li>No uploading of recordings or any other data</li>
+          <li>No analytics, ads, tracking or cookies</li>
+          <li>No third-party services</li>
+          <li>No network requests of any kind. It works with the internet switched off</li>
+        </ul>
+      </section>
 
-  <h2>Changes</h2>
-  <p>If this policy changes, the new version and its date will be published at this address.</p>
+      <section id="ask">
+        <h2>Your permission, every time</h2>
+        <p>Your browser asks you before Reclux can capture the screen, a window, a tab or the microphone. Reclux only records while you have started a recording.</p>
+      </section>
 
-  <h2>Contact</h2>
-  <p>Questions about this policy: <a href="https://github.com/iamaakashoza/reclux-privacy/issues">open an issue on GitHub</a>.</p>
+      <section id="permissions">
+        <h2>Why Reclux asks for its permissions</h2>
+        <div class="table">
+          <table>
+            <thead><tr><th scope="col">Permission</th><th scope="col">Reason</th></tr></thead>
+            <tbody>
+              <tr><td class="code">downloads</td><td>Shows the "Save as" window, so you can choose the folder or drive for the finished recording</td></tr>
+              <tr><td class="code">unlimitedStorage</td><td>Lets a long recording be written to the browser's private storage while you record</td></tr>
+              <tr><td class="code">system.cpu</td><td>Reads how busy the computer is, only to warn you that it is too slow to keep up (Chrome, Brave, Edge and Opera)</td></tr>
+              <tr><td class="code">power</td><td>Keeps the computer awake while a recording is running (Chrome, Brave, Edge and Opera)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="deleting">
+        <h2>Deleting your data</h2>
+        <ul class="list">
+          <li><strong>Unsaved recordings:</strong> press <strong>Discard</strong> or <strong>Delete</strong> in Reclux.</li>
+          <li><strong>Saved files:</strong> they are normal files in the folder you chose. Delete them like any other file.</li>
+          <li><strong>Settings:</strong> removed when you uninstall Reclux or clear the extension's data.</li>
+        </ul>
+      </section>
+
+      <section id="children">
+        <h2>Children</h2>
+        <p>Reclux is a general tool. It does not collect any data from anyone, including children.</p>
+      </section>
+
+      <section id="changes">
+        <h2>Changes</h2>
+        <p>If this policy changes, the new version and its date will be published at this address.</p>
+      </section>
+
+      <section id="contact">
+        <h2>Contact</h2>
+        <p>Questions about this policy: <a href="https://github.com/iamaakashoza/reclux-privacy/issues">open an issue on GitHub</a>.</p>
+      </section>
+    </article>
+  </div>
 </main>
+
+<footer>
+  <div class="wrap foot">
+    <div class="foot-brand">
+      <a class="brand" href="https://reclux.netlify.app/" aria-label="Reclux home"><svg aria-hidden="true"><use href="#logo"/></svg></a>
+      <p>The screen recorder that keeps your video on your computer.</p>
+    </div>
+    <nav aria-label="Footer">
+      <a href="https://reclux.netlify.app/#features">Features</a>
+      <a href="https://reclux.netlify.app/#download">Download</a>
+      <a href="https://reclux.netlify.app/#faq">FAQ</a>
+      <a href="https://github.com/iamaakashoza/reclux">GitHub</a>
+    </nav>
+  </div>
+</footer>
 </body>
 </html>
