@@ -2401,6 +2401,7 @@ The owner asked to set aside the `.exe` installers for now and focus on the exte
 - **Design:** dark only, with brand red as the one accent. The hero light uses the same 45° as the R's leg, and comes from behind the recorder picture.
 - **Motion:** each feature card plays a short story that explains the feature. Nothing moves off screen, and "reduce motion" stops it all.
 - **Claims changed on purpose:** "tested for 2 hours" and "under 1 second lost in a crash" are gone, since neither has been re-measured on the §31 recording pipeline.
+- **Download cards:** the SHA-256 lines were removed at the owner's request, to keep the cards simple.
 - **Learn More tooltip:** opens on hover, keyboard focus or tap, closes with Esc, and flips downward when there is no room above.
 
 ### 33.5 Tested
@@ -2411,12 +2412,12 @@ The owner asked to set aside the `.exe` installers for now and focus on the exte
 | Contrast behind hero text, darkest case in one frame | 13:1 or better (target 4.5:1) ✅ |
 | Reduce motion | 0 animations running, all sections visible ✅ |
 | Netlify's security rules, served locally | no errors, light still runs ✅ |
-| Download files match the SHA-256 on the page | ✅ |
+| Download files matched the built .zip files by SHA-256 | ✅ |
 | Chrome .zip: extracted and loaded as an unpacked extension | loads, welcome guide opens, shows 0.2.1 and the new logo ✅ |
 
 ### 33.6 Not tested
 - 0.2.1 .zip by hand in Edge, Brave, Opera and Firefox.
 - Real phones and tablets (sizes were emulated in Chrome), and Safari.
-- Published on 3 Nov 2026. On the live site: no browser errors, the same five sizes pass, and both downloads match their SHA-256.
+- Published on 3 Nov 2026. On the live site: no browser errors, the same five sizes pass, and both downloads matched by SHA-256 (since removed from the page).
 
 **The owner's call:** the page says Firefox "paused for about a second a few times in our test". That is from one PC (§31.7).
