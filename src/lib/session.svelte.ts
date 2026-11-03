@@ -336,14 +336,7 @@ export async function save() {
   const clean = session.name.replace(/[\\/:*?"<>|]/g, '-').trim() || 'Reclux recording';
   const filename = `${clean}.${session.ext}`;
   try {
-    if (browser?.downloads) {
-      await browser.downloads.download({ url: session.url, filename, saveAs: true });
-    } else {
-      const a = document.createElement('a');
-      a.href = session.url;
-      a.download = filename;
-      a.click();
-    }
+    await browser.downloads.download({ url: session.url, filename, saveAs: true });
     session.saved = true;
     // So the next launch does not offer this recording again as "unsaved".
     if (session.fileName) markSaved(session.fileName);

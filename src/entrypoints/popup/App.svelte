@@ -5,18 +5,12 @@
   import Segmented from '../../lib/Segmented.svelte';
   import Toggle from '../../lib/Toggle.svelte';
   import { PRESETS } from '../../lib/presets';
-  import { loadSettings, saveSettings } from '../../lib/settings';
+  import { SOURCES, loadSettings, saveSettings } from '../../lib/settings';
 
   // Quick options. They are saved, and the recorder page picks them up.
   // The popup closes when it loses focus, and screen sharing needs a click on a page, so Start happens there.
   const s = $state(loadSettings());
   $effect(() => saveSettings({ ...s }));
-
-  const SOURCES = [
-    { value: 'tab', label: 'Tab', icon: 'tab' },
-    { value: 'window', label: 'Window', icon: 'window' },
-    { value: 'screen', label: 'Screen', icon: 'screen' },
-  ];
 
   const openRecorder = () => {
     browser.tabs.create({ url: browser.runtime.getURL('/recorder.html') });

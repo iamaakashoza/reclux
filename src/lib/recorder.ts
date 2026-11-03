@@ -35,26 +35,6 @@ const CODECS = {
 const AUDIO_BITRATE = 128_000;
 const ENCODER_WARMUP_MS = 3000; // never hold the start back longer than this
 
-export interface Recorder {
-  /** File name in private storage. */
-  name: string;
-  /** The format really used. It can differ from the one asked for. */
-  ext: Format;
-  /** False when this PC has no hardware encoder for it. Software is slower and heavier. */
-  hardware: boolean;
-  /** Running totals: new pictures from the capture, and frames the file had to skip. */
-  stats(): { fresh: number; lost: number };
-  setFps(fps: number): void;
-  pause(): void;
-  resume(): void;
-  /** Finish the file. Resolves with the finished file (disk-backed, not in RAM). */
-  stop(onProgress: (share: number) => void): Promise<File>;
-  /** Throw the recording away. */
-  cancel(): Promise<void>;
-  /** Let go of the file lock (call when the file is no longer in use). */
-  release(): void;
-}
-
 // Hardware keeps text sharp: measured 41 dB against 28 dB for software H.264 at the same bitrate (report §31).
 async function pickFormat(want: Format, w: number, h: number, bitrate: number, audio: boolean) {
   for (const ext of want === 'mp4' ? (['mp4', 'webm'] as const) : (['webm', 'mp4'] as const)) {
@@ -241,7 +221,7 @@ export async function startRecorder(
   preset: Preset,
   onSize: (bytes: number) => void,
   onError: (e: Error) => void,
-): Promise<Recorder> {
+) {
   const audio = cap.stream.getAudioTracks()[0];
   const s = cap.video.getSettings();
 
@@ -297,10 +277,15 @@ export async function startRecorder(
     pump.run();
 
     return {
+      /** File name in private storage. */
       name,
+      /** The format really used. It can differ from the one asked for. */
       ext,
+      /** False when this PC has no hardware encoder for it. Software is slower and heavier. */
       hardware,
+      /** Let go of the file lock (call when the file is no longer in use). */
       release,
+      /** Running totals: new pictures from the capture, and frames the file had to skip. */
       stats: pump.stats,
       setFps: pump.setFps,
       pause: () => {
@@ -311,7 +296,8 @@ export async function startRecorder(
         pump.resume();
         audioSource?.resume();
       },
-      stop: async (onProgress) => {
+      /** Finish the file. Resolves with the finished file (disk-backed, not in RAM). */
+      stop: async (onProgress: (share: number) => void) => {
         await pump.stop();
         try {
           await output.finalize();
@@ -321,6 +307,7 @@ export async function startRecorder(
         if (ext === 'mp4') await makeRegularMp4(name, onProgress);
         return getStored(name);
       },
+      /** Throw the recording away. */
       cancel: async () => {
         await pump.stop();
         await output.cancel().catch(() => {});
@@ -335,3 +322,5 @@ export async function startRecorder(
     throw e;
   }
 }
+
+export type Recorder = Awaited<ReturnType<typeof startRecorder>>;

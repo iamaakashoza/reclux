@@ -3,20 +3,6 @@ import type { Preset } from './presets';
 
 export type Format = 'mp4' | 'webm';
 
-export interface Capture {
-  stream: MediaStream;
-  video: MediaStreamTrack;
-  /** Size and fps the browser says it delivers. A report, not a measurement. */
-  actual: string;
-  /** True when system sound dips while the mic hears speech (both must be on). */
-  ducks: boolean;
-  notices: string[];
-  setMuted(muted: boolean): void;
-  /** Ask the browser to deliver fewer frames, without restarting the recording. */
-  setFps(fps: number): Promise<void>;
-  close(): void;
-}
-
 // Ducking: system sound drops to 48% while the mic hears speech, and the voice stays at 100%.
 // Only the recording changes, not what you hear on the speakers.
 const DUCK_LEVEL = 0.48;
@@ -67,7 +53,7 @@ export async function openCapture(
   wantMic: boolean,
   wantSystem: boolean,
   onDuck: (ducked: boolean) => void,
-): Promise<Capture> {
+) {
   const ctx = new AudioContext(); // created before any await, inside the click
   let display: MediaStream | undefined;
   let mic: MediaStream | undefined;
@@ -128,17 +114,19 @@ export async function openCapture(
     return {
       stream,
       video,
-      // Read live, so it stays right after the frame rate is lowered.
+      /** Size and fps the browser says it delivers. A report, not a measurement. Read live, so it stays right after the frame rate is lowered. */
       get actual() {
         const s = video.getSettings();
         return `${s.width}×${s.height} · ${Math.round(s.frameRate ?? 0)} fps`;
       },
+      /** True when system sound dips while the mic hears speech (both must be on). */
       ducks: !!stopDucking,
       notices,
-      setMuted: (muted) => {
+      setMuted: (muted: boolean) => {
         if (micGain) micGain.gain.value = muted ? 0 : 1;
       },
-      setFps: (fps) => video.applyConstraints({ frameRate: { ideal: fps } }),
+      /** Ask the browser to deliver fewer frames, without restarting the recording. */
+      setFps: (fps: number) => video.applyConstraints({ frameRate: { ideal: fps } }),
       close: () => {
         stopDucking?.();
         shown.getTracks().forEach((t) => t.stop());
@@ -153,3 +141,5 @@ export async function openCapture(
     throw e;
   }
 }
+
+export type Capture = Awaited<ReturnType<typeof openCapture>>;

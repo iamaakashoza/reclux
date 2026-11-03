@@ -24,7 +24,6 @@
     shield:
       '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4"/>',
     chevron: '<path d="M6 9l6 6 6-6"/>',
-    'open-tab': '<path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/>',
   };
   const FILLED = new Set(['record', 'play', 'stop']);
 

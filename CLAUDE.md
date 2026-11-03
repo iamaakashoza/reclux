@@ -8,7 +8,7 @@ Reclux is an offline-first screen recorder browser extension (Manifest V3). No a
 
 ```
 npm ci
-npm run dev             # Chromium dev build with reload
+npm run dev             # Chromium dev build. Load .output/chrome-mv3-dev by hand (web-ext, which opened a browser, was removed)
 npm run dev:firefox
 npm run build           # -> .output/chrome-mv3 (Chrome, Brave, Edge, Opera)
 npm run build:firefox   # -> .output/firefox-mv3

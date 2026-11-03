@@ -8,18 +8,13 @@
   import Segmented from '../../lib/Segmented.svelte';
   import Toggle from '../../lib/Toggle.svelte';
   import { PRESETS } from '../../lib/presets';
-  import { loadSettings, saveSettings } from '../../lib/settings';
+  import { SOURCES, loadSettings, saveSettings } from '../../lib/settings';
 
   // The wizard saves the same choices the popup and recorder page use.
   const s = $state(loadSettings());
   $effect(() => saveSettings({ ...s }));
 
   const isFirefox = navigator.userAgent.includes('Firefox/');
-  const SOURCES = [
-    { value: 'tab', label: 'Tab', icon: 'tab' },
-    { value: 'window', label: 'Window', icon: 'window' },
-    { value: 'screen', label: 'Screen', icon: 'screen' },
-  ];
   const STEPS = ['Welcome', 'Your defaults', 'How it works', 'Ready'];
 
   let step = $state(0);

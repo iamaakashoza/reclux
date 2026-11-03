@@ -2,17 +2,21 @@
 import type { Format } from './capture';
 import { PRESETS } from './presets';
 
-export type Source = 'tab' | 'window' | 'screen';
+export const SOURCES = [
+  { value: 'tab', label: 'Tab', icon: 'tab' },
+  { value: 'window', label: 'Window', icon: 'window' },
+  { value: 'screen', label: 'Screen', icon: 'screen' },
+];
 
-export interface Settings {
-  source: Source;
+interface Settings {
+  source: 'tab' | 'window' | 'screen';
   presetId: string;
   format: Format;
   mic: boolean;
   system: boolean;
 }
 
-export const DEFAULTS: Settings = { source: 'screen', presetId: '1080p30', format: 'mp4', mic: true, system: true };
+const DEFAULTS: Settings = { source: 'screen', presetId: '1080p30', format: 'mp4', mic: true, system: true };
 
 const KEY = 'reclux.settings';
 
@@ -22,13 +26,12 @@ export function loadSettings(): Settings {
   try {
     s = JSON.parse(localStorage.getItem(KEY) ?? '{}');
   } catch {}
-  const d = DEFAULTS;
   return {
-    source: ['tab', 'window', 'screen'].includes(s.source!) ? s.source! : d.source,
-    presetId: PRESETS.some((p) => p.id === s.presetId) ? s.presetId! : d.presetId,
-    format: s.format === 'webm' ? 'webm' : d.format,
-    mic: typeof s.mic === 'boolean' ? s.mic : d.mic,
-    system: typeof s.system === 'boolean' ? s.system : d.system,
+    source: ['tab', 'window', 'screen'].includes(s.source!) ? s.source! : DEFAULTS.source,
+    presetId: PRESETS.some((p) => p.id === s.presetId) ? s.presetId! : DEFAULTS.presetId,
+    format: s.format === 'webm' ? 'webm' : DEFAULTS.format,
+    mic: typeof s.mic === 'boolean' ? s.mic : DEFAULTS.mic,
+    system: typeof s.system === 'boolean' ? s.system : DEFAULTS.system,
   };
 }
 

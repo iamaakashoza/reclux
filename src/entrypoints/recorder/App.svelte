@@ -7,10 +7,9 @@
   import Logo from '../../lib/Logo.svelte';
   import Library from '../../lib/Library.svelte';
   import SetupPanel from '../../lib/SetupPanel.svelte';
-  import { MAX_SECONDS, WARN_SECONDS, findPreset } from '../../lib/presets';
+  import { MAX_SECONDS, WARN_SECONDS, findPreset, fmtSize } from '../../lib/presets';
   import { LOW_FREE } from '../../lib/disk';
   import { onMount, tick } from 'svelte';
-  import { fmtSize } from '../../lib/presets';
   import {
     discardRecoverable,
     keepAsIs,

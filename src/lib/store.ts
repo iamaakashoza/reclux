@@ -48,12 +48,8 @@ export async function findUnsaved(): Promise<Stored[]> {
   const out: Stored[] = [];
   for await (const [name, h] of entries) {
     if (h.kind !== 'file' || held.has(lockName(name))) continue;
-    // Half-written rebuild from a crash. The original recording is still there.
-    if (name.endsWith('.tmp')) {
-      await removeStored(name);
-      continue;
-    }
-    if (localStorage.getItem(savedKey(name))) {
+    // A half-written rebuild from a crash (the original is still there), or a file already saved.
+    if (name.endsWith('.tmp') || localStorage.getItem(savedKey(name))) {
       await removeStored(name);
       continue;
     }

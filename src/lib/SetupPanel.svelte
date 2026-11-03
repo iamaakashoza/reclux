@@ -6,6 +6,7 @@
   import Toggle from './Toggle.svelte';
   import { PRESETS, MAX_SECONDS, findPreset, fmtSize, sizeMB } from './presets';
   import { refreshDisk, session } from './session.svelte';
+  import { SOURCES } from './settings';
 
   let { onstart }: { onstart: () => void } = $props();
 
@@ -17,11 +18,6 @@
   });
   const isFirefox = navigator.userAgent.includes('Firefox/');
   const need = $derived(fmtSize(sizeMB(preset, MAX_SECONDS)));
-  const SOURCES = [
-    { value: 'tab', label: 'Tab', icon: 'tab' },
-    { value: 'window', label: 'Window', icon: 'window' },
-    { value: 'screen', label: 'Screen', icon: 'screen' },
-  ];
 </script>
 
 <div class="panel">

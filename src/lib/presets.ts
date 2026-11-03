@@ -17,9 +17,7 @@ export const PRESETS: Preset[] = [
   { id: '1080p60', label: '1080p · 60 fps', height: 1080, fps: 60, mbps: 20 },
 ];
 
-export const DEFAULT_PRESET = PRESETS[3]!;
-
-export const findPreset = (id: string) => PRESETS.find((p) => p.id === id) ?? DEFAULT_PRESET;
+export const findPreset = (id: string) => PRESETS.find((p) => p.id === id) ?? PRESETS[3]!;
 
 /** Size in MB after `seconds` of recording at this preset. */
 export const sizeMB = (p: Preset, seconds: number) => (p.mbps / 8) * seconds;

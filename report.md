@@ -2418,7 +2418,13 @@ Restyled to match the landing page, from its own repo (`reclux-privacy`, branch 
 | Download files matched the built .zip files by SHA-256 | ✅ |
 | Chrome .zip: extracted and loaded as an unpacked extension | loads, welcome guide opens, shows 0.2.1 and the new logo ✅ |
 
+### 33.5b Cleanup after the over-engineering audit
+Removed `web-ext`, `tslib` and `@tsconfig/svelte`, the backup save method, the unused toggle option and icon, repeated lists and types. No behaviour was meant to change. `store/`, the design preview and the parked installer were kept, for the owner to decide.
+
+Re-tested: clean install, type check, both zip builds, 22 extension screen checks, and real recordings in Brave, Chrome, Edge, Opera and Firefox. Pressing Save file sent the right request to the browser each time, with the "Save as" window stubbed in the test.
+
 ### 33.6 Not tested
+- The real "Save as" window after this cleanup, and reload during `npm run dev` without `web-ext`.
 - 0.2.1 .zip by hand in Edge, Brave, Opera and Firefox.
 - Real phones and tablets (sizes were emulated in Chrome), and Safari.
 - Published on 3 Nov 2026. On the live site: no browser errors, the same five sizes pass, and both downloads matched by SHA-256 (since removed from the page).

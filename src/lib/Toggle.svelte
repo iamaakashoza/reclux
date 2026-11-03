@@ -6,11 +6,10 @@
     label,
     icon,
     hint,
-    disabled = false,
-  }: { checked?: boolean; label: string; icon: string; hint?: string; disabled?: boolean } = $props();
+  }: { checked?: boolean; label: string; icon: string; hint?: string } = $props();
 </script>
 
-<label class:disabled>
+<label>
   <span class="text">
     <Icon name={icon} />
     <span>
@@ -18,7 +17,7 @@
       {#if hint}<small>{hint}</small>{/if}
     </span>
   </span>
-  <input type="checkbox" role="switch" bind:checked {disabled} />
+  <input type="checkbox" role="switch" bind:checked />
 </label>
 
 <style>
@@ -33,10 +32,6 @@
     border-radius: var(--r-md);
     background: var(--c-surface);
     cursor: pointer;
-  }
-  .disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
   }
   .text {
     display: flex;
