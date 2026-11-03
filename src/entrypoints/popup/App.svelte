@@ -48,13 +48,6 @@
     width: 20rem;
     padding: var(--s-4);
   }
-  h1 {
-    display: flex;
-    align-items: center;
-    gap: var(--s-2);
-    font-size: var(--t-lg);
-    font-weight: 800;
-  }
   .field {
     display: grid;
     gap: var(--s-2);

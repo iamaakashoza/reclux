@@ -89,7 +89,7 @@
 
 <div class="app">
   <header>
-    <h1 class="brand"><Logo /></h1>
+    <h1><Logo /></h1>
     <span class="right">
       <a class="guide" href="/welcome.html">Setup guide</a>
       <span class="offline"><Icon name="shield" size={16} /> Works offline</span>
@@ -221,14 +221,6 @@
     justify-content: space-between;
     padding: var(--s-3) var(--s-4);
     border-bottom: 1px solid var(--c-border);
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: var(--s-2);
-    font-size: var(--t-lg);
-    font-weight: 800;
-    letter-spacing: -0.01em;
   }
   .right {
     display: flex;

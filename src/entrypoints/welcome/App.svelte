@@ -37,7 +37,7 @@
 
 <main>
   <header>
-    <h1 class="brand"><Logo height={28} /></h1>
+    <h1><Logo height={28} /></h1>
     {#if step < STEPS.length - 1}
       <button class="skip" onclick={() => go(STEPS.length - 1)}>Skip setup</button>
     {/if}
@@ -154,13 +154,6 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: var(--s-2);
-    font-size: var(--t-xl);
-    font-weight: 800;
   }
   .skip {
     min-height: var(--tap);

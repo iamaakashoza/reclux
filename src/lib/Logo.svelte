@@ -12,6 +12,5 @@
 <style>
   svg {
     display: block;
-    width: auto;
   }
 </style>
