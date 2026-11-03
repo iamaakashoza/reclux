@@ -2379,7 +2379,7 @@ The owner's first request ("up to 25%") was read as "lower by 25%", giving 75%. 
 
 ---
 
-## 33. Logo, and a new website for the extension only (not published yet) 🎨
+## 33. Logo, and a new website for the extension only (done) 🎨
 
 ### 33.1 Logo
 - **Idea: Rec + Lux.** The bowl of the R is a lens holding the red record dot. The leg is a beam of light at exactly 45°.
@@ -2417,6 +2417,6 @@ The owner asked to set aside the `.exe` installers for now and focus on the exte
 ### 33.6 Not tested
 - 0.2.1 .zip by hand in Edge, Brave, Opera and Firefox.
 - Real phones and tablets (sizes were emulated in Chrome), and Safari.
-- The website on Netlify: nothing is published until the owner says so.
+- Published on 3 Nov 2026. On the live site: no browser errors, the same five sizes pass, and both downloads match their SHA-256.
 
 **The owner's call:** the page says Firefox "paused for about a second a few times in our test". That is from one PC (§31.7).
