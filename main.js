@@ -64,7 +64,6 @@ function startLight(canvas, calm) {
   canvas.classList.add('on');
   if (calm) {
     draw(0);
-    addEventListener('resize', () => draw(0));
     return;
   }
   // 30 frames a second, and only while the hero is on screen and the tab is visible.
@@ -81,20 +80,14 @@ function startLight(canvas, calm) {
 }
 
 // Steps for each browser. Only the address and the place of the Developer mode switch differ.
-const BROWSERS = {
-  chrome: { name: 'Chrome', address: 'chrome://extensions', place: 'The switch is at the top right.' },
-  edge: { name: 'Edge', address: 'edge://extensions', place: 'The switch is in the left panel, near the bottom. In a narrow window, open the menu at the top left first.' },
-  brave: { name: 'Brave', address: 'brave://extensions', place: 'The switch is at the top right.' },
-  opera: { name: 'Opera', address: 'opera://extensions', place: 'The switch is at the top right.' },
-};
+const EDGE_PLACE = 'The switch is in the left panel, near the bottom. In a narrow window, open the menu at the top left first.';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => document.querySelectorAll(s);
 
-  const light = $('#light');
-  if (light) startLight(light, calm);
+  startLight($('#light'), calm);
 
   // Sound bars: one height per bar, with an even spread of timing.
   $$('[data-bars]').forEach((box) => {
@@ -110,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Reveal sections as they scroll into view. Cards keep their pictures moving only while on screen.
   const reveal = $$('[data-reveal]');
-  if (calm || !('IntersectionObserver' in window)) {
+  if (calm) {
     reveal.forEach((el) => el.classList.add('in'));
     $$('.card').forEach((el) => el.classList.add('live'));
   } else {
@@ -145,8 +138,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Browser choice: switches the address and the place of the switch in the steps.
   const pick = (id) => {
     $$('[data-browser]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.browser === id)));
-    $('#addr').textContent = BROWSERS[id].address;
-    $('#dev-place').textContent = BROWSERS[id].place;
+    $('#addr').textContent = `${id}://extensions`;
+    $('#dev-place').textContent = id === 'edge' ? EDGE_PLACE : 'The switch is at the top right.';
   };
   $$('[data-browser]').forEach((b) => b.addEventListener('click', () => pick(b.dataset.browser)));
 
@@ -199,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const brave = await navigator.brave?.isBrave?.().catch(() => false);
   const firefox = /Firefox\//.test(ua);
   const id = /OPR\//.test(ua) ? 'opera' : /Edg\//.test(ua) ? 'edge' : brave ? 'brave' : 'chrome';
-  $('#hero-cta-text').textContent = `Get Reclux for ${firefox ? 'Firefox' : BROWSERS[id].name}`;
+  $('#hero-cta-text').textContent = `Get Reclux for ${firefox ? 'Firefox' : $(`[data-browser=${id}]`).textContent}`;
   $('#hero-cta').href = firefox ? '#download-firefox' : '#download-chromium';
   if (!firefox) pick(id);
 });

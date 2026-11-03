@@ -9,7 +9,6 @@
   --bg: #0a0a0c;
   --bg-2: #101013;
   --card: #131316;
-  --card-2: #1a1a1e;
   --ink: #f4f2ee;
   --ink-2: #aeadb5;
   --line: rgba(255, 255, 255, 0.09);
@@ -180,7 +179,6 @@ section:not(.hero) { padding-block: clamp(3rem, 5.5vw, 5rem); }
 .track .waves { flex: 1; max-width: none; height: 2.25rem; justify-content: space-between; gap: 0; }
 .track .waves i { flex: 0 0 3px; max-width: none; }
 .voice i { background: #fff; }
-.music { transform-origin: center; }
 .duck-chip, .crash-chip { position: relative; display: grid; margin-top: 0.4rem; color: var(--ink); font-size: 0.75rem; }
 .duck-chip span, .crash-chip span { grid-area: 1 / 1; }
 .duck-chip .b { color: var(--red-hi); opacity: 0; }
@@ -196,7 +194,6 @@ section:not(.hero) { padding-block: clamp(3rem, 5.5vw, 5rem); }
 .sharp-text span { grid-area: 1 / 1; }
 .soft { filter: blur(2.2px); color: var(--ink-2); }
 .crisp { clip-path: inset(-10% 0 -10% 0); }
-.sharp-text i { display: none; }
 
 .meter { height: 0.5rem; border-radius: 99px; background: rgba(255, 255, 255, 0.1); overflow: hidden; margin-bottom: 0.9rem; }
 .meter i { display: block; height: 100%; width: 38%; border-radius: inherit; background: #6fdc92; transform-origin: left; }
@@ -275,7 +272,6 @@ footer nav a:hover { color: var(--ink); }
 @media (min-width: 48rem) {
   .nav { display: flex; }
   .menu { display: none; }
-  .brand { margin-right: auto; }
   .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .card.wide, .card:last-child { grid-column: span 2; }
   .bar { grid-template-columns: 1fr auto; align-items: center; }
@@ -290,10 +286,6 @@ footer nav a:hover { color: var(--ink); }
   .dl-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .faq-grid { grid-template-columns: 22rem minmax(0, 1fr); gap: 3rem; }
 }
-/* Small phones: keep the recorder bar on two lines */
-@media (max-width: 26rem) {
-  .bar-state .chip:last-child { display: none; }
-}
 
 /* Motion. Everything above is the finished, still page: this only adds movement. */
 @media (prefers-reduced-motion: no-preference) {
@@ -302,10 +294,8 @@ footer nav a:hover { color: var(--ink); }
   @keyframes wordIn { from { opacity: 0; transform: translateY(0.35em); filter: blur(10px); } }
   @keyframes riseIn { from { opacity: 0; transform: translateY(14px); } }
 
-  .js [data-reveal] { opacity: 0; transform: translateY(22px); transition: opacity 800ms var(--out), transform 800ms var(--out), border-color 200ms; transition-delay: calc(var(--d, 0) * 70ms), calc(var(--d, 0) * 70ms), 0ms; }
+  .js [data-reveal] { opacity: 0; transform: translateY(22px); transition: opacity 800ms var(--out), transform 800ms var(--out), border-color 200ms; transition-delay: calc(var(--i, 0) * 70ms), calc(var(--i, 0) * 70ms), 0ms; }
   .js [data-reveal].in { opacity: 1; transform: none; }
-  [data-i='1'] { --d: 1; }
-  [data-i='2'] { --d: 2; }
 
   /* The recorder lies back, then flattens as you scroll. Browsers without scroll timelines just show it flat. */
   @supports (animation-timeline: scroll()) {
@@ -371,7 +361,6 @@ footer nav a:hover { color: var(--ink); }
   /* Save battery: card pictures only move while on screen. */
   .js .card:not(.live) .vis *, .js .card:not(.live) .vis, .js .hero:not(.live) .stage * { animation-play-state: paused; }
 
-  .tip { transition-duration: 160ms, 200ms, 160ms; }
 }
 
 @media (prefers-reduced-motion: reduce) {
