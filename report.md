@@ -2405,7 +2405,7 @@ The owner asked to set aside the `.exe` installers for now and focus on the exte
 - **Learn More tooltip:** opens on hover, keyboard focus or tap, closes with Esc, and flips downward when there is no room above.
 
 ### 33.4b Privacy page
-Restyled to match the landing page, from its own repo (`reclux-privacy`, branch `main`, GitHub Pages). All 361 words of the policy were compared by script and are unchanged, so the "Last updated" date stays. A copy is kept in `store/site/privacy-page.html`.
+Restyled to match the landing page, from its own repo (`reclux-privacy`, branch `main`, GitHub Pages). All 361 words of the policy were compared by script and were unchanged by the redesign. The owner then approved one addition, dated 3 November 2026: the mic level is read for ducking, on the device only. A copy is kept in `store/site/privacy-page.html`.
 
 ### 33.5 Tested
 | Check | Result |

@@ -1,6 +1,6 @@
 # Reclux Privacy Policy
 
-Last updated: 29 October 2026
+Last updated: 3 November 2026
 
 **Short version: Reclux does not collect, send or sell any of your data. Everything stays on your device.**
 
@@ -11,6 +11,7 @@ Last updated: 29 October 2026
 | Your choices (what to record, quality, format, mic on/off) | Saved in your browser's local storage on your own computer |
 | Computer load (CPU use) and frames per second | Read while recording, only to show a warning. Not stored, not sent |
 | Free disk space | Read while recording, only to show a warning. Not stored, not sent |
+| How loud your microphone is, when the microphone and system sound are both on | Read while recording, only to lower the system sound in the file while you speak. Not stored, not sent |
 
 ## What Reclux does not do
 - No account or sign-in
