@@ -2427,8 +2427,31 @@ Re-tested: clean install, type check, both zip builds, 22 extension screen check
 `store/`, `installer/` and the design preview (bar, sample list, theme switch, `recorder.html#...` shortcuts) were deleted at the owner's request. Stores and the `.exe` are not planned. Older sections of this report still mention these files, and git history keeps them. Nothing in them reached people using Reclux.
 
 ### 33.5d Seen while re-testing (not caused by the cleanup)
-- **Crash recovery keeps less than the code comment says.** In simulated crashes (page reload), the recovered file was about 1 to 3 seconds short, and the sound could stop up to about 2 seconds before the picture. A comment in `recorder.ts` still says "well under a second". The website makes no claim about this.
+- **Crash recovery kept less than a code comment claimed.** See §33.5e, where this is fixed.
 - **Opera, one run in four:** with the CPU at 100% just after the browser started, the file had holes where frames were skipped. Three repeat runs matched.
+
+### 33.5e Crash recovery fixed
+**Cause, two things together:**
+1. A file section can only end on a key frame, and key frames come every 2 seconds, so up to 2 seconds are always unfinished.
+2. Finished data then waited in a 256 KB holding buffer. On a still screen that can take seconds to fill, and a crash could cut a section in half. The file then claimed more than it could play, the sound stopped early, and the player could get stuck.
+
+**Fix:** the holding buffer is gone, so each finished section goes to disk straight away.
+
+Real tab crashes in Brave, moving screen, 1080p30 and 1080p60:
+
+| Crash at | Old picture / sound | New picture / sound |
+|--:|--:|--:|
+| 8 s | 5.5 s / 4.0 s | 6.0 s / 6.0 s |
+| 11 s | 8.0 s / 8.0 s (file claimed 10 s) | 10.0 s / 10.0 s |
+| 9 s, 60 fps | 8.0 s / 6.4 s, player stuck | 8.0 s / 8.0 s |
+
+Also recovered with picture and sound matching: Chrome and Opera (real crash), Edge (page reload, since the forced crash hangs the test tool there), Firefox (page reload, 7 s and 6 s of 8 s, with its known stalls).
+
+60-second recordings at 1080p60 kept 0 holes, the same file size as before, and rebuild as a regular MP4.
+
+**Most that can still be lost: about 2 seconds, one key-frame interval.** Key frames every second would halve that, but measured on hardware H.264 (text next to moving video) they grew files 23 to 37% (12.8 to 15.7 Mbps at 1080p60, 7.8 to 10.7 at 1080p30) with text about the same, and software H.264 got softer (37.7 to 36.8 dB). Every recording would pay for a rare crash, so this stays at 2 seconds.
+
+**Released as 0.2.2 on 3 November 2026**, with the extension .zip files on the website.
 
 ### 33.6 Not tested
 - The real "Save as" window after this cleanup, and reload during `npm run dev` without `web-ext`.

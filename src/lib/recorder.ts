@@ -238,8 +238,8 @@ export async function startRecorder(
     const sink = await openSink(name, onSize);
     const output = new Output({
       format: ext === 'mp4' ? new Mp4OutputFormat({ fastStart: 'fragmented' }) : new WebMOutputFormat(),
-      // Small chunks, so a crash loses well under a second.
-      target: new StreamTarget(sink.stream, { chunked: true, chunkSize: 256 * 1024 }),
+      // No holding buffer: each finished section goes to disk at once, so a crash keeps every finished section.
+      target: new StreamTarget(sink.stream),
     });
 
     let gotPacket = () => {};
