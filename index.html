@@ -4,17 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Reclux: the screen recorder that keeps your video on your computer</title>
-<meta name="description" content="Reclux records your screen, a window or a tab with sound, and saves the video on your own computer. No account, no upload, works offline. Free for Chrome, Brave, Edge and Opera on Windows.">
-<meta name="theme-color" content="#f7f5f1" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0d0d0f" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Reclux is a free browser extension that records your screen, a window or a tab with sound, and keeps the video on your own computer. No account, no upload, works offline. For Chrome, Edge, Brave, Opera and Firefox.">
+<meta name="theme-color" content="#0a0a0c">
 <meta property="og:title" content="Reclux: record your screen, keep it yours">
-<meta property="og:description" content="Free screen recorder for Chrome, Brave, Edge and Opera. No account, no upload, works offline.">
+<meta property="og:description" content="Free screen recorder extension for Chrome, Edge, Brave, Opera and Firefox. No account, no upload, works offline.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://reclux.netlify.app/og.png">
 <meta property="og:url" content="https://reclux.netlify.app/">
 <link rel="canonical" href="https://reclux.netlify.app/">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="favicon-32.png" type="image/png">
 <link rel="preload" href="fonts/google-sans-flex.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <script src="main.js"></script>
@@ -22,28 +22,31 @@
 <body>
 <a class="skip" href="#main">Skip to content</a>
 
+<!-- The logo, drawn once and reused. Master files are in brand/ on the main branch. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logo" viewBox="20 16 438.68 96">
+    <path fill="currentColor" fill-rule="evenodd" d="M20 16H64A36 36 0 0 1 81.47 83.47L110 112H78L54 88H44V112H20ZM64 38a14 14 0 1 0 0 28a14 14 0 1 0 0-28Z"/>
+    <circle cx="64" cy="52" r="14" fill="#D7263D"/>
+    <path fill="currentColor" transform="translate(-3 0)" d="M158.22 114.35Q141.53 114.35 131.71 104.16Q121.89 93.97 121.89 77.81Q121.89 61.72 131.98 51.33Q142.07 40.94 158.69 40.94Q173.31 40.94 183.13 50.69Q192.95 60.45 192.95 76.87Q192.95 78.75 192.82 80.22Q192.68 81.7 192.28 84.11Q192.28 84.11 192.28 84.11Q192.28 84.11 192.28 84.11L131.61 84.18V68.83H172.97Q172.1 63.53 168.41 60.25Q164.73 56.96 158.63 56.96Q151.39 56.96 146.86 62.19Q142.34 67.42 142.34 76.8Q142.34 87.26 147.43 93.2Q152.53 99.13 161.24 99.13Q167.01 99.13 171.6 96.65Q176.19 94.17 179.94 89.47Q179.94 89.47 179.94 89.47Q179.94 89.47 179.94 89.47L191.01 99.73Q191.01 99.73 191.01 99.73Q191.01 99.73 191.01 99.73Q184.84 106.84 177.23 110.59Q169.62 114.35 158.22 114.35Z M236.26 114.35Q220.21 114.35 209.85 103.98Q199.49 93.62 199.49 77.54Q199.49 61.28 209.82 51.01Q220.14 40.74 236.36 40.74Q248.36 40.74 256.74 46.15Q265.12 51.56 269.25 61.92Q269.25 61.92 269.25 61.92Q269.25 61.92 269.25 61.92L251.92 68.53Q251.92 68.53 251.92 68.53Q251.92 68.53 251.92 68.53Q249.57 63.09 245.9 60.66Q242.23 58.23 236.93 58.23Q229.76 58.23 224.78 63.55Q219.81 68.86 219.81 77.42Q219.81 85.99 224.77 91.4Q229.74 96.82 236.87 96.82Q242.16 96.82 246.07 94.25Q249.97 91.69 252.25 86.46Q252.25 86.46 252.25 86.46Q252.25 86.46 252.25 86.46L269.78 91.82Q269.78 91.82 269.78 91.82Q269.78 91.82 269.78 91.82Q265.63 103.22 256.96 108.78Q248.3 114.35 236.26 114.35Z M279.31 112Q279.31 112 279.31 112Q279.31 112 279.31 112V16Q279.31 16 279.31 16Q279.31 16 279.31 16H300.26Q300.26 16 300.26 16Q300.26 16 300.26 16V112Q300.26 112 300.26 112Q300.26 112 300.26 112Z M340.22 114.35Q328.15 114.35 321.35 107.5Q314.55 100.65 314.55 88.1V43.08Q314.55 43.08 314.55 43.08Q314.55 43.08 314.55 43.08H335.49Q335.49 43.08 335.49 43.08Q335.49 43.08 335.49 43.08V84.85Q335.49 91.55 338.63 95.16Q341.76 98.76 347.47 98.76Q353.46 98.76 357.52 94.17Q361.57 89.58 361.57 82.87V43.08Q361.57 43.08 361.57 43.08Q361.57 43.08 361.57 43.08H382.52Q382.52 43.08 382.52 43.08Q382.52 43.08 382.52 43.08V112Q382.52 112 382.52 112Q382.52 112 382.52 112H362.81Q362.81 112 362.81 112Q362.81 112 362.81 112V93.4L372.33 102.92H362.34Q359.49 107.98 353.68 111.16Q347.86 114.35 340.22 114.35Z M439.01 112Q439.01 112 439.01 112Q439.01 112 439.01 112L419.4 81.16H417.22L390.31 43.08Q390.31 43.08 390.31 43.08Q390.31 43.08 390.31 43.08H413.37Q413.37 43.08 413.37 43.08Q413.37 43.08 413.37 43.08L433.01 73.52H435.09L462.57 112Q462.57 112 462.57 112Q462.57 112 462.57 112ZM389.5 112Q389.5 112 389.5 112Q389.5 112 389.5 112L417.69 72.35H421.38L440.38 43.08Q440.38 43.08 440.38 43.08Q440.38 43.08 440.38 43.08H462.27Q462.27 43.08 462.27 43.08Q462.27 43.08 462.27 43.08L434.48 81.5H431.03L410.95 112Q410.95 112 410.95 112Q410.95 112 410.95 112Z"/>
+  </symbol>
+</svg>
+
 <header class="top">
-  <div class="wrap">
-    <a class="brand" href="#top" aria-label="Reclux home"><i aria-hidden="true"></i>Reclux</a>
+  <div class="top-in">
+    <a class="brand" href="#top" aria-label="Reclux home"><svg aria-hidden="true"><use href="#logo"/></svg></a>
     <nav class="nav" aria-label="Main">
-      <a href="#parts">How it fits</a>
       <a href="#features">Features</a>
-      <a href="#install">Install</a>
-      <a href="#extension">.zip</a>
-      <a href="#privacy">Privacy</a>
+      <a href="#download">Download</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a class="btn btn-red" href="#install">Download</a>
+    <a class="btn btn-red btn-sm" href="#download">Download</a>
     <details class="menu">
       <summary aria-label="Open menu">
-        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 9h14M2 13h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </summary>
-      <nav class="menu-panel" aria-label="Main">
-        <a href="#parts">How it fits</a>
+      <nav class="menu-panel" aria-label="Main, small screens">
         <a href="#features">Features</a>
-        <a href="#install">Install</a>
-        <a href="#extension">.zip</a>
-        <a href="#privacy">Privacy</a>
+        <a href="#download">Download</a>
         <a href="#faq">FAQ</a>
       </nav>
     </details>
@@ -54,512 +57,232 @@
 
 <!-- HERO -->
 <section class="hero" id="top" aria-labelledby="hero-title">
-  <div class="wrap hero-grid">
-    <div>
-      <p class="eyebrow mono" data-reveal><b>v0.1.0</b> Free · Windows · No account</p>
-      <h1 id="hero-title" data-reveal data-i="1">Record your screen. Keep it <span class="serif">yours.</span></h1>
-      <p class="lede" data-reveal data-i="2">Reclux records your screen, a window or a tab, with your voice and the computer’s sound. The video is written straight to your own disk. Nothing is uploaded, and it works with the internet switched off.</p>
-      <div class="cta" data-reveal data-i="3">
-        <a class="btn btn-red btn-lg" href="download/Reclux-Setup-0.1.0.exe" download>
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Download for Windows
-        </a>
-        <a class="btn btn-line btn-lg" href="#parts">See how it installs</a>
+  <canvas id="light" aria-hidden="true"></canvas>
+  <div class="hero-copy wrap">
+    <p class="pill mono rise"><i class="rec" aria-hidden="true"></i>Version 0.2.1 · Free · Works offline</p>
+    <h1 id="hero-title">
+      <span class="w" style="--i:0">Record</span> <span class="w" style="--i:1">your</span> <span class="w" style="--i:2">screen.</span><br>
+      <span class="w" style="--i:3">Keep</span> <span class="w" style="--i:4">it</span> <span class="w serif" style="--i:5">yours.</span>
+    </h1>
+    <p class="lede rise" style="--i:6">Reclux is a free browser extension that records your screen, a window or a tab with sound. The video stays on your computer. No account, no upload, no internet needed.</p>
+    <div class="cta rise" style="--i:7">
+      <a class="btn btn-white btn-lg" id="hero-cta" href="#download">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="hero-cta-text">Get Reclux</span>
+      </a>
+      <a class="btn btn-line btn-lg" href="#features">See what it does</a>
+    </div>
+    <p class="cta-meta mono rise" style="--i:8" id="hero-meta">For Chrome, Edge, Brave, Opera and Firefox on desktop</p>
+  </div>
+
+  <figure class="stage">
+    <div class="panel" role="img" aria-label="The Reclux recorder during a recording, with a running timer, sound levels, the chosen quality, and Pause, Stop and Mute buttons.">
+      <div class="panel-top" aria-hidden="true">
+        <svg class="panel-logo"><use href="#logo"/></svg>
+        <span class="mono panel-safe">
+          <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Works offline
+        </span>
       </div>
-      <p class="cta-meta mono" data-reveal data-i="4">Reclux-Setup-0.1.0.exe · 2.2 MB · Windows 10/11 · for Chrome, Brave, Edge, Opera</p>
-      <p class="cta-meta" id="os-note" hidden></p>
-      <ul class="facts" data-reveal data-i="5">
-        <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Works offline</li>
-        <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>No account</li>
-        <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>No upload</li>
-        <li><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Up to 1080p · 60 fps</li>
-      </ul>
+      <div class="screen" aria-hidden="true">
+        <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i>
+        <div class="doc">
+          <div class="doc-bar"><u></u><u></u><u></u><s></s></div>
+          <div class="doc-body">
+            <div class="doc-text"><b></b><i></i><i></i><i></i><i></i><em></em></div>
+            <div class="doc-video"><span></span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff"/></svg></div>
+          </div>
+        </div>
+        <svg class="cursor" viewBox="0 0 24 24"><path d="M5 3l14 9-6.5 1.5L10 20z" fill="#fff" stroke="#0a0a0c" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="bar" aria-hidden="true">
+        <div class="bar-state">
+          <span class="mono bar-rec"><i class="rec"></i>REC</span>
+          <span class="mono bar-time" id="hero-timer">00:12:48</span>
+          <span class="waves" data-bars="14"></span>
+          <span class="chip mono">1080p · 60 fps</span>
+          <span class="chip mono">MP4</span>
+        </div>
+        <div class="bar-btns">
+          <span>Pause</span>
+          <span class="stop">Stop</span>
+          <span>Mute</span>
+        </div>
+      </div>
     </div>
-
-    <figure class="hero-art art draw" data-reveal data-i="2">
-      <svg viewBox="0 0 560 430" role="img" aria-labelledby="hero-art-t">
-        <title id="hero-art-t">Line drawing: the Reclux recorder in a browser window, recording with a live timer and sound levels, and the video flowing down into a drive on your own computer.</title>
-        <rect class="h" x="10" y="10" width="540" height="300" rx="14" pathLength="1"/>
-        <line class="h ln" x1="10" y1="44" x2="550" y2="44" pathLength="1"/>
-        <circle class="h" cx="32" cy="27" r="5" pathLength="1"/><circle class="h" cx="50" cy="27" r="5" pathLength="1"/><circle class="h" cx="68" cy="27" r="5" pathLength="1"/>
-        <rect class="h" x="96" y="18" width="190" height="18" rx="9" pathLength="1"/>
-        <circle class="dot" cx="110" cy="27" r="3.5"/>
-        <text x="122" y="31" font-size="10">Reclux · recorder</text>
-        <!-- left setup column -->
-        <text x="30" y="72" font-size="9" class="t-muted">WHAT TO RECORD</text>
-        <rect class="h" x="30" y="80" width="150" height="34" rx="8" pathLength="1"/>
-        <line class="h2" x1="80" y1="84" x2="80" y2="110"/><line class="h2" x1="130" y1="84" x2="130" y2="110"/>
-        <rect class="h" x="134" y="84" width="42" height="26" rx="6" pathLength="1"/>
-        <text x="143" y="101" font-size="8.5">Screen</text>
-        <text x="40" y="101" font-size="8.5" class="t-muted">Tab</text><text x="86" y="101" font-size="8.5" class="t-muted">Window</text>
-        <text x="30" y="138" font-size="9" class="t-muted">QUALITY</text>
-        <rect class="h" x="30" y="146" width="150" height="26" rx="7" pathLength="1"/>
-        <text x="40" y="163" font-size="9">1080p · 60 fps</text>
-        <text x="30" y="194" font-size="9" class="t-muted">AUDIO</text>
-        <rect class="h" x="30" y="202" width="150" height="24" rx="7" pathLength="1"/><text x="40" y="218" font-size="8.5">Microphone</text>
-        <rect class="h" x="146" y="208" width="26" height="12" rx="6" pathLength="1"/><circle class="dot" cx="166" cy="214" r="4"/>
-        <rect class="h" x="30" y="232" width="150" height="24" rx="7" pathLength="1"/><text x="40" y="248" font-size="8.5">System audio</text>
-        <rect class="h" x="146" y="238" width="26" height="12" rx="6" pathLength="1"/><circle class="dot" cx="166" cy="244" r="4"/>
-        <!-- stage -->
-        <rect class="h" x="200" y="62" width="330" height="140" rx="10" pathLength="1"/>
-        <path class="h2" d="M200 108H530M200 155H530M310 62V202M420 62V202"/>
-        <path class="red ln" d="M222 180 C 262 150, 292 168, 330 128 S 404 90, 440 112 S 500 86, 512 80" pathLength="1"/>
-        <!-- control bar -->
-        <rect class="h" x="200" y="214" width="330" height="80" rx="10" pathLength="1"/>
-        <circle class="dot pulse" cx="222" cy="238" r="5"/>
-        <text x="234" y="242" font-size="10" fill="currentColor">RECORDING</text>
-        <text id="hero-timer" x="330" y="245" font-size="20">00:12:48</text>
-        <g class="wave" aria-hidden="true">
-          <rect x="452" y="226" width="3" height="24" rx="1.5" class="dot"/>
-          <rect x="460" y="226" width="3" height="24" rx="1.5" class="dot"/>
-          <rect x="468" y="226" width="3" height="24" rx="1.5" class="dot"/>
-          <rect x="476" y="226" width="3" height="24" rx="1.5" class="dot"/>
-          <rect x="484" y="226" width="3" height="24" rx="1.5" class="dot"/>
-          <rect x="492" y="226" width="3" height="24" rx="1.5" class="dot"/>
-          <rect x="500" y="226" width="3" height="24" rx="1.5" class="dot"/>
-          <rect x="508" y="226" width="3" height="24" rx="1.5" class="dot"/>
-        </g>
-        <rect class="h" x="214" y="260" width="96" height="24" rx="12" pathLength="1"/><text x="244" y="276" font-size="9">Pause</text>
-        <rect class="h" x="318" y="260" width="96" height="24" rx="12" pathLength="1"/><text x="352" y="276" font-size="9">Stop</text>
-        <rect class="h" x="422" y="260" width="96" height="24" rx="12" pathLength="1"/><text x="455" y="276" font-size="9">Mute</text>
-        <!-- to disk -->
-        <path class="red ln" d="M365 310 V 342 C 365 356, 372 362, 386 362 H 430" stroke-dasharray="3 5" pathLength="1"/>
-        <rect class="h" x="430" y="336" width="120" height="70" rx="10" pathLength="1"/>
-        <line class="h ln" x1="430" y1="384" x2="550" y2="384" pathLength="1"/>
-        <circle class="dot" cx="532" cy="395" r="3"/>
-        <text x="442" y="356" font-size="10">Your PC</text>
-        <text x="442" y="372" font-size="9" class="t-muted">D:\Videos</text>
-        <text x="10" y="350" font-size="9" class="t-muted">WRITTEN TO DISK AS YOU RECORD</text>
-        <text x="10" y="366" font-size="9" class="t-muted">NOT IN MEMORY · NOT IN A CLOUD</text>
-      </svg>
-    </figure>
-  </div>
-</section>
-
-<!-- PROOF -->
-<section class="proof" aria-label="Key facts">
-  <div class="wrap">
-    <ul>
-      <li data-reveal><strong>0</strong><span>network requests while recording (measured)</span></li>
-      <li data-reveal data-i="1"><strong>2 h</strong><span>non-stop recording, tested end to end</span></li>
-      <li data-reveal data-i="2"><strong>&lt; 1 s</strong><span>lost if the browser or PC crashes</span></li>
-      <li data-reveal data-i="3"><strong>4</strong><span>browsers from one installer</span></li>
-    </ul>
-  </div>
-</section>
-
-<!-- PARTS -->
-<section id="parts" aria-labelledby="parts-title">
-  <div class="wrap">
-    <div class="head" data-reveal>
-      <p class="label">How it fits together</p>
-      <h2 id="parts-title">Four parts. Each with <span class="serif">one</span> job.</h2>
-      <p>People mix these up, so here they are side by side. You meet the first three once. After that, you only use the extension.</p>
-    </div>
-
-    <figure class="flow art draw" data-reveal aria-hidden="true">
-      <svg viewBox="0 0 1000 120">
-        <g><rect class="h" x="2" y="30" width="196" height="60" rx="30" pathLength="1"/><text x="100" y="56" font-size="13" text-anchor="middle">Setup wizard</text><text x="100" y="74" font-size="10" text-anchor="middle" class="t-muted">Windows · once</text></g>
-        <path class="red ln" d="M204 60 H 262" pathLength="1"/><path class="red ln" d="M256 54 L 264 60 L 256 66" pathLength="1"/>
-        <g><rect class="h" x="268" y="30" width="196" height="60" rx="30" pathLength="1"/><text x="366" y="56" font-size="13" text-anchor="middle">Browser guide</text><text x="366" y="74" font-size="10" text-anchor="middle" class="t-muted">each browser · 30 s</text></g>
-        <path class="red ln" d="M470 60 H 528" pathLength="1"/><path class="red ln" d="M522 54 L 530 60 L 522 66" pathLength="1"/>
-        <g><rect class="h" x="534" y="30" width="196" height="60" rx="30" pathLength="1"/><text x="632" y="56" font-size="13" text-anchor="middle">Welcome wizard</text><text x="632" y="74" font-size="10" text-anchor="middle" class="t-muted">inside Reclux · once</text></g>
-        <path class="red ln" d="M736 60 H 794" pathLength="1"/><path class="red ln" d="M788 54 L 796 60 L 788 66" pathLength="1"/>
-        <g><rect class="h" x="800" y="30" width="196" height="60" rx="30" pathLength="1"/><circle class="dot pulse" cx="834" cy="60" r="5"/><text x="910" y="56" font-size="13" text-anchor="middle">The extension</text><text x="910" y="74" font-size="10" text-anchor="middle" class="t-muted">every day</text></g>
-      </svg>
-    </figure>
-
-    <ol class="parts">
-      <li class="part" data-reveal>
-        <header><h3>Setup wizard</h3><span class="num">01</span></header>
-        <svg class="icon art draw" viewBox="0 0 48 48" aria-hidden="true"><rect class="h" x="6" y="12" width="36" height="28" rx="4" pathLength="1"/><path class="h ln" d="M6 20h36" pathLength="1"/><path class="red ln" d="M24 2v16M19 13l5 5 5-5" pathLength="1"/></svg>
-        <dl>
-          <dt>What it is</dt><dd>The Windows program you download: <span class="mono">Reclux-Setup-0.1.0.exe</span>.</dd>
-          <dt>What it does</dt><dd>Copies Reclux to your PC, finds your browsers, and opens the guide in each one you tick.</dd>
-          <dt>What it can’t do</dt><dd>Add the extension by itself. Browsers block programs from doing that, for your safety.</dd>
-          <dt>When</dt><dd>Once. Run it again only to update.</dd>
-        </dl>
-      </li>
-      <li class="part" data-reveal data-i="1">
-        <header><h3>Browser guide</h3><span class="num">02</span></header>
-        <svg class="icon art draw" viewBox="0 0 48 48" aria-hidden="true"><rect class="h" x="9" y="4" width="30" height="40" rx="4" pathLength="1"/><path class="h ln" d="M16 15h16M16 24h16M16 33h10" pathLength="1"/><path class="red ln" d="M12 15l1.5 1.5L16 13" pathLength="1"/></svg>
-        <dl>
-          <dt>What it is</dt><dd>A short page that opens in Chrome, Brave, Edge or Opera.</dd>
-          <dt>What it does</dt><dd>Four steps with Copy buttons: open the extensions page, turn on Developer mode, Load unpacked, paste the folder.</dd>
-          <dt>What it can’t do</dt><dd>Click for you. You press three buttons, about 30 seconds.</dd>
-          <dt>When</dt><dd>Once per browser. Reopen it from the Start menu: “Reclux setup guide”.</dd>
-        </dl>
-      </li>
-      <li class="part" data-reveal data-i="2">
-        <header><h3>Welcome wizard</h3><span class="num">03</span></header>
-        <svg class="icon art draw" viewBox="0 0 48 48" aria-hidden="true"><path class="h ln" d="M4 24h40" pathLength="1"/><circle class="h" cx="8" cy="24" r="4" pathLength="1"/><circle class="h" cx="20" cy="24" r="4" pathLength="1"/><circle class="h" cx="32" cy="24" r="4" pathLength="1"/><circle class="red" cx="44" cy="24" r="3" pathLength="1"/></svg>
-        <dl>
-          <dt>What it is</dt><dd>Four screens inside the Reclux extension: Welcome, Your defaults, How it works, Ready.</dd>
-          <dt>What it does</dt><dd>Lets you pick what to record, quality, format and sound, and explains each permission.</dd>
-          <dt>What it can’t do</dt><dd>Record. It only sets things up. Skip it any time.</dd>
-          <dt>When</dt><dd>Opens by itself after the extension is added. Reopen it with “Setup guide” on the recorder page.</dd>
-        </dl>
-      </li>
-      <li class="part" data-reveal data-i="3">
-        <header><h3>The extension</h3><span class="num">04</span></header>
-        <svg class="icon art draw" viewBox="0 0 48 48" aria-hidden="true"><rect class="h" x="4" y="8" width="40" height="28" rx="4" pathLength="1"/><path class="h ln" d="M16 44h16M24 36v8" pathLength="1"/><circle class="red" cx="24" cy="22" r="6" pathLength="1"/></svg>
-        <dl>
-          <dt>What it is</dt><dd>Reclux itself: the toolbar popup and the recorder page.</dd>
-          <dt>What it does</dt><dd>Records, pauses, stops and saves your video. Writes it to disk while you record.</dd>
-          <dt>What it can’t do</dt><dd>Edit or trim videos. Reclux records and saves.</dd>
-          <dt>When</dt><dd>Every time you record.</dd>
-        </dl>
-      </li>
-    </ol>
-  </div>
+  </figure>
 </section>
 
 <!-- FEATURES -->
 <section id="features" aria-labelledby="features-title">
   <div class="wrap">
     <div class="head" data-reveal>
-      <p class="label">Features</p>
-      <h2 id="features-title">Everything a recording needs. <span class="serif">Nothing</span> it doesn’t.</h2>
+      <p class="label mono">Features</p>
+      <h2 id="features-title">Press record.<br><span class="serif">Everything else is handled.</span></h2>
     </div>
-    <div class="bento">
-      <article class="cell big" data-reveal>
-        <svg class="icon art draw" viewBox="0 0 36 36" aria-hidden="true"><rect class="h" x="2" y="6" width="32" height="22" rx="3" pathLength="1"/><rect class="h" x="7" y="11" width="14" height="10" rx="2" pathLength="1"/><path class="red ln" d="M12 33h12" pathLength="1"/></svg>
+
+    <ul class="bento">
+      <li class="card wide" data-reveal>
+        <div class="vis vis-local" aria-hidden="true">
+          <svg viewBox="0 -14 520 184">
+            <rect class="ln" x="26" y="44" width="120" height="82" rx="10"/>
+            <circle class="red-fill pulse" cx="86" cy="85" r="13"/>
+            <path class="flow" d="M158 85H362"/>
+            <rect class="ln" x="374" y="56" width="120" height="58" rx="10"/>
+            <path class="ln" d="M374 94H494"/>
+            <circle class="red-fill" cx="478" cy="104" r="3"/>
+            <text x="86" y="150" text-anchor="middle">Your screen</text>
+            <text x="434" y="80" text-anchor="middle">D:\Videos</text>
+            <text x="434" y="150" text-anchor="middle">Your disk</text>
+            <path class="ln dim" stroke-dasharray="3 6" d="M260 72V34"/>
+            <path class="ln dim" d="M240 26a10 10 0 0 1 2-19 15 15 0 0 1 28-2 11 11 0 0 1 8 21z"/>
+            <path class="red-ln" d="M242 34 280 2"/>
+          </svg>
+        </div>
+        <h3>It stays on your computer</h3>
+        <p>No account and no upload. Reclux makes no network requests, so it keeps working with the internet off. You pick the folder or drive when you save.</p>
+      </li>
+
+      <li class="card" data-reveal data-i="1">
+        <div class="vis vis-fps" aria-hidden="true">
+          <div class="rates mono"><span>30</span><span>50</span><span>60</span><em>fps</em></div>
+          <div class="strip"><i></i></div>
+        </div>
+        <h3>A frame rate that holds</h3>
+        <p>720p or 1080p at 30, 50 or 60 fps. In Chrome, Edge, Brave and Opera the file keeps exactly the rate you pick.</p>
+      </li>
+
+      <li class="card" data-reveal>
+        <div class="vis vis-source" aria-hidden="true">
+          <div class="frame f-screen"><span class="mono">Screen</span>
+            <div class="frame f-window"><span class="mono">Window</span>
+              <div class="frame f-tab"><span class="mono">Tab</span></div>
+            </div>
+          </div>
+        </div>
         <h3>Screen, window or tab</h3>
-        <p>Pick the whole screen, one app window, or a single browser tab. Your browser always asks first, in its own window, so nothing is captured without your click.</p>
-      </article>
-      <article class="cell" data-reveal data-i="1">
-        <svg class="icon art draw" viewBox="0 0 36 36" aria-hidden="true"><rect class="h" x="13" y="3" width="10" height="18" rx="5" pathLength="1"/><path class="h ln" d="M7 16a11 11 0 0 0 22 0M18 27v6" pathLength="1"/><path class="red ln" d="M30 8l-24 22" pathLength="1"/></svg>
-        <h3>Voice and computer sound</h3>
-        <p>Microphone and system audio, mixed into one track. A Mute button silences your mic without stopping the video.</p>
-      </article>
-      <article class="cell" data-reveal>
-        <svg class="icon art draw" viewBox="0 0 36 36" aria-hidden="true"><path class="h ln" d="M3 27V9M12 27V15M21 27V5M30 27V19" pathLength="1"/><path class="red ln" d="M2 32h32" pathLength="1"/></svg>
-        <h3>720p or 1080p, up to 60 fps</h3>
-        <p>Six presets: 720p and 1080p at 30, 50 or 60 frames per second. Reclux shows the frame rate your computer really delivers.</p>
-      </article>
-      <article class="cell" data-reveal data-i="1">
-        <svg class="icon art draw" viewBox="0 0 36 36" aria-hidden="true"><path class="h ln" d="M8 3h14l8 8v22H8z" pathLength="1"/><path class="h ln" d="M22 3v8h8" pathLength="1"/><path class="red ln" d="M13 22h12" pathLength="1"/></svg>
-        <h3>MP4 or WebM</h3>
-        <p>MP4 plays almost everywhere, including Windows’ own player. WebM is there too. The file’s length is always correct, so you can skip through it.</p>
-      </article>
-      <article class="cell" data-reveal data-i="2">
-        <svg class="icon art draw" viewBox="0 0 36 36" aria-hidden="true"><circle class="h" cx="18" cy="18" r="14" pathLength="1"/><path class="h ln" d="M14 12v12M22 12v12" pathLength="1"/></svg>
-        <h3>Pause and resume</h3>
-        <p>Paused time is left out of the video, and the timer only counts what is recorded.</p>
-      </article>
-      <article class="cell big" data-reveal>
-        <svg class="icon art draw" viewBox="0 0 36 36" aria-hidden="true"><path class="h ln" d="M4 8h28v20H4z" pathLength="1"/><path class="red ln" d="M10 22l5-6 4 4 7-8" pathLength="1"/><path class="h ln" d="M4 32h28" pathLength="1"/></svg>
-        <h3>Crash-safe, written to disk as you record</h3>
-        <p>Your video is saved in small pieces while you record, so memory stays flat and a crash loses less than a second. If the browser closes, Reclux shows “Found a recording that was never saved” next time, with Recover it or Delete.</p>
-      </article>
-      <article class="cell" data-reveal data-i="1">
-        <svg class="icon art draw" viewBox="0 0 36 36" aria-hidden="true"><circle class="h" cx="18" cy="19" r="13" pathLength="1"/><path class="red ln" d="M18 11v8l5 4" pathLength="1"/><path class="h ln" d="M14 2h8" pathLength="1"/></svg>
-        <h3>Long recordings</h3>
-        <p>Tested for two hours non-stop. At 1h45 Reclux tells you 15 minutes are left of 2 hours; at 2h it says so. It never stops by itself.</p>
-      </article>
-      <article class="cell" data-reveal>
-        <svg class="icon art draw" viewBox="0 0 36 36" aria-hidden="true"><path class="h ln" d="M4 30L16 8l6 11 4-6 6 17z" pathLength="1"/><path class="red ln" d="M18 22v3M18 28v.5" pathLength="1"/></svg>
-        <h3>Honest warnings</h3>
-        <ul>
-          <li><strong>Computer struggling:</strong> warns when few frames arrive and the CPU is busy, with a one-click switch to 30 fps.</li>
-          <li><strong>Disk running low:</strong> warns early, and stops safely before the disk is full, keeping what you recorded.</li>
-        </ul>
-      </article>
-      <article class="cell" data-reveal data-i="1">
-        <svg class="icon art draw" viewBox="0 0 36 36" aria-hidden="true"><path class="h ln" d="M26 22A11 11 0 1 1 14 6a9 9 0 0 0 12 16z" pathLength="1"/><path class="red ln" d="M26 5v6M23 8h6" pathLength="1"/></svg>
-        <h3>Keeps your PC awake</h3>
-        <p>Windows won’t sleep or turn off the screen while you record, even when the recorder tab is in the background.</p>
-      </article>
-      <article class="cell" data-reveal data-i="2">
-        <svg class="icon art draw" viewBox="0 0 36 36" aria-hidden="true"><path class="h ln" d="M4 9h18M28 9h4M4 27h4M14 27h18" pathLength="1"/><circle class="h" cx="25" cy="9" r="3" pathLength="1"/><circle class="red" cx="11" cy="27" r="3" pathLength="1"/></svg>
-        <h3>Remembers your choices</h3>
-        <p>Quality, format, sound and what to record are saved. Change them from the toolbar popup without opening the recorder.</p>
-      </article>
-      <article class="cell" data-reveal>
-        <svg class="icon art draw" viewBox="0 0 36 36" aria-hidden="true"><rect class="h" x="3" y="10" width="30" height="18" rx="3" pathLength="1"/><path class="h ln" d="M8 15h2M13 15h2M18 15h2M23 15h2M28 15h0M10 22h16" pathLength="1"/></svg>
-        <h3>Built for everyone</h3>
-        <p>Works fully by keyboard, follows your light or dark setting, grows with large text, and fits small windows.</p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<!-- HOW A RECORDING WORKS -->
-<section id="how" aria-labelledby="how-title">
-  <div class="wrap">
-    <div class="head" data-reveal>
-      <p class="label">Using it</p>
-      <h2 id="how-title">A recording, <span class="serif">start</span> to saved file.</h2>
-    </div>
-    <ol class="steps">
-      <li data-reveal><div><h3>Press Start recording</h3><p>Your browser asks what to share: a tab, a window or the whole screen. Tick “Also share audio” to include the computer’s sound.</p></div></li>
-      <li data-reveal data-i="1"><div><h3>3, 2, 1, and it records</h3><p>Switch to other tabs or apps as you like. Reclux keeps recording in the background.</p></div></li>
-      <li data-reveal data-i="2"><div><h3>Pause, Resume, Mute or Stop</h3><p>The recorder shows the timer, the size so far, and the real frame rate.</p></div></li>
-      <li data-reveal data-i="3"><div><h3>Press Save file</h3><p>A “Save as” window opens. Pick any folder or drive, such as D: or E:.</p><p class="note"><strong>Always press Save file.</strong> Until then the video waits in the browser’s private storage on your computer. Clearing the browser’s data would delete it.</p></div></li>
-    </ol>
-  </div>
-</section>
-
-<!-- INSTALL -->
-<section id="install" aria-labelledby="install-title">
-  <div class="wrap">
-    <div class="head" data-reveal>
-      <p class="label">Install</p>
-      <h2 id="install-title">Two minutes, <span class="serif">once.</span></h2>
-      <p>Reclux is not in any browser store. The Windows setup wizard copies it to your PC, and a short guide shows you how to add it.</p>
-    </div>
-    <div class="install-grid">
-      <ol class="steps">
-        <li data-reveal><div><h3>Download and run the setup wizard</h3><p>Open <span class="mono">Reclux-Setup-0.1.0.exe</span>. No administrator rights are needed.</p><p class="note">Windows may say <strong>“Windows protected your PC”</strong>, because the file is not code-signed. Click <strong>More info</strong>, then <strong>Run anyway</strong>.</p></div></li>
-        <li data-reveal data-i="1"><div><h3>Tick your browsers and click Finish</h3><p>Chrome, Brave, Edge and Opera are found by themselves. Each one you tick opens the browser guide.</p></div></li>
-        <li data-reveal data-i="2"><div><h3>Follow the 4 steps in the guide</h3><p>Paste the extensions address (for example <kbd>brave://extensions</kbd>), turn on <strong>Developer mode</strong>, click <strong>Load unpacked</strong>, and paste the folder the guide gives you.</p></div></li>
-        <li data-reveal data-i="3"><div><h3>The welcome wizard opens</h3><p>Choose your defaults, then pin Reclux: click the puzzle icon in the toolbar, then the pin.</p></div></li>
-      </ol>
-
-      <div class="dl-card" data-reveal role="group" aria-labelledby="dl-title">
-        <p class="label">Download</p>
-        <h3 id="dl-title">Reclux for Windows</h3>
-        <a class="btn btn-red btn-lg" href="download/Reclux-Setup-0.1.0.exe" download>
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Download .exe
-        </a>
-        <dl class="spec">
-          <dt>Version</dt><dd>0.1.0</dd>
-          <dt>Size</dt><dd>2.2 MB</dd>
-          <dt>Windows</dt><dd>10 or 11 (tested on 11)</dd>
-          <dt>Browsers</dt><dd>Chrome, Edge, Opera 116+, Brave 1.58+</dd>
-          <dt>Installs to</dt><dd class="mono">%LOCALAPPDATA%\Reclux</dd>
-          <dt>Update</dt><dd>Run the new .exe, then press reload on Reclux in the extensions page</dd>
-          <dt>Uninstall</dt><dd>Windows Settings › Apps › Reclux, then remove it from the browser</dd>
-        </dl>
-        <p class="hash">SHA-256 402fc57cc2a7bff15fa973b490bbdc5ee184cc3e48ddf5a37542970cf3187623</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- EXTENSION BY HAND -->
-<section id="extension" aria-labelledby="extension-title">
-  <div class="wrap">
-    <div class="head" data-reveal>
-      <p class="label">The extension, by hand</p>
-      <h2 id="extension-title">Rather use the <span class="serif">.zip?</span></h2>
-      <p>Skip the setup wizard and add the extension yourself, in about a minute. This also works on Mac and Linux. Is it the same in every browser? Almost: there are two kinds.</p>
-    </div>
-
-    <ol class="parts two">
-      <li class="part" data-reveal>
-        <header><h3>Chrome, Brave, Edge, Opera</h3><span class="num">Same</span></header>
-        <dl>
-          <dt>The file</dt><dd>One .zip for all four browsers.</dd>
-          <dt>The steps</dt><dd>Identical. Only the extensions address and the place of the Developer mode switch change.</dd>
-          <dt>How long it stays</dt><dd>Until you remove it, through restarts.</dd>
-        </dl>
-        <a class="btn btn-line" href="download/reclux-0.1.0-chrome.zip" download>
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Download .zip · 118 KB
-        </a>
-        <p class="hash">SHA-256 6bdf4ac555714183bffb5f528a24dd4ba767d98cee09ba34d6c84b3c8f3e4692</p>
+        <p>Record all of it or just one part. Your choice is remembered for next time.</p>
       </li>
-      <li class="part" data-reveal data-i="1">
-        <header><h3>Firefox</h3><span class="num">Different</span></header>
-        <dl>
-          <dt>The file</dt><dd>Its own .zip, built for Firefox 140 or newer.</dd>
-          <dt>The steps</dt><dd>No unzipping and no Developer mode. You add it from a debugging page.</dd>
-          <dt>How long it stays</dt><dd>Until Firefox closes. Firefox keeps only add-ons signed by Mozilla, so you add it again each time.</dd>
-        </dl>
-        <a class="btn btn-line" href="download/reclux-0.1.0-firefox.zip" download>
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Download .zip · 118 KB
-        </a>
-        <p class="hash">SHA-256 3ece621fc247cef797076f78fba53de582aa3ec25e2b833bbe7bddf55db97175</p>
+
+      <li class="card wide" data-reveal data-i="1">
+        <div class="vis vis-duck" aria-hidden="true">
+          <div class="track">
+            <span class="mono track-name">Voice</span>
+            <span class="waves voice" data-bars="36"></span>
+          </div>
+          <div class="track">
+            <span class="mono track-name">Music</span>
+            <span class="waves music" data-bars="36"></span>
+          </div>
+          <p class="duck-chip mono"><span class="a">Music in file: 100%</span><span class="b">Voice heard · Music in file: 48%</span></p>
+        </div>
+        <h3>Your voice stays clear</h3>
+        <p>Record your mic and the computer’s sound together. While you speak, the computer’s sound drops to 48% in the file, then comes back when you stop.</p>
       </li>
-    </ol>
 
-    <figure class="flow art draw ext-flow" data-reveal aria-hidden="true">
-      <svg viewBox="0 0 1000 218">
-        <text x="2" y="14" font-size="10" class="t-muted">CHROME · BRAVE · EDGE · OPERA</text>
-        <g><rect class="h" x="2" y="26" width="196" height="60" rx="30" pathLength="1"/><text x="100" y="52" font-size="13" text-anchor="middle">.zip file</text><text x="100" y="70" font-size="10" text-anchor="middle" class="t-muted">chrome build</text></g>
-        <path class="red ln" d="M204 56 H 262" pathLength="1"/><path class="red ln" d="M256 50 L 264 56 L 256 62" pathLength="1"/>
-        <g><rect class="h" x="268" y="26" width="196" height="60" rx="30" pathLength="1"/><text x="366" y="52" font-size="13" text-anchor="middle">Extract</text><text x="366" y="70" font-size="10" text-anchor="middle" class="t-muted">to a folder you keep</text></g>
-        <path class="red ln" d="M470 56 H 528" pathLength="1"/><path class="red ln" d="M522 50 L 530 56 L 522 62" pathLength="1"/>
-        <g><rect class="h" x="534" y="26" width="196" height="60" rx="30" pathLength="1"/><text x="632" y="52" font-size="13" text-anchor="middle">Load unpacked</text><text x="632" y="70" font-size="10" text-anchor="middle" class="t-muted">Developer mode on</text></g>
-        <path class="red ln" d="M736 56 H 794" pathLength="1"/><path class="red ln" d="M788 50 L 796 56 L 788 62" pathLength="1"/>
-        <g><rect class="h" x="800" y="26" width="196" height="60" rx="30" pathLength="1"/><circle class="dot pulse" cx="834" cy="56" r="5"/><text x="910" y="52" font-size="13" text-anchor="middle">Reclux</text><text x="910" y="70" font-size="10" text-anchor="middle" class="t-muted">stays installed</text></g>
+      <li class="card" data-reveal>
+        <div class="vis vis-crash" aria-hidden="true">
+          <div class="blocks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <p class="crash-chip mono"><span class="a">Writing to disk</span><span class="b">Browser closed</span><span class="c">Recording recovered</span></p>
+        </div>
+        <h3>Safe if something crashes</h3>
+        <p>Video goes to disk as you record, so memory stays low. After a crash, Reclux offers to recover what it wrote.</p>
+      </li>
 
-        <text x="2" y="142" font-size="10" class="t-muted">FIREFOX</text>
-        <g><rect class="h" x="2" y="154" width="196" height="60" rx="30" pathLength="1"/><text x="100" y="180" font-size="13" text-anchor="middle">.zip file</text><text x="100" y="198" font-size="10" text-anchor="middle" class="t-muted">firefox build</text></g>
-        <path class="red ln" d="M204 184 H 262" pathLength="1"/><path class="red ln" d="M256 178 L 264 184 L 256 190" pathLength="1"/>
-        <g><rect class="h" x="268" y="154" width="196" height="60" rx="30" pathLength="1"/><text x="366" y="180" font-size="13" text-anchor="middle">Keep it zipped</text><text x="366" y="198" font-size="10" text-anchor="middle" class="t-muted">no extracting</text></g>
-        <path class="red ln" d="M470 184 H 528" pathLength="1"/><path class="red ln" d="M522 178 L 530 184 L 522 190" pathLength="1"/>
-        <g><rect class="h" x="534" y="154" width="196" height="60" rx="30" pathLength="1"/><text x="632" y="180" font-size="13" text-anchor="middle">Temporary Add-on</text><text x="632" y="198" font-size="10" text-anchor="middle" class="t-muted">about:debugging</text></g>
-        <path class="red ln" d="M736 184 H 794" pathLength="1"/><path class="red ln" d="M788 178 L 796 184 L 788 190" pathLength="1"/>
-        <g><rect class="h" x="800" y="154" width="196" height="60" rx="30" pathLength="1"/><circle class="dot" cx="834" cy="184" r="5"/><text x="910" y="180" font-size="13" text-anchor="middle">Reclux</text><text x="910" y="198" font-size="10" text-anchor="middle" class="t-muted">until Firefox closes</text></g>
-      </svg>
-    </figure>
+      <li class="card" data-reveal data-i="1">
+        <div class="vis vis-sharp" aria-hidden="true">
+          <div class="sharp-text"><span class="soft">Small text, still readable.</span><span class="crisp">Small text, still readable.</span><i></i></div>
+        </div>
+        <h3>Text you can read</h3>
+        <p>Quality settings are tuned so small text stays sharp, even beside moving video.</p>
+      </li>
 
-    <div class="table-scroll" data-reveal tabindex="0" role="region" aria-label="Where to add Reclux in each browser">
-      <table>
-        <caption>Each browser at a glance</caption>
-        <thead><tr><th scope="col">Browser</th><th scope="col">Type this address</th><th scope="col">Developer mode switch</th><th scope="col">Then click</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Chrome</th><td><kbd>chrome://extensions</kbd></td><td>Top right</td><td>Load unpacked</td></tr>
-          <tr><th scope="row">Brave</th><td><kbd>brave://extensions</kbd></td><td>Top right</td><td>Load unpacked</td></tr>
-          <tr><th scope="row">Edge</th><td><kbd>edge://extensions</kbd></td><td>Left panel, near the bottom. In a narrow window, open the menu at the top left first</td><td>Load unpacked</td></tr>
-          <tr><th scope="row">Opera</th><td><kbd>opera://extensions</kbd></td><td>Top right</td><td>Load unpacked</td></tr>
-          <tr><th scope="row">Firefox</th><td><kbd>about:debugging#/runtime/this-firefox</kbd></td><td>Not needed</td><td>Load Temporary Add-on…</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="ext-grid">
-      <div data-reveal>
-        <h3 class="col-title">Chrome, Brave, Edge, Opera</h3>
-        <ol class="steps">
-          <li><div><h4>Download and extract</h4><p>Right-click <span class="mono">reclux-0.1.0-chrome.zip</span>, choose <strong>Extract All</strong>, then move the folder somewhere it can stay, such as Documents. Browsers can’t add a .zip directly.</p></div></li>
-          <li><div><h4>Open the extensions page</h4><p>Type the address from the table into the address bar, for example <kbd>brave://extensions</kbd>, and press Enter.</p></div></li>
-          <li><div><h4>Turn on Developer mode</h4><p>Find the switch in the place the table shows. Three new buttons appear.</p></div></li>
-          <li><div><h4>Click Load unpacked</h4><p>Choose the extracted folder, the one with <span class="mono">manifest.json</span> inside, and click <strong>Select Folder</strong>.</p><p class="note"><strong>Keep that folder.</strong> The browser reads Reclux from it every time. If you move or delete it, Reclux stops working.</p></div></li>
-          <li><div><h4>Pin it</h4><p>The welcome wizard opens. Click the puzzle icon in the toolbar, then the pin next to Reclux.</p></div></li>
-        </ol>
-        <p class="muted small">To update: extract the new .zip over the same folder, then press reload on Reclux in the extensions page.</p>
-      </div>
-      <div data-reveal data-i="1">
-        <h3 class="col-title">Firefox</h3>
-        <ol class="steps">
-          <li><div><h4>Download the Firefox .zip</h4><p>Leave <span class="mono">reclux-0.1.0-firefox.zip</span> as it is. Don’t extract it.</p></div></li>
-          <li><div><h4>Open the debugging page</h4><p>Type <kbd>about:debugging#/runtime/this-firefox</kbd> into the address bar and press Enter.</p></div></li>
-          <li><div><h4>Click Load Temporary Add-on…</h4><p>Choose the .zip file. The welcome wizard opens, and Reclux appears under the puzzle icon in the toolbar.</p><p class="note"><strong>Firefox removes it when it closes.</strong> Repeat steps 2 and 3 each time you want to record. Your saved videos are not affected.</p></div></li>
-        </ol>
-        <p class="muted small">In Firefox, recordings with sound save as WebM, and computer sound (system audio) is not available.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- QUALITY TABLE -->
-<section id="sizes" aria-labelledby="sizes-title">
-  <div class="wrap">
-    <div class="head" data-reveal>
-      <p class="label">Quality and file size</p>
-      <h2 id="sizes-title">Know the size <span class="serif">before</span> you press Start.</h2>
-      <p>These are the largest sizes. A mostly still screen needs far less: a real two-hour 1080p test came out at 0.75 GB.</p>
-    </div>
-    <div class="table-scroll" data-reveal tabindex="0" role="region" aria-label="Quality presets and file sizes">
-      <table>
-        <caption>Six quality presets, at most this size</caption>
-        <thead><tr><th scope="col">Preset</th><th scope="col" class="num">Per minute</th><th scope="col" class="num">2 hours</th><th scope="col">Good to know</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">720p · 30 fps</th><td class="num">38 MB</td><td class="num">4.5 GB</td><td>Smoothest on slower computers</td></tr>
-          <tr><th scope="row">720p · 50 fps</th><td class="num">49 MB</td><td class="num">5.9 GB</td><td>Needs a fast computer</td></tr>
-          <tr><th scope="row">720p · 60 fps</th><td class="num">56 MB</td><td class="num">6.8 GB</td><td>Needs a fast computer</td></tr>
-          <tr><th scope="row">1080p · 30 fps</th><td class="num">60 MB</td><td class="num">7.2 GB</td><td>The default</td></tr>
-          <tr><th scope="row">1080p · 50 fps</th><td class="num">75 MB</td><td class="num">9.0 GB</td><td>Needs a fast computer</td></tr>
-          <tr><th scope="row">1080p · 60 fps</th><td class="num">90 MB</td><td class="num">10.8 GB</td><td>Needs a fast computer</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- PRIVACY -->
-<section id="privacy" class="privacy" aria-labelledby="privacy-title">
-  <div class="wrap">
-    <div class="head" data-reveal>
-      <p class="label">Privacy</p>
-      <h2 id="privacy-title">Nothing leaves your <span class="serif">computer.</span></h2>
-      <p>No account. No analytics, ads or cookies. No servers. Reclux made zero network requests in our offline test. This website has no analytics or cookies and loads no third-party fonts. Our host, Netlify, adds its small badge.</p>
-    </div>
-
-    <div class="privacy-grid">
-      <figure class="where art draw" data-reveal>
-        <svg class="wide" viewBox="0 0 900 230" role="img" aria-labelledby="where-t">
-          <title id="where-t">Where your video goes: from your screen, into Reclux in your browser, into the browser’s private storage on your own drive, and when you press Save file, into any folder you choose. Never to the internet.</title>
-          <rect class="h" x="10" y="40" width="150" height="90" rx="10" pathLength="1"/><text x="85" y="80" font-size="13" text-anchor="middle">Your screen</text><text x="85" y="100" font-size="10" text-anchor="middle" class="t-muted">tab · window · screen</text>
-          <path class="red ln" d="M166 85H226" pathLength="1"/><path class="red ln" d="M220 79l8 6-8 6" pathLength="1"/>
-          <rect class="h" x="234" y="40" width="160" height="90" rx="10" pathLength="1"/><circle class="dot pulse" cx="256" cy="62" r="5"/><text x="314" y="80" font-size="13" text-anchor="middle">Reclux</text><text x="314" y="100" font-size="10" text-anchor="middle" class="t-muted">in your browser</text>
-          <path class="red ln" d="M400 85H460" pathLength="1"/><path class="red ln" d="M454 79l8 6-8 6" pathLength="1"/>
-          <rect class="h" x="468" y="40" width="190" height="90" rx="10" pathLength="1"/><text x="563" y="80" font-size="13" text-anchor="middle">Private storage</text><text x="563" y="100" font-size="10" text-anchor="middle" class="t-muted">on your drive, while recording</text>
-          <path class="red ln" d="M664 85H724" pathLength="1"/><path class="red ln" d="M718 79l8 6-8 6" pathLength="1"/>
-          <text x="694" y="70" font-size="9" text-anchor="middle" class="t-muted">Save file</text>
-          <rect class="h" x="732" y="40" width="158" height="90" rx="10" pathLength="1"/><text x="811" y="80" font-size="13" text-anchor="middle">Your folder</text><text x="811" y="100" font-size="10" text-anchor="middle" class="t-muted">C:  D:  E:  any drive</text>
-          <path class="h2" d="M314 150V190" stroke-dasharray="3 5"/>
-          <rect class="h" x="244" y="190" width="140" height="34" rx="17" pathLength="1"/><text x="314" y="211" font-size="11" text-anchor="middle">The internet</text>
-          <path class="red ln" d="M300 160l28 24M328 160l-28 24" pathLength="1"/>
-          <text x="400" y="211" font-size="10" class="t-muted">never</text>
-        </svg>
-        <svg class="tall" viewBox="0 0 320 520" role="img" aria-labelledby="where-t2">
-          <title id="where-t2">Where your video goes: from your screen, into Reclux in your browser, into the browser’s private storage on your own drive, and when you press Save file, into any folder you choose. Never to the internet.</title>
-          <rect class="h" x="40" y="10" width="240" height="72" rx="10" pathLength="1"/><text x="160" y="42" font-size="15" text-anchor="middle">Your screen</text><text x="160" y="62" font-size="11" text-anchor="middle" class="t-muted">tab · window · screen</text>
-          <path class="red ln" d="M160 88V124M154 118l6 8 6-8" pathLength="1"/>
-          <rect class="h" x="40" y="132" width="240" height="72" rx="10" pathLength="1"/><circle class="dot pulse" cx="64" cy="152" r="5"/><text x="160" y="164" font-size="15" text-anchor="middle">Reclux</text><text x="160" y="184" font-size="11" text-anchor="middle" class="t-muted">in your browser</text>
-          <path class="red ln" d="M160 210V246M154 240l6 8 6-8" pathLength="1"/>
-          <rect class="h" x="40" y="254" width="240" height="72" rx="10" pathLength="1"/><text x="160" y="286" font-size="15" text-anchor="middle">Private storage</text><text x="160" y="306" font-size="11" text-anchor="middle" class="t-muted">on your drive, while recording</text>
-          <path class="red ln" d="M160 332V368M154 362l6 8 6-8" pathLength="1"/><text x="176" y="354" font-size="11" class="t-muted">Save file</text>
-          <rect class="h" x="40" y="376" width="240" height="72" rx="10" pathLength="1"/><text x="160" y="408" font-size="15" text-anchor="middle">Your folder</text><text x="160" y="428" font-size="11" text-anchor="middle" class="t-muted">C:  D:  E:  any drive</text>
-          <rect class="h" x="40" y="474" width="170" height="36" rx="18" pathLength="1"/><text x="125" y="497" font-size="13" text-anchor="middle">The internet</text>
-          <path class="red ln" d="M222 480l22 24M244 480l-22 24" pathLength="1"/><text x="254" y="497" font-size="12" class="t-muted">never</text>
-        </svg>
-      </figure>
-
-      <div class="table-scroll" data-reveal tabindex="0" role="region" aria-label="Permissions Reclux asks for">
-        <table>
-          <caption>What Reclux asks your browser for, and why</caption>
-          <thead><tr><th scope="col">Permission</th><th scope="col">Why</th></tr></thead>
-          <tbody>
-            <tr><th scope="row">Downloads</th><td>Shows the “Save as” window, so you choose the folder or drive.</td></tr>
-            <tr><th scope="row">Unlimited storage</th><td>Keeps a long recording safely on your drive while you record.</td></tr>
-            <tr><th scope="row">CPU</th><td>Tells a busy computer from a still screen, to warn you. Stays on your PC.</td></tr>
-            <tr><th scope="row">Power</th><td>Keeps the PC awake while recording. Released when you stop.</td></tr>
-            <tr><th scope="row">Screen and microphone</th><td>Your browser asks every time, in its own window.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="muted" data-reveal>Read the full <a href="https://iamaakashoza.github.io/reclux-privacy/">privacy policy</a>, or the <a href="https://github.com/iamaakashoza/reclux">source code on GitHub</a>.</p>
-    </div>
-  </div>
-</section>
-
-<!-- BROWSERS -->
-<section id="browsers" aria-labelledby="browsers-title">
-  <div class="wrap">
-    <div class="head" data-reveal>
-      <p class="label">Where it works</p>
-      <h2 id="browsers-title">Your browser, <span class="serif">honestly.</span></h2>
-    </div>
-    <div class="table-scroll" data-reveal tabindex="0" role="region" aria-label="Browser and device support">
-      <table>
-        <caption>Support in version 0.1.0</caption>
-        <thead><tr><th scope="col">Browser or device</th><th scope="col">Status</th><th scope="col">Notes</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Chrome</th><td class="yes">Yes</td><td>Through the Windows setup wizard</td></tr>
-          <tr><th scope="row">Brave</th><td class="yes">Yes</td><td>Through the setup wizard. The low-disk warning is off, because Brave hides the real free space for privacy</td></tr>
-          <tr><th scope="row">Edge</th><td class="yes">Yes</td><td>Through the setup wizard</td></tr>
-          <tr><th scope="row">Opera</th><td class="yes">Yes</td><td>Through the setup wizard</td></tr>
-          <tr><th scope="row">Firefox</th><td class="part-yes">Temporary</td><td>Add it with the <a href="#extension">Firefox .zip</a>. Firefox removes it when it closes, because it keeps only add-ons signed by Mozilla. With sound it saves WebM, and system audio is not available</td></tr>
-          <tr><th scope="row">Mac and Linux</th><td class="part-yes">Not tested</td><td>The installer is Windows only. Use the <a href="#extension">.zip</a> in the same browsers</td></tr>
-          <tr><th scope="row">iPad, iPhone, Android</th><td class="no">No</td><td>Their browsers can’t run this kind of extension or record the screen</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-<!-- LIMITS -->
-<section id="limits" aria-labelledby="limits-title">
-  <div class="wrap">
-    <div class="head" data-reveal>
-      <p class="label">Good to know</p>
-      <h2 id="limits-title">What Reclux <span class="serif">doesn’t</span> do (yet).</h2>
-    </div>
-    <ul class="limits" data-reveal>
-      <li><strong>No editing</strong><span>It records and saves. Trim in any video editor.</span></li>
-      <li><strong>No automatic updates</strong><span>Each new version is a new setup file.</span></li>
-      <li><strong>A Windows warning on first run</strong><span>The setup file is not code-signed. Click More info, then Run anyway.</span></li>
-      <li><strong>Developer mode stays on</strong><span>Needed for extensions added outside a store. Your browser may remind you about it.</span></li>
-      <li><strong>Keep the Reclux folder</strong><span>If <span class="mono">%LOCALAPPDATA%\Reclux</span> is deleted, the extension stops working.</span></li>
-      <li><strong>Speed depends on your computer</strong><span>1080p at 60 fps needs a fast PC. Reclux shows what it really gets.</span></li>
+      <li class="card" data-reveal data-i="2">
+        <div class="vis vis-warn" aria-hidden="true">
+          <div class="meter"><i></i></div>
+          <p class="mono warn-row"><span>Disk space</span><b>OK</b></p>
+          <p class="mono warn-row"><span>Frames lost</span><b>0</b></p>
+        </div>
+        <h3>Warns you early</h3>
+        <p>Reclux tells you when frames are being lost or the disk is nearly full, before it spoils a recording.</p>
+      </li>
     </ul>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<section id="download" class="download" aria-labelledby="download-title">
+  <div class="wrap">
+    <div class="head" data-reveal>
+      <p class="label mono">Download</p>
+      <h2 id="download-title">Add Reclux to <span class="serif">your browser.</span></h2>
+      <p>Reclux is not in the browser stores, so you add it by hand. It takes about a minute, and you only need the .zip for your browser.</p>
+    </div>
+
+    <div class="dl-grid">
+      <article class="dl" id="download-chromium" data-reveal aria-labelledby="dl-c">
+        <h3 id="dl-c">Chrome, Edge, Brave, Opera</h3>
+        <p class="dl-sub">One file for all four. Same steps. Stays installed through restarts.</p>
+        <a class="btn btn-red btn-block" href="download/reclux-0.2.1-chrome.zip" download>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download .zip · 229 KB
+        </a>
+        <p class="hash mono">reclux-0.2.1-chrome.zip · Chrome 116 or newer<br>SHA-256 1ab42340503bd7cda27831a5357b5beb11e7bc3fb0ff060c1d2352e120e37e1d</p>
+
+        <div class="pick" role="group" aria-label="Show the steps for your browser">
+          <button type="button" data-browser="chrome" aria-pressed="true">Chrome</button>
+          <button type="button" data-browser="edge" aria-pressed="false">Edge</button>
+          <button type="button" data-browser="brave" aria-pressed="false">Brave</button>
+          <button type="button" data-browser="opera" aria-pressed="false">Opera</button>
+        </div>
+
+        <ol class="steps">
+          <li><strong>Extract the .zip</strong> into a folder you will keep. Reclux runs from that folder, so deleting it removes Reclux.</li>
+          <li><strong>Open the extensions page.</strong> Paste this into the address bar:
+            <span class="addr"><kbd id="addr">chrome://extensions</kbd><button type="button" class="copy" data-copy="#addr">Copy</button></span>
+          </li>
+          <li><strong>Turn on Developer mode.</strong> <span id="dev-place">The switch is at the top right.</span></li>
+          <li><strong>Click Load unpacked</strong> and choose the folder you extracted.</li>
+          <li><strong>Done.</strong> The welcome guide opens by itself. Pin Reclux to your toolbar to keep it close.</li>
+        </ol>
+      </article>
+
+      <article class="dl" id="download-firefox" data-reveal data-i="1" aria-labelledby="dl-f">
+        <h3 id="dl-f">Firefox</h3>
+        <p class="dl-sub">Its own file. Fewer steps. You add it again each time Firefox starts.</p>
+        <a class="btn btn-line btn-block" href="download/reclux-0.2.1-firefox.zip" download>
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download .zip · 229 KB
+        </a>
+        <p class="hash mono">reclux-0.2.1-firefox.zip · Firefox 140 or newer<br>SHA-256 0233a2fd7df33f469e00b0ef47dda186c174deb8abdd37abff27cc02b1ace842</p>
+
+        <ol class="steps">
+          <li><strong>Keep the .zip as it is.</strong> Firefox reads it directly, so there is nothing to extract.</li>
+          <li><strong>Open the debugging page.</strong> Paste this into the address bar:
+            <span class="addr"><kbd id="addr-ff">about:debugging#/runtime/this-firefox</kbd><button type="button" class="copy" data-copy="#addr-ff">Copy</button></span>
+          </li>
+          <li><strong>Click Load Temporary Add-on…</strong> and choose the .zip.</li>
+          <li><strong>Done.</strong> The welcome guide opens by itself.</li>
+        </ol>
+
+        <aside class="note" aria-labelledby="ff-why">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 11v5M12 8h.01" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <div>
+            <h4 id="ff-why">Why Firefox has its own file</h4>
+            <p>Firefox handles extensions and video recording differently from the other browsers, so Reclux needs a separate build.
+              <span class="tip-wrap">
+                <button type="button" class="learn" aria-expanded="false" aria-controls="ff-tip">Learn More</button>
+                <span class="tip" id="ff-tip" role="tooltip">
+                  <span class="tip-row"><b>Why it goes away.</b> Firefox keeps only add-ons signed by Mozilla. Reclux is not signed, so Firefox removes it when it closes.</span>
+                  <span class="tip-row"><b>What is built differently.</b> Firefox has no AAC sound encoder and no built-in frame reader, so this build brings its own frame reader, uses Opus sound in MP4, and uses VP8 for WebM.</span>
+                  <span class="tip-row"><b>What you will notice.</b> Microphone only, no system audio. No warnings about a busy computer, and it cannot keep your PC awake. At 1080p, Firefox paused for about a second a few times in our test, so 720p is the smoother choice.</span>
+                </span>
+              </span>
+            </p>
+          </div>
+        </aside>
+      </article>
+    </div>
   </div>
 </section>
 
@@ -567,48 +290,40 @@
 <section id="faq" aria-labelledby="faq-title">
   <div class="wrap faq-grid">
     <div class="head" data-reveal>
-      <p class="label">Questions</p>
+      <p class="label mono">FAQ</p>
       <h2 id="faq-title">Asked <span class="serif">and</span> answered.</h2>
     </div>
     <div class="faq" data-reveal>
       <details><summary>Is Reclux free?</summary><p>Yes. There is no account, no trial and nothing to pay.</p></details>
       <details><summary>Where is my recording kept?</summary><p>On your own computer. While you record, it is written to the browser’s private storage on your drive. When you press Save file, you choose the folder or drive. It is never uploaded.</p></details>
-      <details><summary>Does it need the internet?</summary><p>No. Reclux made zero network requests in our offline test. Only downloading the setup file needs a connection.</p></details>
+      <details><summary>Does it need the internet?</summary><p>No. Reclux made zero network requests in our offline test. You only need a connection to download the .zip.</p></details>
       <details><summary>Does it keep recording when I switch apps or tabs?</summary><p>Yes. This was tested with the recorder hidden behind other tabs and apps.</p></details>
-      <details><summary>What happens if my browser or PC crashes?</summary><p>The video is saved in small pieces as you record. Next time you open Reclux, it offers to recover the recording. At most about a second is lost.</p></details>
-      <details><summary>Why does Windows warn me about the setup file?</summary><p>The file is not signed with a paid certificate, so Windows does not recognise it yet. Click More info, then Run anyway. You can check the file with the SHA-256 shown in the download box.</p></details>
-      <details><summary>Why do I need Developer mode?</summary><p>Browsers only add extensions from their own stores automatically. Reclux is not in a store, so you add it once with Load unpacked, which needs Developer mode.</p></details>
-      <details><summary>Can I use it in Firefox?</summary><p>Yes, for one session at a time. Add the <a href="#extension">Firefox .zip</a> from <kbd>about:debugging</kbd>. Firefox keeps only add-ons signed by Mozilla, so it removes Reclux when it closes.</p></details>
-      <details><summary>Can I skip the setup wizard?</summary><p>Yes. Download the <a href="#extension">.zip</a> and add it yourself. Chrome, Brave, Edge and Opera use the same .zip and the same steps.</p></details>
-      <details><summary>How do I update or uninstall?</summary><p>To update, run the new setup file and press reload on Reclux in the extensions page. To uninstall, use Windows Settings › Apps › Reclux, then remove Reclux from your browser.</p></details>
+      <details><summary>What happens if my browser or PC crashes?</summary><p>Reclux writes the video in small pieces as you record. Next time you open it, it offers to recover the recording.</p></details>
+      <details><summary>Why do I need Developer mode?</summary><p>Browsers add extensions automatically only from their own stores. Reclux is not in a store, so you add it once with Load unpacked, which needs Developer mode. Firefox uses its debugging page instead.</p></details>
+      <details><summary>How do I update or remove it?</summary><p>To update, extract the new .zip over the same folder, then press reload on Reclux in the extensions page. To remove it, click Remove on that page, then delete the folder. In Firefox, add the new .zip next time, or simply close Firefox to remove it.</p></details>
+      <details><summary>Does it work on Mac, Linux or a phone?</summary><p>Reclux is for desktop computers and is tested on Windows. Mac and Linux should work in the same browsers but are not tested yet. Phones and tablets do not allow this kind of screen recording.</p></details>
+      <details><summary>Can it edit videos?</summary><p>No. Reclux records and saves. It does not trim or edit.</p></details>
       <details><summary>Is the code public?</summary><p>Yes. You can read all of it on <a href="https://github.com/iamaakashoza/reclux">GitHub</a>.</p></details>
     </div>
-  </div>
-</section>
-
-<!-- FINAL CTA -->
-<section class="final" aria-labelledby="final-title">
-  <div class="wrap">
-    <h2 id="final-title" data-reveal>Press record. <span class="serif">Keep it.</span></h2>
-    <div class="cta" data-reveal data-i="1">
-      <a class="btn btn-red btn-lg" href="download/Reclux-Setup-0.1.0.exe" download>Download for Windows</a>
-      <a class="btn btn-line btn-lg" href="https://github.com/iamaakashoza/reclux">View the source</a>
-    </div>
-    <p class="cta-meta mono" data-reveal data-i="2">Free · 2.2 MB · Chrome, Brave, Edge, Opera</p>
   </div>
 </section>
 
 </main>
 
 <footer>
-  <div class="wrap">
-    <a class="brand" href="#top"><i aria-hidden="true"></i>Reclux</a>
+  <div class="wrap foot">
+    <div class="foot-brand">
+      <a class="brand" href="#top" aria-label="Back to top"><svg aria-hidden="true"><use href="#logo"/></svg></a>
+      <p>The screen recorder that keeps your video on your computer.</p>
+    </div>
     <nav aria-label="Footer">
-      <a href="#install">Install</a>
+      <a href="#features">Features</a>
+      <a href="#download">Download</a>
+      <a href="#faq">FAQ</a>
       <a href="https://iamaakashoza.github.io/reclux-privacy/">Privacy policy</a>
       <a href="https://github.com/iamaakashoza/reclux">GitHub</a>
     </nav>
-    <p>Version 0.1.0 · Built by <a href="https://github.com/iamaakashoza">@iamaakashoza</a></p>
+    <p class="foot-legal">Version 0.2.1 · Built by <a href="https://github.com/iamaakashoza">iamaakashoza</a>. This website has no analytics or cookies and loads no third-party fonts. Our host, Netlify, adds its small badge.</p>
   </div>
 </footer>
 </body>
