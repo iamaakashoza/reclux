@@ -189,10 +189,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     $('#hero-meta').textContent = 'Reclux runs on desktop computers. Open this page on a computer to add it.';
     return;
   }
-  const brave = await navigator.brave?.isBrave?.().catch(() => false);
-  const firefox = /Firefox\//.test(ua);
-  const id = /OPR\//.test(ua) ? 'opera' : /Edg\//.test(ua) ? 'edge' : brave ? 'brave' : 'chrome';
-  $('#hero-cta-text').textContent = `Get Reclux for ${firefox ? 'Firefox' : $(`[data-browser=${id}]`).textContent}`;
-  $('#hero-cta').href = firefox ? '#download-firefox' : '#download-chromium';
-  if (!firefox) pick(id);
+  // The button text stays "Get Reclux for Your Browser" and the Chrome tab stays the default. Firefox visitors land on their card.
+  $('#hero-cta').href = /Firefox\//.test(ua) ? '#download-firefox' : '#download-chromium';
 });
