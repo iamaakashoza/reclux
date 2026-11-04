@@ -8,8 +8,8 @@ Needs Node.js 20 or newer and npm.
 
 ```
 npm ci
-npm run build           # Chrome, Brave, Edge, Opera  -> .output/chrome-mv3
-npm run build:firefox   # Firefox (Manifest V3)       -> .output/firefox-mv3
+npm run build           # Chrome, Brave, Edge, Opera  -> .output/reclux-extension-all-in-one
+npm run build:firefox   # Firefox (Manifest V3)       -> .output/reclux-firefox-extension
 npm run zip             # store zip for Chrome
 npm run zip:firefox     # store zip for Firefox, plus the sources zip
 npm run check           # type check

@@ -8,15 +8,15 @@ Reclux is an offline-first screen recorder browser extension (Manifest V3). No a
 
 ```
 npm ci
-npm run dev             # Chromium dev build. Load .output/chrome-mv3-dev by hand (web-ext, which opened a browser, was removed)
+npm run dev             # Chromium dev build. Load .output/reclux-extension-all-in-one-dev by hand (web-ext, which opened a browser, was removed)
 npm run dev:firefox
-npm run build           # -> .output/chrome-mv3 (Chrome, Brave, Edge, Opera)
-npm run build:firefox   # -> .output/firefox-mv3
+npm run build           # -> .output/reclux-extension-all-in-one (Chrome, Brave, Edge, Opera)
+npm run build:firefox   # -> .output/reclux-firefox-extension
 npm run zip / zip:firefox
 npm run check           # svelte-check type check — the only automated verification
 ```
 
-There is no test suite. Verify with `npm run check` plus a manual load of `.output/chrome-mv3` via "Load unpacked". Brave is the main test browser.
+There is no test suite. Verify with `npm run check` plus a manual load of `.output/reclux-extension-all-in-one` via "Load unpacked". Brave is the main test browser.
 
 When testing a recording automatically, do not use `--use-fake-device-for-media-stream`: it also replaces the screen with a fake 20 fps video. Report §31 lists what is and is not covered.
 
@@ -57,4 +57,5 @@ UI: shared components in `src/lib/*.svelte` (`Logo.svelte` is the logo), design 
 
 - Comments are short plain English explaining *why* (the owner is a designer, not a developer).
 - Deliberate shortcuts are marked `// ponytail: <limit>, <upgrade path>`.
+- The version stays 1.0.0 (`package.json`, website, GitHub Release) until the owner says to change it. Download names: `reclux-extension-v1.zip`, `reclux-firefox-extension-v1.zip`.
 - Commits use the GitHub no-reply address; never put a real email in commits or published files.

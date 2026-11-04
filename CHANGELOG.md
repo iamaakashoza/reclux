@@ -7,6 +7,15 @@ Download Reclux and see the install steps at [reclux.netlify.app](https://reclux
 - **Chrome, Edge, Brave, Opera:** extract the new .zip over the same folder, then press reload on Reclux in your browser's extensions page.
 - **Firefox:** load the new .zip the next time you add Reclux.
 
+## 1.0.0 (4 November 2026)
+
+First full release. Recording works the same as 0.2.2. What changed is the name and the files.
+
+### Changed
+- **Version 1.0.0.** Reclux now shows 1.0.0 in your browser, on the website and here.
+- **New download names.** Chrome, Edge, Brave and Opera: `reclux-extension-v1.zip`. Firefox: `reclux-firefox-extension-v1.zip`.
+- **New build folder names** for anyone building Reclux from the code: `reclux-extension-all-in-one` and `reclux-firefox-extension`.
+
 ## 0.2.2 (3 November 2026)
 
 ### Fixed

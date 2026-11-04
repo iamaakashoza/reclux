@@ -144,7 +144,7 @@ Reclux-extension/
 |---------|--------------|
 | `npm run dev` | Opens Chrome with Reclux, auto-reloads on edits |
 | `npm run dev:firefox` | Same, in Firefox |
-| `npm run build` | Makes the Chrome version in `.output/chrome-mv3` |
+| `npm run build` | Makes the Chrome version in `.output/reclux-extension-all-in-one` |
 | `npx wxt build -b firefox --mv3` | Makes the Firefox version |
 | `npm run check` | Looks for code mistakes |
 | `npm run zip` | Makes the file you upload to the store |
@@ -155,12 +155,12 @@ Reclux-extension/
   1. Open `chrome://extensions` (Opera: `opera://extensions`)
   2. Turn on **Developer mode**
   3. Click **Load unpacked**
-  4. Pick `.output/chrome-mv3`
+  4. Pick `.output/reclux-extension-all-in-one`
 - **Firefox**
   1. Open `about:debugging`
   2. Click **This Firefox**
   3. Click **Load Temporary Add-on**
-  4. Pick `manifest.json` inside `.output/firefox-mv3`
+  4. Pick `manifest.json` inside `.output/reclux-firefox-extension`
 
 ### Small notes
 
@@ -1171,7 +1171,7 @@ Brave is Chromium-based, so our Chrome build should load in it. These difference
 
 1. Run `npm run build` in the project folder
 2. Brave → `brave://extensions` → turn on **Developer mode**
-3. **Load unpacked** → pick `.output/chrome-mv3`
+3. **Load unpacked** → pick `.output/reclux-extension-all-in-one`
 4. Click the Reclux icon → **Open full recorder**
 5. The grey **"Design preview"** bar at the top jumps between screens
 
@@ -2452,6 +2452,8 @@ Also recovered with picture and sound matching: Chrome and Opera (real crash), E
 **Most that can still be lost: about 2 seconds, one key-frame interval.** Key frames every second would halve that, but measured on hardware H.264 (text next to moving video) they grew files 23 to 37% (12.8 to 15.7 Mbps at 1080p60, 7.8 to 10.7 at 1080p30) with text about the same, and software H.264 got softer (37.7 to 36.8 dB). Every recording would pay for a rare crash, so this stays at 2 seconds.
 
 **Released as 0.2.2 on 3 November 2026**, with the extension .zip files on the website.
+
+**Released as 1.0.0 on 4 November 2026.** Same recording code as 0.2.2. New names: `reclux-extension-v1.zip` and `reclux-firefox-extension-v1.zip` (website and GitHub Release), build folders `reclux-extension-all-in-one` and `reclux-firefox-extension`. Checked after the rename: type check 0 errors, extension screens 22/22, website 63/63.
 
 ### 33.6 Not tested
 - The real "Save as" window after this cleanup, and reload during `npm run dev` without `web-ext`.

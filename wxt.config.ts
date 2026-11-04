@@ -1,11 +1,22 @@
 import { defineConfig } from 'wxt';
 
 // See https://wxt.dev/api/reference/wxt/interfaces/inlineconfig.html
+// ponytail: names depend on the -b flag read from the command line (defineConfig cannot take the browser here), upgrade path: WXT option per browser.
+declare const process: { argv: string[] }; // Node's, without adding @types/node
+const firefox = process.argv.some((a: string, i: number, all: string[]) => a === 'firefox' && (all[i - 1] === '-b' || all[i - 1] === '--browser'));
+
 export default defineConfig({
   srcDir: 'src',
   modules: ['@wxt-dev/module-svelte'],
-  // The sources zip (needed by Firefox's add-on review) only needs the code, not our notes and store files.
-  zip: { excludeSources: ['report.md', 'docs/**', 'spike/**', 'brand/**'] },
+  // Folder and .zip names people see: the build folder, and the files on the website.
+  outDirTemplate: firefox ? 'reclux-firefox-extension{{modeSuffix}}' : 'reclux-extension-all-in-one{{modeSuffix}}',
+  zip: {
+    // "v1" is the major version (1.0.0). Change it with the version number, only when the owner says so.
+    artifactTemplate: firefox ? 'reclux-firefox-extension-v1{{modeSuffix}}.zip' : 'reclux-extension-v1{{modeSuffix}}.zip',
+    sourcesTemplate: 'reclux-sources-v1{{modeSuffix}}.zip',
+    // The sources zip (needed by Firefox's add-on review) only needs the code, not our notes and store files.
+    excludeSources: ['report.md', 'docs/**', 'spike/**', 'brand/**'],
+  },
   manifest: ({ browser }) => ({
     name: 'Reclux',
     // Oldest Chrome/Brave that has everything Reclux needs (report §6). Brave 1.58 is Chromium 116.
