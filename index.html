@@ -3,11 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Reclux: the screen recorder that keeps your video on your computer</title>
-<meta name="description" content="Reclux is a free browser extension that records your screen, a window or a tab with sound, and keeps the video on your own computer. No account, no upload, works offline. For Chrome, Edge, Brave, Opera and Firefox.">
-<meta name="theme-color" content="#0a0a0c">
-<meta property="og:title" content="Reclux: record your screen, keep it yours">
-<meta property="og:description" content="Free screen recorder extension for Chrome, Edge, Brave, Opera and Firefox. No account, no upload, works offline.">
+<title>Reclux: record your screen, edit it, keep it on your computer</title>
+<meta name="description" content="Reclux is a free browser extension that records your screen with sound, lets you trim, split and zoom, and keeps the video on your own computer. No account, no upload, works offline. For Chrome, Edge, Brave, Opera and Firefox.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f3f2ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b0e13" media="(prefers-color-scheme: dark)">
+<meta property="og:title" content="Reclux 2.0: record your screen, keep it yours">
+<meta property="og:description" content="Free screen recorder extension with a built-in editor, webcam circle and cursor zoom. No account, no upload, works offline.">
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://reclux.netlify.app/og.png">
 <meta property="og:url" content="https://reclux.netlify.app/">
@@ -15,6 +17,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="favicon-32.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" href="fonts/google-sans-flex.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <script src="main.js"></script>
@@ -22,30 +25,37 @@
 <body>
 <a class="skip" href="#main">Skip to content</a>
 
-<!-- The logo, drawn once and reused. Master files are in brand/ on the main branch. -->
+<!-- The logo (Frame R), drawn once and reused. Master files are in brand/ on the main branch. -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="logo" viewBox="20 16 438.68 96">
-    <path fill="currentColor" fill-rule="evenodd" d="M20 16H64A36 36 0 0 1 81.47 83.47L110 112H78L54 88H44V112H20ZM64 38a14 14 0 1 0 0 28a14 14 0 1 0 0-28Z"/>
-    <circle cx="64" cy="52" r="14" fill="#D7263D"/>
-    <path fill="currentColor" transform="translate(-3 0)" d="M158.22 114.35Q141.53 114.35 131.71 104.16Q121.89 93.97 121.89 77.81Q121.89 61.72 131.98 51.33Q142.07 40.94 158.69 40.94Q173.31 40.94 183.13 50.69Q192.95 60.45 192.95 76.87Q192.95 78.75 192.82 80.22Q192.68 81.7 192.28 84.11Q192.28 84.11 192.28 84.11Q192.28 84.11 192.28 84.11L131.61 84.18V68.83H172.97Q172.1 63.53 168.41 60.25Q164.73 56.96 158.63 56.96Q151.39 56.96 146.86 62.19Q142.34 67.42 142.34 76.8Q142.34 87.26 147.43 93.2Q152.53 99.13 161.24 99.13Q167.01 99.13 171.6 96.65Q176.19 94.17 179.94 89.47Q179.94 89.47 179.94 89.47Q179.94 89.47 179.94 89.47L191.01 99.73Q191.01 99.73 191.01 99.73Q191.01 99.73 191.01 99.73Q184.84 106.84 177.23 110.59Q169.62 114.35 158.22 114.35Z M236.26 114.35Q220.21 114.35 209.85 103.98Q199.49 93.62 199.49 77.54Q199.49 61.28 209.82 51.01Q220.14 40.74 236.36 40.74Q248.36 40.74 256.74 46.15Q265.12 51.56 269.25 61.92Q269.25 61.92 269.25 61.92Q269.25 61.92 269.25 61.92L251.92 68.53Q251.92 68.53 251.92 68.53Q251.92 68.53 251.92 68.53Q249.57 63.09 245.9 60.66Q242.23 58.23 236.93 58.23Q229.76 58.23 224.78 63.55Q219.81 68.86 219.81 77.42Q219.81 85.99 224.77 91.4Q229.74 96.82 236.87 96.82Q242.16 96.82 246.07 94.25Q249.97 91.69 252.25 86.46Q252.25 86.46 252.25 86.46Q252.25 86.46 252.25 86.46L269.78 91.82Q269.78 91.82 269.78 91.82Q269.78 91.82 269.78 91.82Q265.63 103.22 256.96 108.78Q248.3 114.35 236.26 114.35Z M279.31 112Q279.31 112 279.31 112Q279.31 112 279.31 112V16Q279.31 16 279.31 16Q279.31 16 279.31 16H300.26Q300.26 16 300.26 16Q300.26 16 300.26 16V112Q300.26 112 300.26 112Q300.26 112 300.26 112Z M340.22 114.35Q328.15 114.35 321.35 107.5Q314.55 100.65 314.55 88.1V43.08Q314.55 43.08 314.55 43.08Q314.55 43.08 314.55 43.08H335.49Q335.49 43.08 335.49 43.08Q335.49 43.08 335.49 43.08V84.85Q335.49 91.55 338.63 95.16Q341.76 98.76 347.47 98.76Q353.46 98.76 357.52 94.17Q361.57 89.58 361.57 82.87V43.08Q361.57 43.08 361.57 43.08Q361.57 43.08 361.57 43.08H382.52Q382.52 43.08 382.52 43.08Q382.52 43.08 382.52 43.08V112Q382.52 112 382.52 112Q382.52 112 382.52 112H362.81Q362.81 112 362.81 112Q362.81 112 362.81 112V93.4L372.33 102.92H362.34Q359.49 107.98 353.68 111.16Q347.86 114.35 340.22 114.35Z M439.01 112Q439.01 112 439.01 112Q439.01 112 439.01 112L419.4 81.16H417.22L390.31 43.08Q390.31 43.08 390.31 43.08Q390.31 43.08 390.31 43.08H413.37Q413.37 43.08 413.37 43.08Q413.37 43.08 413.37 43.08L433.01 73.52H435.09L462.57 112Q462.57 112 462.57 112Q462.57 112 462.57 112ZM389.5 112Q389.5 112 389.5 112Q389.5 112 389.5 112L417.69 72.35H421.38L440.38 43.08Q440.38 43.08 440.38 43.08Q440.38 43.08 440.38 43.08H462.27Q462.27 43.08 462.27 43.08Q462.27 43.08 462.27 43.08L434.48 81.5H431.03L410.95 112Q410.95 112 410.95 112Q410.95 112 410.95 112Z"/>
+  <symbol id="logo" viewBox="20 14 434 102">
+    <g transform="translate(20 16) scale(5.3933) translate(-4.1 -3.1)">
+      <path d="M6 19V7A2 2 0 0 1 8 5H8.75" fill="none" stroke="currentColor" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M11.5 13L17.75 19.25" fill="none" stroke="currentColor" stroke-width="3.65" stroke-linecap="round"/>
+      <circle cx="15" cy="7" r="3.75" style="fill:var(--lux)"/>
+    </g>
+    <path fill="currentColor" transform="translate(-8 0)" d="M158.22 114.35Q141.53 114.35 131.71 104.16Q121.89 93.97 121.89 77.81Q121.89 61.72 131.98 51.33Q142.07 40.94 158.69 40.94Q173.31 40.94 183.13 50.69Q192.95 60.45 192.95 76.87Q192.95 78.75 192.82 80.22Q192.68 81.7 192.28 84.11Q192.28 84.11 192.28 84.11Q192.28 84.11 192.28 84.11L131.61 84.18V68.83H172.97Q172.1 63.53 168.41 60.25Q164.73 56.96 158.63 56.96Q151.39 56.96 146.86 62.19Q142.34 67.42 142.34 76.8Q142.34 87.26 147.43 93.2Q152.53 99.13 161.24 99.13Q167.01 99.13 171.6 96.65Q176.19 94.17 179.94 89.47Q179.94 89.47 179.94 89.47Q179.94 89.47 179.94 89.47L191.01 99.73Q191.01 99.73 191.01 99.73Q191.01 99.73 191.01 99.73Q184.84 106.84 177.23 110.59Q169.62 114.35 158.22 114.35Z M236.26 114.35Q220.21 114.35 209.85 103.98Q199.49 93.62 199.49 77.54Q199.49 61.28 209.82 51.01Q220.14 40.74 236.36 40.74Q248.36 40.74 256.74 46.15Q265.12 51.56 269.25 61.92Q269.25 61.92 269.25 61.92Q269.25 61.92 269.25 61.92L251.92 68.53Q251.92 68.53 251.92 68.53Q251.92 68.53 251.92 68.53Q249.57 63.09 245.9 60.66Q242.23 58.23 236.93 58.23Q229.76 58.23 224.78 63.55Q219.81 68.86 219.81 77.42Q219.81 85.99 224.77 91.4Q229.74 96.82 236.87 96.82Q242.16 96.82 246.07 94.25Q249.97 91.69 252.25 86.46Q252.25 86.46 252.25 86.46Q252.25 86.46 252.25 86.46L269.78 91.82Q269.78 91.82 269.78 91.82Q269.78 91.82 269.78 91.82Q265.63 103.22 256.96 108.78Q248.3 114.35 236.26 114.35Z M279.31 112Q279.31 112 279.31 112Q279.31 112 279.31 112V16Q279.31 16 279.31 16Q279.31 16 279.31 16H300.26Q300.26 16 300.26 16Q300.26 16 300.26 16V112Q300.26 112 300.26 112Q300.26 112 300.26 112Z M340.22 114.35Q328.15 114.35 321.35 107.5Q314.55 100.65 314.55 88.1V43.08Q314.55 43.08 314.55 43.08Q314.55 43.08 314.55 43.08H335.49Q335.49 43.08 335.49 43.08Q335.49 43.08 335.49 43.08V84.85Q335.49 91.55 338.63 95.16Q341.76 98.76 347.47 98.76Q353.46 98.76 357.52 94.17Q361.57 89.58 361.57 82.87V43.08Q361.57 43.08 361.57 43.08Q361.57 43.08 361.57 43.08H382.52Q382.52 43.08 382.52 43.08Q382.52 43.08 382.52 43.08V112Q382.52 112 382.52 112Q382.52 112 382.52 112H362.81Q362.81 112 362.81 112Q362.81 112 362.81 112V93.4L372.33 102.92H362.34Q359.49 107.98 353.68 111.16Q347.86 114.35 340.22 114.35Z M439.01 112Q439.01 112 439.01 112Q439.01 112 439.01 112L419.4 81.16H417.22L390.31 43.08Q390.31 43.08 390.31 43.08Q390.31 43.08 390.31 43.08H413.37Q413.37 43.08 413.37 43.08Q413.37 43.08 413.37 43.08L433.01 73.52H435.09L462.57 112Q462.57 112 462.57 112Q462.57 112 462.57 112ZM389.5 112Q389.5 112 389.5 112Q389.5 112 389.5 112L417.69 72.35H421.38L440.38 43.08Q440.38 43.08 440.38 43.08Q440.38 43.08 440.38 43.08H462.27Q462.27 43.08 462.27 43.08Q462.27 43.08 462.27 43.08L434.48 81.5H431.03L410.95 112Q410.95 112 410.95 112Q410.95 112 410.95 112Z"/>
   </symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
 </svg>
 
 <header class="top">
-  <div class="top-in">
+  <div class="top-in glass">
     <a class="brand" href="#top" aria-label="Reclux home"><svg aria-hidden="true"><use href="#logo"/></svg></a>
     <nav class="nav" aria-label="Main">
       <a href="#features">Features</a>
+      <a href="#how">How it works</a>
       <a href="#download">Download</a>
       <a href="#faq">FAQ</a>
     </nav>
-    <a class="btn btn-red btn-sm" href="#download">Download</a>
+    <a class="btn btn-primary btn-sm" href="#download">Download</a>
     <details class="menu">
       <summary aria-label="Open menu">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16M4 16h16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </summary>
-      <nav class="menu-panel" aria-label="Main, small screens">
+      <nav class="menu-panel glass" aria-label="Main, small screens">
         <a href="#features">Features</a>
+        <a href="#how">How it works</a>
         <a href="#download">Download</a>
         <a href="#faq">FAQ</a>
       </nav>
@@ -57,59 +67,35 @@
 
 <!-- HERO -->
 <section class="hero" id="top" aria-labelledby="hero-title">
-  <canvas id="light" aria-hidden="true"></canvas>
-  <div class="hero-copy wrap">
-    <p class="pill mono rise"><i class="rec" aria-hidden="true"></i>Version 1.0.0 · Free · Works offline</p>
-    <h1 id="hero-title">
-      <span class="w" style="--i:0">Record</span> <span class="w" style="--i:1">your</span> <span class="w" style="--i:2">screen.</span><br>
-      <span class="w" style="--i:3">Keep</span> <span class="w" style="--i:4">it</span> <span class="w serif" style="--i:5">yours.</span>
-    </h1>
-    <p class="lede rise" style="--i:6">Reclux is a free browser extension that records your screen, a window or a tab with sound. The video stays on your computer. No account, no upload, no internet needed.</p>
-    <div class="cta rise" style="--i:7">
-      <a class="btn btn-white btn-lg" id="hero-cta" href="#download">
-        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span id="hero-cta-text">Get Reclux for Your Browser</span>
+  <div class="wrap hero-copy">
+    <p class="pill rise"><span class="pill-new">New</span> Version 2.0.0 · Free · Works offline</p>
+    <h1 id="hero-title" class="rise" style="--i:1">Record your screen.<br><span class="soft">Edit it. Keep it yours.</span></h1>
+    <p class="lede rise" style="--i:2">A free browser extension that records your screen with sound, lets you trim, split and zoom, and keeps every video on your own computer. No account, no upload, no internet needed.</p>
+    <div class="cta rise" style="--i:3">
+      <a class="btn btn-primary btn-lg" id="hero-cta" href="#download">
+        <svg aria-hidden="true"><use href="#i-down"/></svg>
+        Get Reclux for your browser
       </a>
-      <a class="btn btn-line btn-lg" href="#features">See what it does</a>
+      <a class="btn btn-glass btn-lg" href="#features">See what’s new</a>
     </div>
-    <p class="cta-meta mono rise" style="--i:8" id="hero-meta">For Chrome, Edge, Brave, Opera and Firefox on desktop</p>
+    <p class="cta-meta rise" style="--i:4" id="hero-meta">For Chrome, Edge, Brave, Opera and Firefox on desktop</p>
   </div>
 
-  <figure class="stage">
-    <div class="panel" role="img" aria-label="The Reclux recorder during a recording, with a running timer, sound levels, the chosen quality, and Pause, Stop and Mute buttons.">
-      <div class="panel-top" aria-hidden="true">
-        <svg class="panel-logo"><use href="#logo"/></svg>
-        <span class="mono panel-safe">
-          <svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Works offline
-        </span>
-      </div>
-      <div class="screen" aria-hidden="true">
-        <i class="corner c1"></i><i class="corner c2"></i><i class="corner c3"></i><i class="corner c4"></i>
-        <div class="doc">
-          <div class="doc-bar"><u></u><u></u><u></u><s></s></div>
-          <div class="doc-body">
-            <div class="doc-text"><b></b><i></i><i></i><i></i><i></i><em></em></div>
-            <div class="doc-video"><span></span><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="#fff"/></svg></div>
-          </div>
-        </div>
-        <svg class="cursor" viewBox="0 0 24 24"><path d="M5 3l14 9-6.5 1.5L10 20z" fill="#fff" stroke="#0a0a0c" stroke-width="1.4" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="bar" aria-hidden="true">
-        <div class="bar-state">
-          <span class="mono bar-rec"><i class="rec"></i>REC</span>
-          <span class="mono bar-time" id="hero-timer">00:12:48</span>
-          <span class="waves" data-bars="14"></span>
-          <span class="chip mono">1080p · 60 fps</span>
-          <span class="chip mono">MP4</span>
-        </div>
-        <div class="bar-btns">
-          <span>Pause</span>
-          <span class="stop">Stop</span>
-          <span>Mute</span>
-        </div>
-      </div>
+  <figure class="stage rise" style="--i:5">
+    <div class="window">
+      <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i><span>Reclux · Edit</span></div>
+      <picture>
+        <source srcset="img/editor-dark.webp" media="(prefers-color-scheme: dark)">
+        <img src="img/editor-light.webp" width="1600" height="1000" alt="The Reclux editor: a recorded slide deck in the middle, with Split, Trim, Delete and Zoom tools, and a timeline with two parts and a zoom block.">
+      </picture>
     </div>
+    <div class="float-bar">
+      <picture>
+        <source srcset="img/bar-dark.webp" media="(prefers-color-scheme: dark)">
+        <img src="img/bar-light.webp" width="865" height="320" alt="The floating recording controls: Recording, pause, stop, the timer, the file size and the quality.">
+      </picture>
+    </div>
+    <div class="float-cam" aria-hidden="true"></div>
   </figure>
 </section>
 
@@ -117,96 +103,144 @@
 <section id="features" aria-labelledby="features-title">
   <div class="wrap">
     <div class="head" data-reveal>
-      <p class="label mono">Features</p>
-      <h2 id="features-title">Press record.<br><span class="serif">Everything else is handled.</span></h2>
+      <p class="label">What’s new in 2.0</p>
+      <h2 id="features-title">Everything from record to share, <span class="soft">in one place.</span></h2>
     </div>
 
     <ul class="bento">
       <li class="card wide" data-reveal>
+        <div class="vis vis-edit" aria-hidden="true">
+          <div class="tl">
+            <div class="tl-ruler"><b>0:00</b><b>0:05</b><b>0:10</b><b>0:15</b></div>
+            <div class="tl-parts"><span class="part p1">Part 1</span><span class="part p2">Cut</span><span class="part p3">Part 2</span></div>
+            <div class="tl-zoom"><span>Zoom 1.6×</span></div>
+            <i class="tl-head"></i>
+          </div>
+          <div class="tl-keys"><kbd>Ctrl+B</kbd> Split <kbd>I</kbd> <kbd>O</kbd> Trim <kbd>Del</kbd> Delete <kbd>Ctrl+Z</kbd> Undo</div>
+        </div>
+        <h3>Edit before you share</h3>
+        <p>Split, trim and delete parts, add zooms, and undo anything. The preview plays your edit exactly as it will be saved.</p>
+      </li>
+      <li class="card" data-reveal style="--i:1">
+        <div class="vis vis-zoom" aria-hidden="true">
+          <div class="zscreen"><div class="zcontent"><i class="zbar b1"></i><i class="zbar b2"></i><i class="zbar b3"></i><i class="zbar b4"></i><i class="zcursor"></i></div></div>
+        </div>
+        <h3>Cursor zoom</h3>
+        <p>Work in one area of a web page and the video zooms in there, then glides back out when you stop. Change any zoom later.</p>
+      </li>
+      <li class="card" data-reveal style="--i:2">
+        <div class="vis vis-cam" aria-hidden="true">
+          <div class="cscreen"><i class="cline"></i><i class="cline short"></i><i class="cline"></i><span class="ccircle"></span></div>
+        </div>
+        <h3>Webcam circle</h3>
+        <p>Your face in a round frame on the screen, recorded with it. Drag it anywhere while you record, or hide it.</p>
+      </li>
+      <li class="card" data-reveal>
+        <div class="vis vis-bar">
+          <picture>
+            <source srcset="img/bar-dark.webp" media="(prefers-color-scheme: dark)">
+            <img src="img/bar-light.webp" width="865" height="320" loading="lazy" alt="">
+          </picture>
+        </div>
+        <h3>Controls that float</h3>
+        <p>A small window stays on top of every app, so you can pause and stop from anywhere. In Firefox, a bar on the page does the same.</p>
+      </li>
+      <li class="card" data-reveal style="--i:1">
+        <div class="vis vis-fps" aria-hidden="true">
+          <div class="rates"><span>720p</span><span>1080p</span></div>
+          <div class="rates"><span>50</span><span>60</span><em>fps</em></div>
+        </div>
+        <h3>Smooth, steady video</h3>
+        <p>720p or 1080p at 50 or 60 frames a second. The file keeps exactly the rate you pick, on everyday computers too.</p>
+      </li>
+      <li class="card wide" data-reveal style="--i:2">
+        <div class="vis vis-duck" aria-hidden="true">
+          <div class="track"><span class="track-name">Voice</span><span class="waves voice" data-bars="36"></span></div>
+          <div class="track"><span class="track-name">Music</span><span class="waves music" data-bars="36"></span></div>
+          <p class="duck-chip"><span class="a">Music in file: 100%</span><span class="b">You speak · Music in file: 20%</span></p>
+        </div>
+        <h3>Your voice stays clear</h3>
+        <p>Record your microphone and your computer’s sound together. While you speak, the computer’s sound drops to 20% in the video, then glides back to 100%. Your voice stays at full volume.</p>
+      </li>
+      <li class="card tab-wide" data-reveal>
+        <div class="vis vis-crash" aria-hidden="true">
+          <div class="blocks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <p class="crash-chip"><span class="a">Writing to disk</span><span class="b">Browser closed</span><span class="c">Recording recovered</span></p>
+        </div>
+        <h3>Safe if something crashes</h3>
+        <p>Video goes to disk as you record. After a crash, Reclux offers to recover it. Saving an edit never touches the original until the new video is done.</p>
+      </li>
+      <li class="card full" data-reveal style="--i:1">
         <div class="vis vis-local" aria-hidden="true">
           <svg viewBox="0 -14 520 184">
-            <rect class="ln" x="26" y="44" width="120" height="82" rx="10"/>
-            <circle class="red-fill pulse" cx="86" cy="85" r="13"/>
+            <rect class="ln" x="26" y="44" width="120" height="82" rx="14"/>
+            <circle class="lux-fill pulse" cx="86" cy="85" r="13"/>
             <path class="flow" d="M158 85H362"/>
-            <rect class="ln" x="374" y="56" width="120" height="58" rx="10"/>
+            <rect class="ln" x="374" y="56" width="120" height="58" rx="12"/>
             <path class="ln" d="M374 94H494"/>
-            <circle class="red-fill" cx="478" cy="104" r="3"/>
+            <circle class="lux-fill" cx="478" cy="104" r="3"/>
             <text x="86" y="150" text-anchor="middle">Your screen</text>
             <text x="434" y="80" text-anchor="middle">D:\Videos</text>
             <text x="434" y="150" text-anchor="middle">Your disk</text>
             <path class="ln dim" stroke-dasharray="3 6" d="M260 72V34"/>
             <path class="ln dim" d="M240 26a10 10 0 0 1 2-19 15 15 0 0 1 28-2 11 11 0 0 1 8 21z"/>
-            <path class="red-ln" d="M242 34 280 2"/>
+            <path class="no-ln" d="M242 34 280 2"/>
           </svg>
         </div>
         <h3>It stays on your computer</h3>
-        <p>No account and no upload. Reclux makes no network requests, so it keeps working with the internet off. You pick the folder or drive when you save.</p>
-      </li>
-
-      <li class="card" data-reveal style="--i:1">
-        <div class="vis vis-fps" aria-hidden="true">
-          <div class="rates mono"><span>30</span><span>50</span><span>60</span><em>fps</em></div>
-          <div class="strip"><i></i></div>
-        </div>
-        <h3>A frame rate that holds</h3>
-        <p>720p or 1080p at 30, 50 or 60 fps. In Chrome, Edge, Brave and Opera the file keeps exactly the rate you pick.</p>
-      </li>
-
-      <li class="card" data-reveal>
-        <div class="vis vis-source" aria-hidden="true">
-          <div class="frame f-screen"><span class="mono">Screen</span>
-            <div class="frame f-window"><span class="mono">Window</span>
-              <div class="frame f-tab"><span class="mono">Tab</span></div>
-            </div>
-          </div>
-        </div>
-        <h3>Screen, window or tab</h3>
-        <p>Record all of it or just one part. Your choice is remembered for next time.</p>
-      </li>
-
-      <li class="card wide" data-reveal style="--i:1">
-        <div class="vis vis-duck" aria-hidden="true">
-          <div class="track">
-            <span class="mono track-name">Voice</span>
-            <span class="waves voice" data-bars="36"></span>
-          </div>
-          <div class="track">
-            <span class="mono track-name">Music</span>
-            <span class="waves music" data-bars="36"></span>
-          </div>
-          <p class="duck-chip mono"><span class="a">Music in file: 100%</span><span class="b">Voice heard · Music in file: 48%</span></p>
-        </div>
-        <h3>Your voice stays clear</h3>
-        <p>Record your mic and the computer’s sound together. While you speak, the computer’s sound drops to 48% in the file, then comes back when you stop.</p>
-      </li>
-
-      <li class="card" data-reveal>
-        <div class="vis vis-crash" aria-hidden="true">
-          <div class="blocks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-          <p class="crash-chip mono"><span class="a">Writing to disk</span><span class="b">Browser closed</span><span class="c">Recording recovered</span></p>
-        </div>
-        <h3>Safe if something crashes</h3>
-        <p>Video goes to disk as you record, so memory stays low. After a crash, Reclux offers to recover what it wrote.</p>
-      </li>
-
-      <li class="card" data-reveal style="--i:1">
-        <div class="vis vis-sharp" aria-hidden="true">
-          <div class="sharp-text"><span class="soft">Small text, still readable.</span><span class="crisp">Small text, still readable.</span></div>
-        </div>
-        <h3>Text you can read</h3>
-        <p>Quality settings are tuned so small text stays sharp, even beside moving video.</p>
-      </li>
-
-      <li class="card" data-reveal style="--i:2">
-        <div class="vis vis-warn" aria-hidden="true">
-          <div class="meter"><i></i></div>
-          <p class="mono warn-row"><span>Disk space</span><b>OK</b></p>
-          <p class="mono warn-row"><span>Frames lost</span><b>0</b></p>
-        </div>
-        <h3>Warns you early</h3>
-        <p>Reclux tells you when frames are being lost or the disk is nearly full, before it spoils a recording.</p>
+        <p>No account and no upload. Reclux works with the internet off. You choose the folder or drive when you export: Downloads, D:, E: or anywhere else.</p>
       </li>
     </ul>
+  </div>
+</section>
+
+<!-- HOW IT WORKS: a short tour with real screens -->
+<section id="how" aria-labelledby="how-title">
+  <div class="wrap">
+    <div class="head" data-reveal>
+      <p class="label">How it works</p>
+      <h2 id="how-title">Four steps. <span class="soft">No learning curve.</span></h2>
+    </div>
+
+    <div class="tour" data-reveal>
+      <div class="tour-tabs" role="tablist" aria-label="Steps">
+        <button type="button" role="tab" id="t1" aria-controls="s1" aria-selected="true"><b>1</b><span><strong>Choose</strong>Quality, sound, webcam</span></button>
+        <button type="button" role="tab" id="t2" aria-controls="s2" aria-selected="false" tabindex="-1"><b>2</b><span><strong>Record</strong>Tab, window or screen</span></button>
+        <button type="button" role="tab" id="t3" aria-controls="s3" aria-selected="false" tabindex="-1"><b>3</b><span><strong>Edit</strong>Trim, split, zoom</span></button>
+        <button type="button" role="tab" id="t4" aria-controls="s4" aria-selected="false" tabindex="-1"><b>4</b><span><strong>Export</strong>Any folder or drive</span></button>
+      </div>
+
+      <div class="tour-stage">
+        <div class="tour-panel narrow" role="tabpanel" id="s1" aria-labelledby="t1">
+          <picture>
+            <source srcset="img/popup-dark.webp" media="(prefers-color-scheme: dark)">
+            <img src="img/popup-light.webp" width="720" height="940" loading="lazy" alt="The Reclux popup: Quality 720p or 1080p, 50 or 60 fps, switches for Microphone, System audio, Webcam and Cursor zoom, and a Start recording button.">
+          </picture>
+          <p>Click Reclux in your toolbar. Pick the quality and what to include, then press <strong>Start recording</strong>.</p>
+        </div>
+        <div class="tour-panel narrow bar" role="tabpanel" id="s2" aria-labelledby="t2" hidden>
+          <picture>
+            <source srcset="img/bar-dark.webp" media="(prefers-color-scheme: dark)">
+            <img src="img/bar-light.webp" width="865" height="320" loading="lazy" alt="The recording controls: a red Recording label, pause and stop buttons, and the timer.">
+          </picture>
+          <p>Your browser asks what to share: a tab, a window or your whole screen. After 3, 2, 1 it records. Pause, resume or stop from the floating controls.</p>
+        </div>
+        <div class="tour-panel" role="tabpanel" id="s3" aria-labelledby="t3" hidden>
+          <picture>
+            <source srcset="img/editor-zoomed-dark.webp" media="(prefers-color-scheme: dark)">
+            <img src="img/editor-zoomed-light.webp" width="1600" height="1000" loading="lazy" alt="The editor playing a zoom: the chart fills the preview, and the timeline shows the zoom block under the first part.">
+          </picture>
+          <p>Stop takes you straight to the editor. Cut what you do not need, zoom into the important part, and press <strong>Save changes</strong>.</p>
+        </div>
+        <div class="tour-panel" role="tabpanel" id="s4" aria-labelledby="t4" hidden>
+          <picture>
+            <source srcset="img/export-dark.webp" media="(prefers-color-scheme: dark)">
+            <img src="img/export-light.webp" width="1600" height="1000" loading="lazy" alt="The export screen: the video on the left; on the right the file name, format, quality, frame rate, length and size, and an Export video button.">
+          </picture>
+          <p>Name your video and press <strong>Export video</strong>. Choose any folder or drive. It is an ordinary MP4 that plays everywhere.</p>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -214,8 +248,8 @@
 <section id="download" class="download" aria-labelledby="download-title">
   <div class="wrap">
     <div class="head" data-reveal>
-      <p class="label mono">Download</p>
-      <h2 id="download-title">Add Reclux to <span class="serif">your browser.</span></h2>
+      <p class="label">Download</p>
+      <h2 id="download-title">Add Reclux to <span class="soft">your browser.</span></h2>
       <p>Reclux is not in the browser stores, so you add it by hand. It takes about a minute, and you only need the .zip for your browser.</p>
     </div>
 
@@ -223,11 +257,11 @@
       <article class="dl" id="download-chromium" data-reveal aria-labelledby="dl-c">
         <h3 id="dl-c">Chrome, Edge, Brave, Opera</h3>
         <p class="dl-sub">One file for all four. Same steps. Stays installed through restarts.</p>
-        <a class="btn btn-red btn-block" href="download/reclux-extension-v1.zip" download>
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Download .zip · 227 KB
+        <a class="btn btn-primary btn-block" href="download/reclux-extension-v2.zip" download>
+          <svg aria-hidden="true"><use href="#i-down"/></svg>
+          Download .zip · 255 KB
         </a>
-        <p class="hash mono">reclux-extension-v1.zip · Chrome 116 or newer</p>
+        <p class="fine">reclux-extension-v2.zip · Version 2.0.0 · Chrome 116 or newer</p>
 
         <div class="pick" role="group" aria-label="Show the steps for your browser">
           <button type="button" data-browser="chrome" aria-pressed="true">Chrome</button>
@@ -250,11 +284,11 @@
       <article class="dl" id="download-firefox" data-reveal style="--i:1" aria-labelledby="dl-f">
         <h3 id="dl-f">Firefox</h3>
         <p class="dl-sub">Its own file. Fewer steps. You add it again each time Firefox starts.</p>
-        <a class="btn btn-line btn-block" href="download/reclux-firefox-extension-v1.zip" download>
-          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 17h12" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Download .zip · 227 KB
+        <a class="btn btn-glass btn-block" href="download/reclux-firefox-extension-v2.zip" download>
+          <svg aria-hidden="true"><use href="#i-down"/></svg>
+          Download .zip · 255 KB
         </a>
-        <p class="hash mono">reclux-firefox-extension-v1.zip · Firefox 140 or newer</p>
+        <p class="fine">reclux-firefox-extension-v2.zip · Version 2.0.0 · Firefox 140 or newer</p>
 
         <ol class="steps">
           <li><strong>Keep the .zip as it is.</strong> Firefox reads it directly, so there is nothing to extract.</li>
@@ -271,11 +305,11 @@
             <h4 id="ff-why">Why Firefox has its own file</h4>
             <p>Firefox handles extensions and video recording differently from the other browsers, so Reclux needs a separate build.
               <span class="tip-wrap">
-                <button type="button" class="learn" aria-expanded="false" aria-controls="ff-tip">Learn More</button>
-                <span class="tip" id="ff-tip" role="tooltip">
+                <button type="button" class="learn" aria-expanded="false" aria-controls="ff-tip">Learn more</button>
+                <span class="tip glass" id="ff-tip" role="tooltip">
                   <span class="tip-row"><b>Why it goes away.</b> Firefox keeps only add-ons signed by Mozilla. Reclux is not signed, so Firefox removes it when it closes.</span>
-                  <span class="tip-row"><b>What is built differently.</b> Firefox has no AAC sound encoder and no built-in frame reader, so this build brings its own frame reader, uses Opus sound in MP4, and uses VP8 for WebM.</span>
-                  <span class="tip-row"><b>What you will notice.</b> Microphone only, no system audio. No warnings about a busy computer, and it cannot keep your PC awake. At 1080p, Firefox paused for about a second a few times in our test, so 720p is the smoother choice.</span>
+                  <span class="tip-row"><b>What is built differently.</b> Firefox has no AAC sound encoder and no built-in frame reader, so this build brings its own frame reader and saves MP4 with Opus sound.</span>
+                  <span class="tip-row"><b>What you will notice.</b> Microphone only, no system audio. No floating window: a small control bar appears on web pages instead. It cannot keep your PC awake. 720p is the smoother choice.</span>
                 </span>
               </span>
             </p>
@@ -290,19 +324,20 @@
 <section id="faq" aria-labelledby="faq-title">
   <div class="wrap faq-grid">
     <div class="head" data-reveal>
-      <p class="label mono">FAQ</p>
-      <h2 id="faq-title">Asked <span class="serif">and</span> answered.</h2>
+      <p class="label">FAQ</p>
+      <h2 id="faq-title">Asked <span class="soft">and answered.</span></h2>
     </div>
     <div class="faq" data-reveal>
       <details><summary>Is Reclux free?</summary><p>Yes. There is no account, no trial and nothing to pay.</p></details>
-      <details><summary>Where is my recording kept?</summary><p>On your own computer. While you record, it is written to the browser’s private storage on your drive. When you press Save file, you choose the folder or drive. It is never uploaded.</p></details>
-      <details><summary>Does it need the internet?</summary><p>No. Reclux made zero network requests in our offline test. You only need a connection to download the .zip.</p></details>
-      <details><summary>Does it keep recording when I switch apps or tabs?</summary><p>Yes. This was tested with the recorder hidden behind other tabs and apps.</p></details>
-      <details><summary>What happens if my browser or PC crashes?</summary><p>Reclux writes the video in small pieces as you record. Next time you open it, it offers to recover the recording.</p></details>
+      <details><summary>Where is my recording kept?</summary><p>On your own computer. While you record and edit, it is kept in the browser’s private storage on your drive. When you press Export video, you choose the folder or drive. It is never uploaded.</p></details>
+      <details><summary>Does it need the internet?</summary><p>No. Reclux works with the internet off. You only need a connection to download the .zip.</p></details>
+      <details><summary>Can I edit my videos?</summary><p>Yes. Split, trim and delete parts, add or change zooms, and undo any step. Saving builds a new video and replaces the original only once the new one is complete.</p></details>
+      <details><summary>Do the webcam circle and cursor zoom see my web pages?</summary><p>They ask for access to web pages only when you switch them on, never at install. The circle is shown on top of the page, and cursor zoom notes where your pointer is while you record. Nothing is collected or sent anywhere.</p></details>
+      <details><summary>Does it keep recording when I switch apps or tabs?</summary><p>Yes. Record, then work anywhere. The floating controls stay on top so you can pause or stop.</p></details>
+      <details><summary>What happens if my browser or PC crashes?</summary><p>Reclux writes the video to disk in small pieces as you record. Next time you open it, it offers to recover the recording.</p></details>
       <details><summary>Why do I need Developer mode?</summary><p>Browsers add extensions automatically only from their own stores. Reclux is not in a store, so you add it once with Load unpacked, which needs Developer mode. Firefox uses its debugging page instead.</p></details>
-      <details><summary>How do I update or remove it?</summary><p>To update, extract the new .zip over the same folder, then press reload on Reclux in the extensions page. To remove it, click Remove on that page, then delete the folder. In Firefox, add the new .zip next time, or simply close Firefox to remove it.</p></details>
-      <details><summary>Does it work on Mac, tablets or a phone?</summary><p>Reclux runs on desktop computers. Tablets and phones are not supported for now.</p></details>
-      <details><summary>Can it edit videos?</summary><p>No. Reclux records and saves. It does not trim or edit.</p></details>
+      <details><summary>How do I update from version 1?</summary><p>Extract the new .zip over the same folder, then press reload on Reclux in the extensions page. In Firefox, add the new .zip next time. Your settings carry over.</p></details>
+      <details><summary>Does it work on tablets or a phone?</summary><p>Reclux runs on desktop and laptop computers. Phones and tablets are not supported for now.</p></details>
       <details><summary>Is the code public?</summary><p>Yes. You can read all of it on <a href="https://github.com/iamaakashoza/reclux" target="_blank" rel="noopener" aria-label="GitHub (opens in a new tab)">GitHub</a>.</p></details>
     </div>
   </div>
@@ -314,16 +349,17 @@
   <div class="wrap foot">
     <div class="foot-brand">
       <a class="brand" href="#top" aria-label="Back to top"><svg aria-hidden="true"><use href="#logo"/></svg></a>
-      <p>The screen recorder that keeps your video on your computer.</p>
+      <p>Record your screen. Edit it. Keep it yours.</p>
     </div>
     <nav aria-label="Footer">
       <a href="#features">Features</a>
+      <a href="#how">How it works</a>
       <a href="#download">Download</a>
       <a href="#faq">FAQ</a>
       <a href="https://iamaakashoza.github.io/reclux-privacy/">Privacy policy</a>
       <a href="https://github.com/iamaakashoza/reclux">GitHub</a>
     </nav>
-    <p class="foot-legal">Version 1.0.0 · Built by Aakash&nbsp;Prajapati | UX/UI&nbsp;Designer. This website has no analytics or cookies and loads no third-party fonts.</p>
+    <p class="foot-legal">Version 2.0.0 · Built by Aakash&nbsp;Prajapati | UX/UI&nbsp;Designer. This website has no analytics or cookies and loads no third-party fonts.</p>
   </div>
 </footer>
 </body>
