@@ -1,52 +1,62 @@
-# Reclux brand
+# Reclux brand (V2)
 
-One idea: **Rec + Lux** (record + light).
+One idea: **Rec + Lux**: you choose what to capture, and the light stays with you.
 
-- The bowl of the R is a lens, and it holds the red record dot.
-- The leg of the R is a beam of light at exactly 45°.
-- The mark replaces the capital R in the wordmark, so the name reads "Reclux", not "R Reclux".
+- **Frame R.** The R is built from a screen-selection corner (stem and arm), an amber light (the bowl) and a 45° capsule (the leg).
+- **Light, not a red dot.** The amber disc is the "lux". Red is no longer a brand colour; it only means "recording now" in the app.
+- **The mark replaces the capital R** in the wordmark, so the name reads "Reclux", not "R Reclux" (same rule as V1).
+
+Chosen on 17 Nov 2026 from four directions (see `concepts/v2-logo-concepts.html`). Research: report §35.
 
 ## Files
 
 | Folder | Use it for |
 |---|---|
 | `logo/` | The full logo. Default choice anywhere the name fits |
-| `mark/` | The R alone, where the name is already nearby |
-| `icon/` | The dark rounded app tile |
-| `png/` | Exported app icons, 16 to 512 px |
-| `concepts/` | The concept sheet, showing the ideas that were compared |
+| `mark/` | The Frame R alone, where the name is already nearby |
+| `icon/` | The Deep Ink app tile |
+| `png/` | Exported app icons, 16 to 512 px (`public/icon/` copies 16–128) |
+| `concepts/` | The V2 concept board: directions A–D compared |
 
 | File ending | Background |
 |---|---|
-| `-on-light` | White or light |
-| `-on-dark` | Black or dark |
-| `-mono-black`, `-mono-white` | One-colour printing, stamps, or photos. The dot becomes a hole |
+| `-on-light` | White or light. Ink letters, deep amber light |
+| `-on-dark` | Black or dark. White letters, bright amber light |
+| `-mono-black`, `-mono-white` | One colour for print, stamps, photos. The light is the same colour as the R |
 
 | Icon file | Sizes |
 |---|---|
-| `reclux-icon-small.svg` | 16 to 32 px. Bigger R and dot, so the dot survives |
-| `reclux-icon.svg` | 48 px and up. Has a small margin, to sit level with other browser icons |
+| `reclux-icon-small.svg` | 16 to 32 px. Flat, bigger mark, solid leg, no glass (glass turns to mud this small) |
+| `reclux-icon.svg` | 48 px and up. Glass finish, small margin, to sit level with other browser icons |
 | `reclux-icon-full.svg` | Fills the square, for places that add their own margin or round the corners |
 
 ## Colours
 
 | Name | Hex | Use |
 |---|---|---|
-| Record red | `#D7263D` | The dot, and main buttons. White text on it is 4.9:1 |
-| Ink | `#141417` | Logo on light, icon tile |
-| White | `#FFFFFF` | Logo on dark |
+| Lux amber | `#FFB547` | The light, on dark backgrounds (`--c-lux` in dark mode) |
+| Deep amber | `#F59E0B` | The light, on light backgrounds (`--c-lux` in light mode) |
+| Deep Ink | `#0E1116` | Letters on light, the app tile |
+| Paper | `#F6F5F2` | The R on the app tile, light surfaces |
+| Signal red | `#E5484D` | **Never in the logo.** Only the in-app "recording now" state |
+
+## Liquid glass
+
+Apple's icon rule: flat filled shapes on one background, the system adds light. Browsers only take flat PNGs, so the glass finish is baked into the 48 px and larger icons: one light from the top left, a soft sheen on the R, a lit "bead" for the amber light, a faint rim on the tile. The leg sits at 75% white so it reads as a second glass layer.
 
 ## Type
 
-The wordmark letters are Google Sans Flex Bold, converted to shapes, so no font is needed to display it. The font is under the SIL Open Font License.
+The letters "eclux" are Google Sans Flex Bold, converted to shapes (kept from V1), so no font is needed. SIL Open Font License.
 
 ## Rules
 
-- **Clear space:** keep a margin of at least the width of the record dot on every side.
-- **Smallest size:** logo 16 px tall, mark 12 px tall, app icon 16 px. Below 24 px, prefer the app icon.
-- **Keep:** the dot red, the leg at 45°, and the proportions as drawn.
-- **Avoid:** recolouring the dot, adding shadows or outlines, stretching, or placing the colour version on a busy photo. Use mono there.
+- **Clear space:** at least the diameter of the amber light on every side.
+- **Smallest size:** logo 16 px tall, app icon 16 px. Below 24 px, prefer the app icon.
+- **Keep:** the light amber, the leg at 45° and detached from the light, the proportions as drawn.
+- **Avoid:** red in the logo, recolouring the light, outlines, stretching, the colour logo on busy photos (use mono).
 
 ## Geometry
 
-Drawn on a 128-unit grid: stem 24 wide, bowl radius 36, lens radius 14, cap height 96. The extension and website copy these shapes from `logo/`, so change them here first.
+24-unit grid. Corner: path `M6 19V7A2 2 0 0 1 8 5H8.75`, stroke 3.8, round. Light: circle at (15, 7), radius 3.75. Leg: (11.5, 13) to (17.75, 19.25), stroke 3.65 (a little thinner, so the diagonal looks the same weight). In the logo the stem height equals the letters' cap height (96 units).
+
+All files here are generated from that one geometry, so change it once and regenerate everything. `src/lib/Logo.svelte` copies `logo/reclux-logo-on-light.svg`.

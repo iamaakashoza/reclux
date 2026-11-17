@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Reclux V2 logo concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* Review board only. Marks are drawn on a 24-unit grid; every size below is the same SVG. */
+  :root {
+    --ink: #0e1116;
+    --paper: #f6f5f2;
+    --amber: #ffb547;
+    --muted: #6b7280;
+    --line: #e4e2dc;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 32px 24px 64px; background: var(--paper); color: var(--ink); font: 15px/1.5 Geist, system-ui, sans-serif; }
+  h1 { margin: 0 0 4px; font-size: 28px; font-weight: 600; letter-spacing: -0.02em; }
+  h2 { margin: 48px 0 4px; font-size: 18px; font-weight: 600; }
+  p.lead { margin: 0 0 8px; color: var(--muted); max-width: 70ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 20px; }
+  .card h3 { margin: 0; font-size: 16px; font-weight: 600; }
+  .card .tag { font-size: 12px; color: var(--muted); }
+  .rec { color: #7a4a00; background: #fff1d6; border-radius: 99px; padding: 1px 8px; font-size: 12px; font-weight: 600; margin-left: 6px; }
+  .sizes { display: flex; align-items: end; gap: 20px; margin: 16px 0 12px; }
+  .sizes figure { margin: 0; display: grid; justify-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+  .dark { background: var(--ink); color: #fff; border-radius: 12px; padding: 10px; display: flex; gap: 14px; align-items: end; }
+  svg { display: block; }
+  .mono figure svg { color: var(--ink); }
+  ul { margin: 8px 0 0; padding-left: 18px; font-size: 13px; color: #374151; }
+  .icons { display: flex; flex-wrap: wrap; gap: 20px; align-items: end; margin-top: 12px; }
+  .lockup { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 44px; letter-spacing: -0.035em; }
+  .lockup.small { font-size: 22px; gap: 7px; }
+  .on-dark { background: var(--ink); color: #fff; border-radius: 16px; padding: 20px; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .sw { width: 150px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: #fff; font-size: 12px; }
+  .sw i { display: block; height: 56px; }
+  .sw span { display: block; padding: 6px 10px; }
+</style>
+</head>
+<body>
+
+<!-- Marks. 24 × 24 grid. Mono versions use currentColor so they work in black or white. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- A · Lens R: a disc with an R cut out; the leg breaks the rim so it does not read as ® -->
+    <mask id="mA" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+      <rect width="24" height="24" fill="#fff" />
+      <path d="M9.5 17.5V7H12.6A3 3 0 0 1 12.6 13H9.5M12.4 13L21 21.6" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round" />
+    </mask>
+    <symbol id="A" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor" mask="url(#mA)" /></symbol>
+
+    <!-- B · Kept Light: a sealed body with a pill window; the light sits inside, off-centre -->
+    <symbol id="B-body" viewBox="0 0 24 24">
+      <path fill-rule="evenodd" fill="currentColor" d="M8 2H16A6 6 0 0 1 22 8V16A6 6 0 0 1 16 22H8A6 6 0 0 1 2 16V8A6 6 0 0 1 8 2Z M9.5 8H14.5A3.5 3.5 0 0 1 14.5 15H9.5A3.5 3.5 0 0 1 9.5 8Z" />
+    </symbol>
+    <symbol id="B-dot" viewBox="0 0 24 24"><circle cx="13.25" cy="11.5" r="2.25" fill="currentColor" /></symbol>
+    <symbol id="B" viewBox="0 0 24 24"><use href="#B-body" /><use href="#B-dot" /></symbol>
+
+    <!-- C · Frame R: a selection corner is the stem and arm, a disc is the bowl, a 45° capsule is the leg -->
+    <symbol id="C-corner" viewBox="0 0 24 24"><path d="M6 19V7A2 2 0 0 1 8 5H8.75" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" /></symbol>
+    <symbol id="C-disc" viewBox="0 0 24 24"><circle cx="15" cy="7" r="3.75" fill="currentColor" /></symbol>
+    <symbol id="C-leg" viewBox="0 0 24 24"><path d="M11.6 13.1L18 19.5" fill="none" stroke="currentColor" stroke-width="3.35" stroke-linecap="round" /></symbol>
+    <symbol id="C" viewBox="0 0 24 24"><use href="#C-corner" /><use href="#C-disc" /><use href="#C-leg" /></symbol>
+
+    <!-- D · Iris: six capsule blades round a light centre (the expected camera answer, for comparison) -->
+    <mask id="mD" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+      <rect width="24" height="24" fill="#fff" />
+      <circle cx="12" cy="12" r="3.6" fill="#000" />
+    </mask>
+    <symbol id="D" viewBox="0 0 24 24">
+      <g mask="url(#mD)" stroke="currentColor" stroke-width="4" stroke-linecap="round">
+        <path d="M8.97 4.25L15.03 7.75" /><path d="M8.97 4.25L15.03 7.75" transform="rotate(60 12 12)" />
+        <path d="M8.97 4.25L15.03 7.75" transform="rotate(120 12 12)" /><path d="M8.97 4.25L15.03 7.75" transform="rotate(180 12 12)" />
+        <path d="M8.97 4.25L15.03 7.75" transform="rotate(240 12 12)" /><path d="M8.97 4.25L15.03 7.75" transform="rotate(300 12 12)" />
+      </g>
+      <circle cx="12" cy="12" r="2.1" fill="currentColor" />
+    </symbol>
+
+    <!-- Liquid-glass paint: one light source from the top left, shared by every layer -->
+    <linearGradient id="glacier" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7fd3e6" /><stop offset="1" stop-color="#3a7bd5" />
+    </linearGradient>
+    <linearGradient id="inkTile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c2230" /><stop offset="1" stop-color="#0e1116" />
+    </linearGradient>
+    <linearGradient id="sheen" gradientUnits="userSpaceOnUse" x1="4" y1="2" x2="18" y2="20">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.7" /><stop offset="0.45" stop-color="#fff" stop-opacity="0.08" /><stop offset="1" stop-color="#fff" stop-opacity="0" />
+    </linearGradient>
+    <radialGradient id="bead" cx="0.35" cy="0.3" r="0.8">
+      <stop offset="0" stop-color="#fff4dc" /><stop offset="0.35" stop-color="#ffc766" /><stop offset="1" stop-color="#f59e0b" />
+    </radialGradient>
+    <mask id="kB" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><use width="24" height="24" href="#B-body" style="color:#fff" /></mask>
+    <mask id="kC" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><use width="24" height="24" href="#C-corner" style="color:#fff" /><use width="24" height="24" href="#C-leg" style="color:#fff" /></mask>
+    <filter id="lift" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0.6" stdDeviation="0.7" flood-color="#0b1830" flood-opacity="0.35" />
+    </filter>
+  </defs>
+</svg>
+
+<h1>Reclux V2 · logo concepts</h1>
+<p class="lead">LogoBook test first: every mark must read in plain black at 16 px. Glass is a finish added later, not the idea. Same SVG at every size, no hand-tuning yet.</p>
+
+<h2>1 · Mono test (black and white, 128 / 32 / 16 px)</h2>
+<div class="grid">
+  <div class="card"><h3>B · Kept Light <span class="rec">recommended</span></h3><span class="tag">your light stays inside your device</span>
+    <div class="sizes mono"><figure><svg width="128" height="128"><use href="#B" /></svg>128</figure><figure><svg width="32" height="32"><use href="#B" /></svg>32</figure><figure><svg width="16" height="16"><use href="#B" /></svg>16</figure>
+      <div class="dark"><svg width="32" height="32"><use href="#B" /></svg><svg width="16" height="16"><use href="#B" /></svg></div></div>
+    <ul><li>Says private and offline, with no lock cliché</li><li>Strongest at 16 px: one cut, one dot</li><li>Risk: could read as a toggle, so the dot is kept small and away from the end</li></ul>
+  </div>
+  <div class="card"><h3>C · Frame R <span class="rec">recommended</span></h3><span class="tag">a screen-selection corner that is also an R</span>
+    <div class="sizes mono"><figure><svg width="128" height="128"><use href="#C" /></svg>128</figure><figure><svg width="32" height="32"><use href="#C" /></svg>32</figure><figure><svg width="16" height="16"><use href="#C" /></svg>16</figure>
+      <div class="dark"><svg width="32" height="32"><use href="#C" /></svg><svg width="16" height="16"><use href="#C" /></svg></div></div>
+    <ul><li>Says screen capture plus the brand letter</li><li>The R is implied: corner, dot, stroke</li><li>Risk: corner brackets appear in screenshot tools</li></ul>
+  </div>
+  <div class="card"><h3>A · Lens R</h3><span class="tag">comparison only</span>
+    <div class="sizes mono"><figure><svg width="128" height="128"><use href="#A" /></svg>128</figure><figure><svg width="32" height="32"><use href="#A" /></svg>32</figure><figure><svg width="16" height="16"><use href="#A" /></svg>16</figure>
+      <div class="dark"><svg width="32" height="32"><use href="#A" /></svg><svg width="16" height="16"><use href="#A" /></svg></div></div>
+    <ul><li>Close to V1's lens R</li><li>Risk: an R in a circle reads as ®</li></ul>
+  </div>
+  <div class="card"><h3>D · Iris</h3><span class="tag">comparison only</span>
+    <div class="sizes mono"><figure><svg width="128" height="128"><use href="#D" /></svg>128</figure><figure><svg width="32" height="32"><use href="#D" /></svg>32</figure><figure><svg width="16" height="16"><use href="#D" /></svg>16</figure>
+      <div class="dark"><svg width="32" height="32"><use href="#D" /></svg><svg width="16" height="16"><use href="#D" /></svg></div></div>
+    <ul><li>The expected camera answer</li><li>Risk: every camera app; blurs at 16 px</li></ul>
+  </div>
+</div>
+
+<h2>2 · Liquid-glass app icon (B and C)</h2>
+<p class="lead">Layers as Apple's icon rules ask: one background, flat filled shapes on top, one shared light. Browsers only take flat PNGs, so this look gets baked into the 48–128 px icons; 16 px uses the plain mono mark.</p>
+<div class="grid">
+  <div class="card"><h3>B · Kept Light</h3><span class="tag">Glacier (light) · Ink (dark)</span>
+    <div class="icons">
+      <svg width="160" height="160" viewBox="0 0 32 32"><rect width="32" height="32" rx="7.2" fill="url(#glacier)" />
+        <g transform="translate(4 4)" filter="url(#lift)"><use width="24" height="24" href="#B-body" style="color:#f6f5f2" opacity="0.8" /><use width="24" height="24" href="#B-dot" style="color:#ffb547" /></g>
+        <g transform="translate(4 4)"><rect width="24" height="24" fill="url(#sheen)" mask="url(#kB)" opacity="0.6" /><circle cx="13.25" cy="11.5" r="2.25" fill="url(#bead)" /></g>
+        <rect x="0.25" y="0.25" width="31.5" height="31.5" rx="7" fill="none" stroke="#fff" stroke-opacity="0.35" stroke-width="0.5" /></svg>
+      <svg width="160" height="160" viewBox="0 0 32 32"><rect width="32" height="32" rx="7.2" fill="url(#inkTile)" />
+        <g transform="translate(4 4)" filter="url(#lift)"><use width="24" height="24" href="#B-body" style="color:#ffffff" opacity="0.16" /></g>
+        <g transform="translate(4 4)"><rect width="24" height="24" fill="url(#sheen)" mask="url(#kB)" opacity="0.5" /><circle cx="13.25" cy="11.5" r="2.25" fill="url(#bead)" /></g>
+        <rect x="0.25" y="0.25" width="31.5" height="31.5" rx="7" fill="none" stroke="#fff" stroke-opacity="0.14" stroke-width="0.5" /></svg>
+      <svg width="48" height="48" viewBox="0 0 32 32"><rect width="32" height="32" rx="7.2" fill="url(#glacier)" /><g transform="translate(4 4)"><use width="24" height="24" href="#B-body" style="color:#f6f5f2" opacity="0.85" /><circle cx="13.25" cy="11.5" r="2.25" fill="url(#bead)" /></g></svg>
+      <svg width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="7.2" fill="url(#glacier)" /><g transform="translate(4 4)"><use width="24" height="24" href="#B-body" style="color:#f6f5f2" /><use width="24" height="24" href="#B-dot" style="color:#ffb547" /></g></svg>
+    </div>
+  </div>
+  <div class="card"><h3>C · Frame R</h3><span class="tag">Ink (dark) · Glacier (light)</span>
+    <div class="icons">
+      <svg width="160" height="160" viewBox="0 0 32 32"><rect width="32" height="32" rx="7.2" fill="url(#inkTile)" />
+        <g transform="translate(4 4)" filter="url(#lift)"><use width="24" height="24" href="#C-corner" style="color:#f6f5f2" opacity="0.92" /><use width="24" height="24" href="#C-leg" style="color:#f6f5f2" opacity="0.62" /></g>
+        <g transform="translate(4 4)"><rect width="24" height="24" fill="url(#sheen)" mask="url(#kC)" opacity="0.5" /><circle cx="15" cy="7" r="3.75" fill="url(#bead)" /></g>
+        <rect x="0.25" y="0.25" width="31.5" height="31.5" rx="7" fill="none" stroke="#fff" stroke-opacity="0.14" stroke-width="0.5" /></svg>
+      <svg width="160" height="160" viewBox="0 0 32 32"><rect width="32" height="32" rx="7.2" fill="url(#glacier)" />
+        <g transform="translate(4 4)" filter="url(#lift)"><use width="24" height="24" href="#C-corner" style="color:#ffffff" opacity="0.92" /><use width="24" height="24" href="#C-leg" style="color:#ffffff" opacity="0.6" /></g>
+        <g transform="translate(4 4)"><circle cx="15" cy="7" r="3.75" fill="url(#bead)" /></g>
+        <rect x="0.25" y="0.25" width="31.5" height="31.5" rx="7" fill="none" stroke="#fff" stroke-opacity="0.35" stroke-width="0.5" /></svg>
+      <svg width="48" height="48" viewBox="0 0 32 32"><rect width="32" height="32" rx="7.2" fill="url(#inkTile)" /><g transform="translate(4 4)"><use width="24" height="24" href="#C-corner" style="color:#f6f5f2" /><use width="24" height="24" href="#C-leg" style="color:#f6f5f2" opacity="0.7" /><circle cx="15" cy="7" r="3.75" fill="url(#bead)" /></g></svg>
+      <svg width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="7.2" fill="#0e1116" /><g transform="translate(4 4)"><use width="24" height="24" href="#C-corner" style="color:#f6f5f2" /><use width="24" height="24" href="#C-leg" style="color:#f6f5f2" /><use width="24" height="24" href="#C-disc" style="color:#ffb547" /></g></svg>
+    </div>
+  </div>
+</div>
+
+<h2>3 · Wordmark lockup (Geist SemiBold, lowercase)</h2>
+<div class="grid">
+  <div class="card"><div class="lockup"><svg width="48" height="48"><use href="#B" /></svg>reclux</div>
+    <div class="lockup small" style="margin-top:14px"><svg width="24" height="24"><use href="#B" /></svg>reclux</div></div>
+  <div class="card on-dark"><div class="lockup"><svg width="48" height="48" style="color:#fff"><use href="#B-body" /><use href="#B-dot" style="color:#ffb547" /></svg>reclux</div></div>
+  <div class="card"><div class="lockup"><svg width="48" height="48"><use href="#C-corner" /><use href="#C-leg" /><use href="#C-disc" style="color:#ffb547" /></svg>reclux</div>
+    <div class="lockup small" style="margin-top:14px"><svg width="24" height="24"><use href="#C" /></svg>reclux</div></div>
+  <div class="card on-dark"><div class="lockup"><svg width="48" height="48" style="color:#fff"><use href="#C-corner" /><use href="#C-leg" /><use href="#C-disc" style="color:#ffb547" /></svg>reclux</div></div>
+</div>
+
+<h2>4 · Palette</h2>
+<div class="swatches">
+  <div class="sw"><i style="background:#ffb547"></i><span><b>Lux amber</b> #FFB547<br />brand light</span></div>
+  <div class="sw"><i style="background:#0e1116"></i><span><b>Deep Ink</b> #0E1116<br />text, dark tile</span></div>
+  <div class="sw"><i style="background:linear-gradient(135deg,#7fd3e6,#3a7bd5)"></i><span><b>Glacier</b> #7FD3E6→#3A7BD5<br />glass backdrop</span></div>
+  <div class="sw"><i style="background:#f6f5f2"></i><span><b>Paper</b> #F6F5F2<br />light surfaces</span></div>
+  <div class="sw"><i style="background:#e5484d"></i><span><b>Signal red</b> #E5484D<br />"recording now" only</span></div>
+</div>
+</body>
+</html>

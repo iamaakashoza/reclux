@@ -13,11 +13,13 @@
   --c-text: #14171f;
   --c-text-muted: #5b6472;
 
-  /* Brand: "record red". White text on it = 4.9:1 */
+  /* Action and "recording now" red (not the brand colour in V2, see --c-lux). White text on it = 4.9:1 */
   --c-accent: #d7263d;
   --c-accent-hover: #bf1f35;
   --c-accent-text: #c01e34;
   --c-on-accent: #ffffff;
+  /* Brand light ("lux"): the dot in the logo. Red above stays for "recording now" (V2 brand, report §35) */
+  --c-lux: #f59e0b;
   --c-focus: #2f6feb;
 
   /* Status */
@@ -75,6 +77,7 @@
     --c-text: #eef0f4;
     --c-text-muted: #9aa3b2;
     --c-accent-text: #ff6b7a;
+    --c-lux: #ffb547;
     --c-focus: #6aa0ff;
     --c-ok: #5fd397;
     --c-warn: #f2c14e;

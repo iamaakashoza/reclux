@@ -2504,3 +2504,43 @@ Version 2.0.0 lives in `Version 2.0.0/`. V1 is frozen in `Version 1.0.0/` (tag `
 ### Not tested yet
 - A real screen through the browser picker, ducking with a real mic, and Firefox. Owner tests in Brave once V2 is complete.
 - A weak PC with no hardware encoder.
+
+---
+
+## 35. V2 Phase 3: new logo (done) 🔆
+
+Research behind it: `reports/Reclux V2 warning glass and logo.md` (LogoBook, Apple's icon rules; local only). Concept board: `Version 2.0.0/brand/concepts/v2-logo-concepts.html`.
+
+### Four directions, tested in black first (LogoBook rule)
+
+| Direction | Verdict |
+|---|---|
+| A · Lens R | Reads as ®, close to V1 |
+| B · Kept Light | In glass it looked like a toggle switch, in black like an eye |
+| **C · Frame R** ✅ | Reads as R at 16 px. Selection corner + amber light + 45° leg |
+| D · Iris | Reads as a gear or camera app |
+
+**Owner's choice (17 Nov 2026):** C on a Deep Ink tile.
+
+### What changed
+
+```
+ V1:  [R with red lens dot] eclux       red / white / black
+ V2:  [corner · amber light · leg] eclux   ink / paper / amber
+```
+
+| Item | Now |
+|---|---|
+| Brand colour | Lux amber `#FFB547` (deep amber `#F59E0B` on light). Red only means "recording now" |
+| Logo, mark, icons | `Version 2.0.0/brand/`, all from one 24-unit geometry |
+| Extension icons | `public/icon/` 16–128 px. 16–32 flat; 48+ with the baked glass finish |
+| In-app logo | `Logo.svelte` uses the new logo and `--c-lux` |
+| Wordmark letters | Kept from V1 (Google Sans Flex Bold, outlined); the mark's stroke weight was matched to them |
+
+### Tested
+- Every size rendered and checked by eye: 16, 24, 32, 48, 96, 128, 256, 512 px; logo on light, dark and mono at 96, 24 and 16 px tall.
+- Type check 0 errors; Chromium and Firefox builds.
+
+### Not done yet
+- The website (`website` branch) still shows the V1 logo. Update it with the V2 launch.
+- No trademark search (design judgement only).
