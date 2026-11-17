@@ -1,18 +1,14 @@
 // Recording controller: real capture, written straight to disk, driving the screens.
 import { openCapture, type Capture, type Format } from './capture';
-import { HIGH_CPU, LOST_RATIO, LOW_FPS_MIN_PRESET, LOW_FPS_RATIO, STRUGGLE_SECONDS, startMonitor, type Reading } from './monitor';
 import { keepAwake } from './awake';
 import { STOP_FREE, freeBytes } from './disk';
 import { MAX_SECONDS, findPreset, fmtSize, sizeMB } from './presets';
 import { startRecorder, type Recorder } from './recorder';
 import { loadSettings, saveSettings } from './settings';
-import { isPolyfill } from './track-processor';
 import { findUnsaved, getStored, holdStored, markSaved, removeStored, type Stored } from './store';
 import { untrack } from 'svelte';
 
 type Phase = 'idle' | 'countdown' | 'recording' | 'paused' | 'finished';
-
-const SURFACE = { tab: 'browser', window: 'window', screen: 'monitor' } as const;
 
 export const session = $state({
   phase: 'idle' as Phase,
@@ -33,23 +29,17 @@ export const session = $state({
   error: '',
   // Unsaved recordings found from an earlier session
   recoverable: [] as Stored[],
-  // Measured while recording (null = no reading yet / browser cannot tell)
-  fps: null as number | null,
-  cpu: null as number | null,
-  struggling: false,
-  losing: false, // the warning is about frames really missing from the file
   ducked: null as boolean | null, // system sound is dipped for speech right now (null = ducking is not in use)
-  ignoreStruggle: false,
   // Free space for recordings (null = browser cannot tell). lowDisk = less than a full 2 hours would need.
   free: null as number | null,
   lowDisk: false,
 });
 
-// Remember the choices. Changes made while recording (e.g. "Switch to 30 fps") are one-offs and are not kept.
+// Remember the choices (only while idle, so nothing changes under a live recording).
 $effect.root(() => {
   $effect(() => {
-    const { source, presetId, format, mic, system } = session;
-    if (untrack(() => session.phase) === 'idle') saveSettings({ source, presetId, format, mic, system });
+    const { presetId, format, mic, system } = session;
+    if (untrack(() => session.phase) === 'idle') saveSettings({ presetId, format, mic, system });
   });
 });
 // The popup may change them while this page is open and idle.
@@ -81,8 +71,6 @@ addEventListener('pagehide', () => keepAwake(false));
 let cap: Capture | undefined;
 let rec: Recorder | undefined;
 let releaseFile: (() => void) | undefined;
-let stopMonitor: (() => void) | undefined;
-let recent: Reading[] = [];
 let busy = false;
 
 // Clock counts only time spent recording, so Pause does not add time.
@@ -108,53 +96,9 @@ const runClock = () => {
   every(250, tick);
 };
 
-// Struggling = frames really missing from the file, or (at 50/60 fps only) few new pictures on a busy CPU.
-// Either must last several seconds. Once shown, the warning stays until the user answers it.
-function onReading(r: Reading) {
-  session.fps = r.fps === null ? null : Math.round(r.fps);
-  session.cpu = r.cpu;
-  if (session.phase !== 'recording') {
-    recent = [];
-    return;
-  }
-  recent = [...recent, r].slice(-STRUGGLE_SECONDS);
-  if (session.ignoreStruggle || recent.length < STRUGGLE_SECONDS) return;
-  const want = findPreset(session.presetId).fps;
-  const losing = recent.every((x) => x.lost > want * LOST_RATIO);
-  const starved =
-    want >= LOW_FPS_MIN_PRESET &&
-    recent.every((x) => x.cpu !== null && x.cpu >= HIGH_CPU && x.fps !== null && x.fps < want * LOW_FPS_RATIO);
-  if (losing || starved) {
-    session.struggling = true;
-    session.losing = losing;
-  }
-}
-
-/** "Switch to 30 fps": lowers the frame rate of the live recording. */
-export async function lowerFps() {
-  const next = findPreset(`${findPreset(session.presetId).height}p30`);
-  session.presetId = next.id;
-  session.struggling = false;
-  session.losing = false;
-  recent = [];
-  rec?.setFps(30);
-  await cap?.setFps(30).catch(() => {
-    session.notices = [...session.notices, 'The browser would not lower the frame rate while recording.'];
-  });
-  if (cap) session.actual = cap.actual;
-}
-
-/** "Keep": stop warning for the rest of this recording. */
-export function keepAsIs() {
-  session.ignoreStruggle = true;
-  session.struggling = false;
-  session.losing = false;
-}
-
+// No "your computer is struggling" warning in V2: V1's rule mostly measured the browser's change-driven
+// screen capture, not the computer (report §34). Frames the pump had to skip are only logged, for testing.
 function endMonitor() {
-  stopMonitor?.();
-  stopMonitor = undefined;
-  recent = [];
   clearInterval(diskTimer);
 }
 
@@ -163,11 +107,10 @@ export async function start() {
   busy = true;
   session.error = '';
   session.notices = [];
-  Object.assign(session, { fps: null, cpu: null, struggling: false, losing: false, ignoreStruggle: false, finishShare: 0 });
-  recent = [];
+  session.finishShare = 0;
   const preset = findPreset(session.presetId);
   try {
-    cap = await openCapture(preset, SURFACE[session.source], session.mic, session.system, (d) => (session.ducked = d));
+    cap = await openCapture(preset, session.mic, session.system, (d) => (session.ducked = d));
   } catch (e) {
     if ((e as DOMException).name === 'NotAllowedError') {
       session.notices = ['Screen sharing was cancelled or blocked.'];
@@ -223,16 +166,9 @@ async function begin() {
   rec = started;
   releaseFile = rec.release;
   session.fileName = rec.name;
-  if (rec.ext !== session.format) {
-    session.notices = [...session.notices, `${session.format.toUpperCase()} is not available here. Saving as ${rec.ext.toUpperCase()}.`];
-  }
-  // WebM without a hardware encoder often cannot keep up. Say so before it shows.
-  if (rec.ext === 'webm' && !rec.hardware) {
-    session.notices = [...session.notices, 'WebM has no hardware encoder here, so frames may be skipped. MP4 is much lighter.'];
-  }
+  // WebM without a hardware encoder quietly becomes MP4. The Finished screen shows the real format.
   session.ext = rec.ext;
   cap!.setMuted(session.muted);
-  stopMonitor = startMonitor(rec.stats, !isPolyfill, onReading);
   diskTimer = setInterval(checkDisk, 10_000);
   keepAwake(true);
   session.phase = 'recording';
@@ -262,6 +198,8 @@ export async function stop() {
     if (session.phase === 'recording') tick();
     stopTimer();
     endMonitor();
+    const { fresh, lost } = rec.stats();
+    console.info(`Reclux: ${fresh} new pictures from the capture, ${lost} frames skipped.`);
     try {
       const file = await rec.stop((share) => (session.finishShare = share));
       show(file);
@@ -319,10 +257,6 @@ export function reset() {
     actual: '',
     name: '',
     fileName: '',
-    fps: null,
-    cpu: null,
-    struggling: false,
-    losing: false,
     ducked: null,
   });
   void refreshRecoverable();

@@ -2,14 +2,15 @@
   import Button from '../../lib/Button.svelte';
   import Icon from '../../lib/Icon.svelte';
   import Logo from '../../lib/Logo.svelte';
-  import Segmented from '../../lib/Segmented.svelte';
+  import QualityPicker from '../../lib/QualityPicker.svelte';
   import Toggle from '../../lib/Toggle.svelte';
-  import { PRESETS } from '../../lib/presets';
-  import { SOURCES, loadSettings, saveSettings } from '../../lib/settings';
+  import { loadSettings, saveSettings, suggestedPreset } from '../../lib/settings';
 
   // Quick options. They are saved, and the recorder page picks them up.
-  // The popup closes when it loses focus, and screen sharing needs a click on a page, so Start happens there.
+  // The popup closes when it loses focus, and screen sharing needs a click on a page, so recording starts there.
+  // What to record (tab, window, screen) is asked by the browser itself at that moment.
   const s = $state(loadSettings());
+  void suggestedPreset().then((id) => id && (s.presetId = id)); // before the first save below
   $effect(() => saveSettings({ ...s }));
 
   const openRecorder = () => {
@@ -20,18 +21,12 @@
 
 <main>
   <h1><Logo /></h1>
-  <Segmented legend="What to record" name="source" options={SOURCES} bind:value={s.source} />
-  <div class="field">
-    <label for="quality">Quality</label>
-    <select id="quality" bind:value={s.presetId}>
-      {#each PRESETS as p (p.id)}<option value={p.id}>{p.label}</option>{/each}
-    </select>
-  </div>
+  <QualityPicker name="popup" bind:value={s.presetId} />
   <div class="field">
     <Toggle icon="mic" label="Microphone" bind:checked={s.mic} />
     <Toggle icon="speaker" label="System audio" bind:checked={s.system} />
   </div>
-  <Button variant="primary" icon="record" block onclick={openRecorder}>Open recorder</Button>
+  <Button variant="primary" icon="record" block onclick={openRecorder}>Start recording</Button>
   <p class="offline"><Icon name="shield" size={16} /> Works offline · Saved on this device</p>
 </main>
 
@@ -45,15 +40,6 @@
   .field {
     display: grid;
     gap: var(--s-2);
-  }
-  label {
-    font-size: var(--t-sm);
-    font-weight: 600;
-  }
-  select {
-    border: 1px solid var(--c-border);
-    border-radius: var(--r-md);
-    background-color: var(--c-surface);
   }
   .offline {
     display: flex;

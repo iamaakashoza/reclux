@@ -6,13 +6,11 @@
   import Icon from '../../lib/Icon.svelte';
   import Logo from '../../lib/Logo.svelte';
   import SetupPanel from '../../lib/SetupPanel.svelte';
-  import { MAX_SECONDS, WARN_SECONDS, findPreset, fmtSize } from '../../lib/presets';
+  import { MAX_SECONDS, WARN_SECONDS, fmtSize } from '../../lib/presets';
   import { LOW_FREE } from '../../lib/disk';
   import { onMount, tick } from 'svelte';
   import {
     discardRecoverable,
-    keepAsIs,
-    lowerFps,
     recover,
     refreshRecoverable,
     reset,
@@ -53,8 +51,6 @@
     window.addEventListener('beforeunload', ask);
     return () => window.removeEventListener('beforeunload', ask);
   });
-
-  const wantFps = $derived(findPreset(session.presetId).fps);
 </script>
 
 <div class="app">
@@ -100,7 +96,7 @@
         <div class="empty">
           <Icon name="screen" size={48} />
           <h2>Ready when you are</h2>
-          <p>Choose what to record, then press Start.</p>
+          <p>Press Start recording. Your browser then asks what to record.</p>
         </div>
       {:else if session.phase === 'countdown'}
         <div class="empty">
@@ -114,21 +110,6 @@
           <p>{session.phase === 'paused' ? 'Paused. Nothing is being recorded.' : 'Recording your screen'}</p>
         </div>
 
-        {#if session.struggling}
-          <Banner kind="warn" title="Your computer is struggling">
-            {#if session.losing || session.fps === null}
-              Frames are being skipped because the computer cannot encode them fast enough. Motion may look choppy.
-              {#if session.ext === 'webm'}MP4 is much lighter, so try it next time.{/if}
-            {:else}
-              Your screen is sending about {session.fps} new pictures a second, and the file repeats them to fill {wantFps}.
-              Motion will look like {session.fps} fps. Recording a Tab or Window is usually much smoother.
-            {/if}
-            {#snippet actions()}
-              {#if wantFps > 30}<Button onclick={lowerFps}>Switch to 30 fps</Button>{/if}
-              <Button variant="ghost" onclick={keepAsIs}>Keep</Button>
-            {/snippet}
-          </Banner>
-        {/if}
         {#if session.free !== null && session.free < LOW_FREE}
           <Banner kind="warn" title="Disk space is running low">
             About {fmtSize(session.free / 1e6)} left on the drive that holds your browser. If it gets

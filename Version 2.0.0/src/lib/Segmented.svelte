@@ -8,7 +8,7 @@
     legend,
   }: {
     value: string;
-    options: { value: string; label: string; icon: string }[];
+    options: { value: string; label: string; icon?: string }[];
     name: string;
     legend: string;
   } = $props();
@@ -20,7 +20,7 @@
     {#each options as o (o.value)}
       <label class:on={value === o.value}>
         <input type="radio" {name} value={o.value} bind:group={value} />
-        <Icon name={o.icon} />
+        {#if o.icon}<Icon name={o.icon} />{/if}
         <span>{o.label}</span>
       </label>
     {/each}
@@ -42,7 +42,7 @@
   }
   .row {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
     gap: var(--s-1);
     padding: var(--s-1);
     border-radius: var(--r-md);

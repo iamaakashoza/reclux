@@ -5,13 +5,13 @@
   import Icon from '../../lib/Icon.svelte';
   import Logo from '../../lib/Logo.svelte';
   import HowItWorks from './HowItWorks.svelte';
-  import Segmented from '../../lib/Segmented.svelte';
+  import QualityPicker from '../../lib/QualityPicker.svelte';
   import Toggle from '../../lib/Toggle.svelte';
-  import { PRESETS } from '../../lib/presets';
-  import { SOURCES, loadSettings, saveSettings } from '../../lib/settings';
+  import { loadSettings, saveSettings, suggestedPreset } from '../../lib/settings';
 
   // The wizard saves the same choices the popup and recorder page use.
   const s = $state(loadSettings());
+  void suggestedPreset().then((id) => id && (s.presetId = id)); // first run: 720p on PCs with no hardware encoder
   $effect(() => saveSettings({ ...s }));
 
   const isFirefox = navigator.userAgent.includes('Firefox/');
@@ -84,14 +84,8 @@
       <h2 id="step-title" tabindex="-1" bind:this={heading}>Choose your defaults</h2>
       <p class="lead">You can change these any time, in the toolbar popup or on the recorder page.</p>
       <div class="form">
-        <Segmented legend="What to record" name="wiz-source" options={SOURCES} bind:value={s.source} />
-        <div class="field">
-          <label for="wiz-quality">Quality</label>
-          <select id="wiz-quality" bind:value={s.presetId}>
-            {#each PRESETS as p (p.id)}<option value={p.id}>{p.label}</option>{/each}
-          </select>
-          <p class="small">The saved file always plays at the frame rate you choose.{#if !isFirefox}{' '}For the smoothest motion, record a Tab or Window: browsers send fewer new pictures from an entire screen.{/if}</p>
-        </div>
+        <QualityPicker name="wiz" bind:value={s.presetId} />
+        <p class="small">The saved file always plays at the frame rate you choose. Your browser asks what to record (a tab, a window or your whole screen) when you start.</p>
         <div class="field">
           <label for="wiz-format">Format</label>
           <select id="wiz-format" bind:value={s.format}>
@@ -106,7 +100,7 @@
         </div>
         {#if isFirefox}
           <Banner kind="info" title="Firefox">
-            Choose MP4: WebM is much slower to encode in Firefox. System audio is not available in Firefox.
+            Firefox always saves MP4, because WebM is too slow to encode there. System audio is not available in Firefox.
           </Banner>
         {/if}
       </div>

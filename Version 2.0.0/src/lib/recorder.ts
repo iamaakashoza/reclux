@@ -2,7 +2,7 @@
 // Video and audio are encoded with WebCodecs and muxed by Mediabunny.
 //   MP4  = H.264 + AAC (or Opus where the browser has no AAC encoder, as in Firefox), written as a fragmented MP4 (every piece is playable on its own, so a crash loses little),
 //          then rebuilt as a regular MP4 on Stop, because Windows misreads the frame rate and length of a fragmented one
-//   WebM = VP9 + Opus (VP8 in Firefox), with the duration written at the end
+//   WebM = VP9 + Opus, only where VP9 runs on the graphics chip; otherwise MP4 is used (report §34)
 // Nothing is kept in RAM except the piece being encoded.
 import {
   ALL_FORMATS,
@@ -27,21 +27,25 @@ import type { Preset } from './presets';
 import { isPolyfill } from './track-processor'; // also gives Firefox the frame reader it lacks
 import { getStored, holdStored, removeStored, replaceStored } from './store';
 
-// In Firefox, 1080p VP9 manages only about 5 fps on a mid-range laptop, VP8 16 and H.264 26 or more (report §31).
 const CODECS = {
   mp4: { v: 'avc', a: ['aac', 'opus'] },
-  webm: { v: isPolyfill ? 'vp8' : 'vp9', a: ['opus'] },
+  webm: { v: 'vp9', a: ['opus'] },
 } as const;
 const AUDIO_BITRATE = 128_000;
 const ENCODER_WARMUP_MS = 3000; // never hold the start back longer than this
+// The pump may fall this far behind (a short stall) and catch up with repeats. Beyond it, it jumps to "now"
+// instead of piling frames up, which is what made V1's encoder fall seconds behind (report §34).
+const MAX_BEHIND_SECONDS = 0.25;
 
 // Hardware keeps text sharp: measured 41 dB against 28 dB for software H.264 at the same bitrate (report §31).
+// WebM is only used with a hardware VP9 encoder: software VP9 managed about 5 fps at 1080p (report §31).
+// Firefox's hardware answer cannot be trusted before 143, so Firefox always gets MP4 (H.264 was 26+ fps there).
 async function pickFormat(want: Format, w: number, h: number, bitrate: number, audio: boolean) {
-  for (const ext of want === 'mp4' ? (['mp4', 'webm'] as const) : (['webm', 'mp4'] as const)) {
+  for (const ext of want === 'webm' ? (['webm', 'mp4'] as const) : (['mp4'] as const)) {
     const c = CODECS[ext];
     const opts = { width: w, height: h, quality: new Quality({ bitrate }) };
     const hardware = !isPolyfill && (await canEncodeVideo(c.v, { ...opts, hardwareAcceleration: 'prefer-hardware' }));
-    const video = hardware || (await canEncodeVideo(c.v, opts));
+    const video = hardware || (ext === 'mp4' && (await canEncodeVideo(c.v, opts)));
     let sound: AudioCodec | undefined;
     for (const a of c.a) {
       if (sound) break;
@@ -49,7 +53,7 @@ async function pickFormat(want: Format, w: number, h: number, bitrate: number, a
     }
     if (video && (sound || !audio)) return { ext, hardware, sound: sound ?? 'opus' };
   }
-  throw new Error('This browser cannot encode video as MP4 or WebM.');
+  throw new Error('This browser cannot encode MP4 video.');
 }
 
 /** A background worker writes each piece into the file. Its answers slow us down if the disk is slow. */
@@ -111,7 +115,7 @@ type ProcessorCtor = new (init: { track: MediaStreamTrack }) => { readable: { ge
  * Screen capture only sends a frame when it has a new picture, and often fewer than asked for (report §31),
  * so the newest picture is repeated until the next one arrives.
  */
-function startPump(track: MediaStreamTrack, source: VideoSampleSource, startFps: number, onError: (e: Error) => void) {
+function startPump(track: MediaStreamTrack, source: VideoSampleSource, fps: number, onError: (e: Error) => void) {
   const { MediaStreamTrackProcessor: Processor } = globalThis as unknown as { MediaStreamTrackProcessor: ProcessorCtor };
   const reader = new Processor({ track }).readable.getReader();
   let latest: VideoFrame | undefined;
@@ -136,11 +140,9 @@ function startPump(track: MediaStreamTrack, source: VideoSampleSource, startFps:
   let wake: (() => void) | undefined;
   ticker.onmessage = () => wake?.();
 
-  let fps = startFps;
   let next = 0; // timestamp of the next frame, in seconds of file time
   let startedAt = 0;
   let pausedAt = 0;
-  let overloaded = false;
   let finished: Promise<void> = Promise.resolve();
   const elapsed = () => (performance.now() - startedAt) / 1000;
 
@@ -159,13 +161,11 @@ function startPump(track: MediaStreamTrack, source: VideoSampleSource, startFps:
       await new Promise<void>((r) => (wake = r));
       if (!latest) continue;
       while (running && !pausedAt && next <= elapsed() + 0.5 / fps) {
-        // A short stall is made up with repeats, so the timeline has no hole. If the PC truly cannot keep up,
-        // skip evenly instead of building a lag, and count it so the warning can tell the truth.
-        const behind = (elapsed() - next) * fps;
-        if (behind > fps) overloaded = true; // over a second late
-        else if (behind < 1) overloaded = false;
-        if (overloaded && behind >= 1) {
-          const skip = Math.floor(behind);
+        // A short stall is made up with repeats, so the timeline has no hole. A longer one is skipped,
+        // so the encoder never builds a lag. Players simply hold the last picture over the gap.
+        const behind = elapsed() - next;
+        if (behind > MAX_BEHIND_SECONDS) {
+          const skip = Math.floor(behind * fps);
           lost += skip;
           next += skip / fps;
         }
@@ -177,10 +177,6 @@ function startPump(track: MediaStreamTrack, source: VideoSampleSource, startFps:
 
   return {
     stats: () => ({ fresh, lost }),
-    setFps: (value: number) => {
-      fps = value;
-      ticker.postMessage(1000 / fps);
-    },
     pause: () => {
       pausedAt = performance.now();
     },
@@ -248,8 +244,8 @@ export async function startRecorder(
       codec: codec.v,
       quality: new Quality({ bitrate, bitrateMode }),
       sizeChangeBehavior: 'contain', // a resized window must not stop the recording
-      // "quality" promises not to drop frames. Firefox stays on the setting it was tested with.
-      latencyMode: isPolyfill ? 'realtime' : 'quality',
+      // "realtime" lets a busy encoder skip a frame instead of queueing it, so it never falls behind (report §34).
+      latencyMode: 'realtime',
       ...(hardware ? { hardwareAcceleration: 'prefer-hardware' as const } : {}),
       onEncodedPacket: () => gotPacket(),
       // Told 50 or 60 fps, this VP9 chip is refused and slow software takes over, yet it copes without the hint (report §31).
@@ -287,7 +283,6 @@ export async function startRecorder(
       release,
       /** Running totals: new pictures from the capture, and frames the file had to skip. */
       stats: pump.stats,
-      setFps: pump.setFps,
       pause: () => {
         pump.pause();
         audioSource?.pause();

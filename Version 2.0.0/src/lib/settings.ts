@@ -1,22 +1,16 @@
 // Remembered choices. The popup and the recorder page share one origin, so one localStorage key serves both.
 import type { Format } from './capture';
-import { PRESETS } from './presets';
+import { DEFAULT_PRESET, PRESETS } from './presets';
 
-export const SOURCES = [
-  { value: 'tab', label: 'Tab', icon: 'tab' },
-  { value: 'window', label: 'Window', icon: 'window' },
-  { value: 'screen', label: 'Screen', icon: 'screen' },
-];
-
+// No "what to record" choice: the browser's own picker asks for that when recording starts.
 interface Settings {
-  source: 'tab' | 'window' | 'screen';
   presetId: string;
   format: Format;
   mic: boolean;
   system: boolean;
 }
 
-const DEFAULTS: Settings = { source: 'screen', presetId: '1080p30', format: 'mp4', mic: true, system: true };
+const DEFAULTS: Settings = { presetId: DEFAULT_PRESET, format: 'mp4', mic: true, system: true };
 
 const KEY = 'reclux.settings';
 
@@ -27,7 +21,6 @@ export function loadSettings(): Settings {
     s = JSON.parse(localStorage.getItem(KEY) ?? '{}');
   } catch {}
   return {
-    source: ['tab', 'window', 'screen'].includes(s.source!) ? s.source! : DEFAULTS.source,
     presetId: PRESETS.some((p) => p.id === s.presetId) ? s.presetId! : DEFAULTS.presetId,
     format: s.format === 'webm' ? 'webm' : DEFAULTS.format,
     mic: typeof s.mic === 'boolean' ? s.mic : DEFAULTS.mic,
@@ -39,4 +32,26 @@ export function saveSettings(s: Settings) {
   try {
     localStorage.setItem(KEY, JSON.stringify(s));
   } catch {} // private window or blocked storage: just do not remember
+}
+
+/**
+ * First run only: if this computer has no hardware H.264 encoder for 1080p60, start on 720p instead.
+ * Software encoding at 1080p60 is what dropped frames in V1 (report §34). The user can still pick 1080p.
+ * Firefox 140–142 always answers "yes" here, so it simply keeps 1080p.
+ */
+export async function suggestedPreset(): Promise<string | undefined> {
+  try {
+    if (localStorage.getItem(KEY) !== null || typeof VideoEncoder === 'undefined') return;
+    const { supported } = await VideoEncoder.isConfigSupported({
+      codec: 'avc1.64002a', // H.264 High, level 4.2: enough for 1080p60
+      width: 1920,
+      height: 1080,
+      framerate: 60,
+      bitrate: 20e6,
+      hardwareAcceleration: 'prefer-hardware',
+    });
+    return supported ? undefined : '720p60';
+  } catch {
+    return;
+  }
 }

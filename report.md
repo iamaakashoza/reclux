@@ -2462,3 +2462,45 @@ Also recovered with picture and sound matching: Chrome and Opera (real crash), E
 - Published on 3 Nov 2026. On the live site: no browser errors, the same five sizes pass, and both downloads matched by SHA-256 (since removed from the page).
 
 **The owner's call:** the page says Firefox "paused for about a second a few times in our test". That is from one PC (§31.7).
+
+---
+
+## 34. V2 Phase 2: recording core (done) 🎬
+
+Version 2.0.0 lives in `Version 2.0.0/`. V1 is frozen in `Version 1.0.0/` (tag `v1.0.0`). Research behind these choices: `reports/Reclux V2 warning glass and logo.md` (local only).
+
+### What changed
+
+| Change | Before (V1) | Now (V2) |
+|---|---|---|
+| "What to record" | Tab / Window / Screen choice in popup, recorder and welcome | Gone. The browser's own picker asks |
+| Quality | 720p/1080p × 30/50/60 in a list | Two buttons each: **720p / 1080p** and **50 / 60 fps**. Default 1080p60 |
+| First run | Always 1080p30 | 1080p60, or 720p60 if the PC has no hardware H.264 for 1080p60 |
+| "Needs a fast computer." | Always shown at 50/60 fps | Deleted |
+| "Your computer is struggling" | Few frames + CPU ≥ 80%, or encoder > 1 s behind | Deleted, with "Switch to 30 fps", the CPU and fps chips, and the `system.cpu` permission |
+| Encoder mode | "quality" (queues frames) | "realtime" (may skip one instead) |
+| Frame pump | Could fall 1 s (60 frames) behind | Falls at most 0.25 s behind, then jumps to now |
+| WebM | VP9, or VP8 on Firefox, even in software | Only with hardware VP9. Otherwise MP4, silently |
+| Music while you speak | Drops to 48% | Drops to **20%**, glides back to 100% in about 1.5 s |
+
+### Why the warning was wrong (short)
+
+- Browsers send a new screen picture only when something changes, and cap their own grabbing at 50% of one core. 15–23 new pictures a second at 1080p60 is normal, not a slow PC. The file still plays at a locked 60.
+- Real frame loss came from V1's own setup: a long encoder queue and software WebM.
+
+### Owner's decisions (17 Nov 2026)
+
+1. Never drop to 30 fps. 2. Keep 50 fps as a choice. 3. No 1080p → 720p switch mid-recording. 4. No message after recording. 5. One "Reduce transparency" switch (Phase 4). 6. Popup background chosen with the logo (Phase 3). 7. Logo directions B and C, brand colour amber. 8. No "tab is smoother" hint.
+
+### Tested
+
+| Check | Result |
+|---|---|
+| Type check | 0 errors |
+| Chromium and Firefox builds | ✅ Firefox manifest has no `power`; Chromium has no `system.cpu` |
+| Popup: 720p + 50 fps saved | ✅ `720p50` in settings, picked up by the recorder page |
+| Real pipeline, 29 s at 720p60 (test picture instead of the picker) | ✅ Regular MP4, 29 s, 60 fps, **0 frames skipped** |
+
+### Not tested yet
+- A real screen through the browser picker, ducking with a real mic, and Firefox. Owner tests in Brave once V2 is complete.
+- A weak PC with no hardware encoder.

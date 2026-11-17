@@ -27,3 +27,7 @@ stats-*.json
 # Local only: design screenshots and the iPad probe page
 docs/
 spike/
+
+# Local only: deep-research notes and reports
+research_notes/
+reports/

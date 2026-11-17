@@ -3,9 +3,9 @@ import type { Preset } from './presets';
 
 export type Format = 'mp4' | 'webm';
 
-// Ducking: system sound drops to 48% while the mic hears speech, and the voice stays at 100%.
-// Only the recording changes, not what you hear on the speakers.
-const DUCK_LEVEL = 0.48;
+// Ducking: system sound drops to 20% while the mic hears speech, and the voice stays at 100%.
+// When speech stops it glides back to 100%. Only the recording changes, not what you hear on the speakers.
+const DUCK_LEVEL = 0.2;
 // Speech = louder than the quietest thing heard lately, and not just tiny. Mics differ a lot in level, and
 // speakers can leak into the mic as a steady sound, so one fixed threshold cannot work for everyone.
 const VOICE_MIN_RMS = 0.004; // ponytail: starting guesses, tune on real mics
@@ -13,8 +13,9 @@ const VOICE_OVER_NOISE = 3;
 const NOISE_RISE = 0.002; // per tick, so a long sentence is not mistaken for noise
 const NOISE_FALL = 0.2;
 const HOLD_MS = 500; // stay ducked through the short gaps between words
+// Time constants: drops fast so the first word is clear, comes back slowly (about 1.5 s) so it does not jump.
 const DOWN_SECONDS = 0.05;
-const UP_SECONDS = 0.25;
+const UP_SECONDS = 0.5;
 
 function duckWhileSpeaking(ctx: AudioContext, voice: AudioNode, level: AudioParam, onDuck: (ducked: boolean) => void) {
   const band = ctx.createBiquadFilter(); // listen where speech lives, not to hum or hiss
@@ -49,7 +50,6 @@ function duckWhileSpeaking(ctx: AudioContext, voice: AudioNode, level: AudioPara
 /** Must be called straight from a click, so the browser allows the picker and audio. */
 export async function openCapture(
   p: Preset,
-  surface: 'browser' | 'window' | 'monitor',
   wantMic: boolean,
   wantSystem: boolean,
   onDuck: (ducked: boolean) => void,
@@ -60,7 +60,6 @@ export async function openCapture(
   try {
     display = await navigator.mediaDevices.getDisplayMedia({
       video: {
-        displaySurface: surface, // only a hint for the picker
         width: { ideal: p.height === 720 ? 1280 : 1920 },
         height: { ideal: p.height },
         frameRate: { ideal: p.fps },
@@ -71,7 +70,7 @@ export async function openCapture(
         ? ({ echoCancellation: false, noiseSuppression: false, autoGainControl: false, suppressLocalAudioPlayback: false } as MediaTrackConstraints)
         : false,
       systemAudio: wantSystem ? 'include' : 'exclude',
-      selfBrowserSurface: 'exclude', // recording the recorder page itself is never useful, and the setup hint relies on this
+      selfBrowserSurface: 'exclude', // recording the recorder page itself is never useful
     } as DisplayMediaStreamOptions);
 
     const notices: string[] = [];
@@ -125,8 +124,6 @@ export async function openCapture(
       setMuted: (muted: boolean) => {
         if (micGain) micGain.gain.value = muted ? 0 : 1;
       },
-      /** Ask the browser to deliver fewer frames, without restarting the recording. */
-      setFps: (fps: number) => video.applyConstraints({ frameRate: { ideal: fps } }),
       close: () => {
         stopDucking?.();
         shown.getTracks().forEach((t) => t.stop());

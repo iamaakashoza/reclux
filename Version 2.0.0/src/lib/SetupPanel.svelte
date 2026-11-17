@@ -2,11 +2,10 @@
   import Banner from './Banner.svelte';
   import Button from './Button.svelte';
   import Icon from './Icon.svelte';
-  import Segmented from './Segmented.svelte';
+  import QualityPicker from './QualityPicker.svelte';
   import Toggle from './Toggle.svelte';
-  import { PRESETS, MAX_SECONDS, findPreset, fmtSize, sizeMB } from './presets';
+  import { MAX_SECONDS, findPreset, fmtSize, presetId, sizeMB } from './presets';
   import { refreshDisk, session } from './session.svelte';
-  import { SOURCES } from './settings';
 
   let { onstart }: { onstart: () => void } = $props();
 
@@ -16,28 +15,12 @@
     void session.presetId;
     void refreshDisk();
   });
-  const isFirefox = navigator.userAgent.includes('Firefox/');
   const need = $derived(fmtSize(sizeMB(preset, MAX_SECONDS)));
 </script>
 
 <div class="panel">
-  <Segmented legend="What to record" name="source" options={SOURCES} bind:value={session.source} />
-  {#if session.source === 'screen' && !isFirefox}
-    <p class="hint">Smoothest motion: Tab or Window. Browsers send fewer new pictures from an entire screen.</p>
-  {:else if session.source === 'tab' && !isFirefox}
-    <p class="hint"><strong>Open the tab you want to record first.</strong> The browser lists your other tabs, but not this Reclux tab.</p>
-  {/if}
-
-  <div class="field">
-    <label for="quality">Quality</label>
-    <select id="quality" bind:value={session.presetId}>
-      {#each PRESETS as p (p.id)}<option value={p.id}>{p.label}</option>{/each}
-    </select>
-    <p class="hint">
-      About {fmtSize(sizeMB(preset, 60))} per minute · {need} for 2 hours
-      {#if preset.fps >= 50}<br /><strong>Needs a fast computer.</strong>{/if}
-    </p>
-  </div>
+  <QualityPicker name="setup" bind:value={session.presetId} />
+  <p class="hint">About {fmtSize(sizeMB(preset, 60))} per minute · {need} for 2 hours</p>
 
   <div class="field">
     <label for="format">Format</label>
@@ -64,7 +47,7 @@
       2 hours at this quality could need about {need}. Free up space on the drive that holds your browser
       (usually C:) or lower the quality. When it is done, you can save the file to another drive like D: or E:.
       {#snippet actions()}
-        <Button onclick={() => (session.presetId = '720p30')}>Lower quality</Button>
+        <Button onclick={() => (session.presetId = presetId(720, preset.fps))}>Lower quality</Button>
       {/snippet}
     </Banner>
   {/if}
@@ -96,9 +79,6 @@
   .hint {
     font-size: var(--t-xs);
     color: var(--c-text-muted);
-  }
-  .hint strong {
-    color: var(--c-warn);
   }
   .offline {
     display: flex;

@@ -35,21 +35,20 @@ Entrypoints (`src/entrypoints/`):
 - `recorder/` — the page that actually records. All recording state lives here.
 - `welcome/` — first-run guide.
 
-Popup and recorder share one origin, so settings pass through one `localStorage` key (`src/lib/settings.ts`), not messaging.
+Popup and recorder share one origin, so settings pass through one `localStorage` key (`src/lib/settings.ts`), not messaging. Quality is locked to 720p/1080p × 50/60 fps (`presets.ts`, picked with `QualityPicker.svelte`); on first run, a PC with no hardware H.264 encoder for 1080p60 starts on 720p.
 
 Recording pipeline (`src/lib/`):
-- `session.svelte.ts` — the controller. A single `$state` object (`session`) drives every screen through `phase`: `idle → countdown → recording ⇄ paused → finished`. Also runs disk checks, the struggle monitor, keep-awake, and crash recovery.
-- `capture.ts` — `getDisplayMedia` + mic, mixed with an `AudioContext` created *before any await* (must stay inside the click gesture). Also ducks system audio to 48% in the recording while the mic hears speech (the voice stays at 100%).
-- `recorder.ts` — WebCodecs encode via Mediabunny. MP4 = H.264+AAC (Opus where there is no AAC encoder, i.e. Firefox); WebM = VP9+Opus (VP8 in Firefox). Falls back to the other format if the asked one can't encode. Each finished section goes straight to disk (a new section starts at each key frame, about every 2 s), so a crash loses at most about 2 s (report §33). A clock-driven pump repeats the newest picture so the file has a locked frame rate (report §31). MP4 is written fragmented for crash safety, then rebuilt as a regular MP4 on Stop, because Windows misreads a fragmented file's frame rate and length.
+- `session.svelte.ts` — the controller. A single `$state` object (`session`) drives every screen through `phase`: `idle → countdown → recording ⇄ paused → finished`. Also runs disk checks, keep-awake, and crash recovery. There is no "struggling" warning in V2 (report §34): skipped frames are only logged to the console on Stop.
+- `capture.ts` — `getDisplayMedia` + mic, mixed with an `AudioContext` created *before any await* (must stay inside the click gesture). Also ducks system audio to 20% in the recording while the mic hears speech (the voice stays at 100%), gliding back to 100% after. No source hint: the browser's picker chooses tab/window/screen.
+- `recorder.ts` — WebCodecs encode via Mediabunny. MP4 = H.264+AAC (Opus where there is no AAC encoder, i.e. Firefox); WebM = VP9+Opus, only with a hardware VP9 encoder (never on Firefox); otherwise MP4 is used silently. Encoder runs in `latencyMode: 'realtime'`; the pump never falls more than 0.25 s behind (report §34). Each finished section goes straight to disk (a new section starts at each key frame, about every 2 s), so a crash loses at most about 2 s (report §33). A clock-driven pump repeats the newest picture so the file has a locked frame rate (report §31). MP4 is written fragmented for crash safety, then rebuilt as a regular MP4 on Stop, because Windows misreads a fragmented file's frame rate and length.
 - `writer.worker.ts` — writes chunks into OPFS (`recordings/` dir) with a sync access handle, flushing every write, so a crash keeps everything already written. Nothing big is held in RAM — 2-hour 1080p60 recordings (up to ~18 GB) are a requirement.
 - `store.ts` — OPFS file helpers. A live recording is marked by a Web Lock (`reclux:<name>`); unlocked, unsaved files are offered for recovery. Saved flags live in `localStorage`.
-- `monitor.ts` — once-a-second readings. "Struggling" = frames really skipped from the file (any fps), or at 50/60 fps only, few new pictures **and** high CPU (`system.cpu`), since a still screen also gives low fps.
 - `disk.ts` — free space = quota − usage (needs `unlimitedStorage`). Brave (fake 2 GB quota) and Firefox return `null`; code must treat `null` as "unknown", not "full".
 - `track-processor.ts` — polyfill for `MediaStreamTrackProcessor` on Firefox (hidden `<video>` read on a worker clock, since hidden-tab timers are throttled).
 - `ticker.worker.ts` — that worker clock. Used anywhere a timer must keep running in a hidden tab (Firefox frames, the frame pump, ducking).
 - `awake.ts` — `chrome.power`; Chromium only.
 
-Browser differences live in `wxt.config.ts` (`system.cpu`/`power` omitted on Firefox, min Chrome 116, min Firefox 140) and in runtime feature checks — not separate code paths.
+Browser differences live in `wxt.config.ts` (`power` omitted on Firefox, min Chrome 116, min Firefox 140) and in runtime feature checks — not separate code paths.
 
 UI: shared components in `src/lib/*.svelte` (`Logo.svelte` is the logo), design tokens in `src/styles/tokens.css`.
 

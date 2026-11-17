@@ -17,17 +17,11 @@
       <li>Asked: {preset.label}</li>
       {#if session.actual}<li>Browser reports: {session.actual}</li>{/if}
       <li title="The saved file always plays at this rate.">File: {preset.fps} fps locked</li>
-      {#if session.fps !== null}
-        <li title="How many frames each second show a new picture from your screen. The rest repeat the last picture. A still screen sends few, which is normal. Tab and Window send more than Entire screen.">
-          {session.fps === 0 ? 'Screen is still' : `New pictures: ${session.fps}/s`}
-        </li>
-      {/if}
       {#if session.ducked !== null}
-        <li class:on={session.ducked} title="While you speak, system sound in the recording drops to 48%. What you hear on your speakers stays the same, so listen to the saved file.">
-          {session.ducked ? 'Voice heard · Music in file: 48%' : 'Music in file: 100%'}
+        <li class:on={session.ducked} title="While you speak, system sound in the recording drops to 20%, then glides back to 100% when you stop. What you hear on your speakers stays the same, so listen to the saved file.">
+          {session.ducked ? 'Voice heard · Music in file: 20%' : 'Music in file: 100%'}
         </li>
       {/if}
-      {#if session.cpu !== null}<li title="How busy the processor is, on average.">CPU {session.cpu}%</li>{/if}
       <li>{fmtSize(session.bytes / 1e6)}</li>
       <li>{session.ext.toUpperCase()}</li>
     </ul>
