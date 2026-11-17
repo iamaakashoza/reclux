@@ -24,6 +24,16 @@
     shield:
       '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM9 12l2 2 4-4"/>',
     chevron: '<path d="M6 9l6 6 6-6"/>',
+    undo: '<path d="M9 14L4 9l5-5M4 9h11a5 5 0 0 1 0 10h-3"/>',
+    redo: '<path d="M15 14l5-5-5-5M20 9H9a5 5 0 0 0 0 10h3"/>',
+    split: '<path d="M12 3v18M8 7H4v10h4M16 7h4v10h-4"/>',
+    trim: '<path d="M7 4v13a3 3 0 0 0 3 3h10M4 7h13a3 3 0 0 1 3 3v10"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    minus: '<path d="M5 12h14"/>',
+    close: '<path d="M6 6l12 12M18 6L6 18"/>',
+    contrast: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>',
+    camera: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/>',
+    zoom: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5M11 8v6M8 11h6"/>',
   };
   const FILLED = new Set(['record', 'play', 'stop']);
 

@@ -45,8 +45,9 @@
     grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
     gap: var(--s-1);
     padding: var(--s-1);
-    border-radius: var(--r-md);
-    background: var(--c-surface-2);
+    border-radius: var(--r-pill);
+    background: var(--fill);
+    border: 1px solid var(--glass-border);
   }
   label {
     display: flex;
@@ -54,19 +55,27 @@
     align-items: center;
     justify-content: center;
     gap: 2px;
-    min-height: var(--tap);
-    padding: var(--s-2);
-    border-radius: var(--r-sm);
-    font-size: var(--t-xs);
+    min-height: calc(var(--tap) - 4px);
+    padding: var(--s-1) var(--s-2);
+    border-radius: var(--r-pill);
+    font-size: var(--t-sm);
     font-weight: 600;
     color: var(--c-text-muted);
     cursor: pointer;
     transition: background var(--ease), color var(--ease);
   }
-  label.on {
-    background: var(--c-bg);
+  label:hover:not(.on) {
     color: var(--c-text);
-    box-shadow: var(--shadow);
+  }
+  label.on {
+    background: var(--fill-strong);
+    color: var(--c-text);
+    box-shadow: var(--shadow), inset 0 1px 0 rgb(255 255 255 / 20%);
+  }
+  @media (forced-colors: active) {
+    label.on {
+      outline: 2px solid Highlight;
+    }
   }
   label:has(input:focus-visible) {
     outline: 3px solid var(--c-focus);

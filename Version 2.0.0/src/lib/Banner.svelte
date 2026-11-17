@@ -29,7 +29,8 @@
     display: flex;
     gap: var(--s-3);
     padding: var(--s-3) var(--s-4);
-    border-radius: var(--r-md);
+    border-radius: var(--r-lg);
+    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
     font-size: var(--t-sm);
   }
   .banner > :global(svg) {

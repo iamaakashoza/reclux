@@ -1,25 +1,26 @@
-/* Reclux design tokens + base reset.
-   Rules: system fonts only (offline), 4px spacing grid, WCAG AA contrast,
-   44px tap targets (48px on touch). Change values here, not in components. */
+/* Reclux V2 design tokens + base reset. "Liquid glass": glass only on floating controls, content stays solid (report §36).
+   Rules: system fonts only (offline), 4px spacing grid, WCAG AA contrast, 44px tap targets (48px on touch).
+   Change values here, not in components. */
 
 :root {
   color-scheme: light dark;
 
-  /* Surfaces + text */
-  --c-bg: #ffffff;
-  --c-surface: #f6f7f9;
-  --c-surface-2: #eceff3;
-  --c-border: #dde1e7;
-  --c-text: #14171f;
-  --c-text-muted: #5b6472;
+  /* Surfaces + text (light) */
+  --c-bg: #f3f2ee;
+  --c-surface: #ffffff;
+  --c-surface-2: #ecebe6;
+  --c-border: #dcdad3;
+  --c-text: #0e1116;
+  --c-text-muted: #545b66;
 
   /* Action and "recording now" red (not the brand colour in V2, see --c-lux). White text on it = 4.9:1 */
   --c-accent: #d7263d;
   --c-accent-hover: #bf1f35;
   --c-accent-text: #c01e34;
   --c-on-accent: #ffffff;
-  /* Brand light ("lux"): the dot in the logo. Red above stays for "recording now" (V2 brand, report §35) */
+  /* Brand light ("lux"): the dot in the logo and "on" switches (report §35) */
   --c-lux: #f59e0b;
+  --c-on-lux: #0e1116;
   --c-focus: #2f6feb;
 
   /* Status */
@@ -30,6 +31,26 @@
   --c-info-bg: #e8f0fd;
   --c-error: #9b1c2c;
   --c-error-bg: #fde8ea;
+  /* "Paused": a warning light that reads on light and dark glass alike */
+  --c-paused-bg: #ffd77a;
+  --c-paused-text: #3d2a00;
+
+  /* The backdrop glass sits on: a still gradient (glass over flat colour reads as a grey card) */
+  --backdrop: radial-gradient(70% 55% at 10% 0%, rgb(127 211 230 / 45%), transparent 70%),
+    radial-gradient(55% 45% at 100% 100%, rgb(255 181 71 / 30%), transparent 70%), var(--c-bg);
+
+  /* Glass (Regular). One blur knob. Fairly opaque, like Apple's 2026 default, so text stays readable. */
+  --glass-blur: 16px;
+  --glass-saturate: 170%;
+  --glass-bg: rgb(255 255 255 / 66%);
+  --glass-bg-solid: rgb(252 252 250 / 97%);
+  --glass-border: rgb(14 17 22 / 10%);
+  --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 70%);
+  --glass-shadow: 0 1px 2px rgb(14 17 22 / 6%), 0 10px 30px rgb(14 17 22 / 12%);
+  /* A plain fill for controls sitting ON glass (never glass on glass) */
+  --fill: rgb(14 17 22 / 6%);
+  --fill-hover: rgb(14 17 22 / 11%);
+  --fill-strong: #ffffff;
 
   /* Space (4px grid) */
   --s-1: 4px;
@@ -39,10 +60,11 @@
   --s-5: 24px;
   --s-6: 32px;
 
-  /* Shape */
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
+  /* Shape: capsules for bars and buttons; nested corners are concentric (inner = outer - padding) */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
   --r-pill: 999px;
 
   /* Type */
@@ -58,7 +80,7 @@
   /* Touch */
   --tap: 44px;
 
-  --shadow: 0 1px 2px rgb(20 23 31 / 8%), 0 4px 16px rgb(20 23 31 / 8%);
+  --shadow: 0 1px 2px rgb(14 17 22 / 8%), 0 4px 16px rgb(14 17 22 / 8%);
   --ease: 150ms ease-out;
 }
 
@@ -70,15 +92,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --c-bg: #0f1217;
-    --c-surface: #171b22;
-    --c-surface-2: #212731;
+    --c-bg: #0b0e13;
+    --c-surface: #151a22;
+    --c-surface-2: #1f2530;
     --c-border: #2c333e;
     --c-text: #eef0f4;
-    --c-text-muted: #9aa3b2;
+    --c-text-muted: #a3acba;
     --c-accent-text: #ff6b7a;
     --c-lux: #ffb547;
-    --c-focus: #6aa0ff;
+    --c-focus: #7fd3e6;
     --c-ok: #5fd397;
     --c-warn: #f2c14e;
     --c-warn-bg: #2d2410;
@@ -86,8 +108,26 @@
     --c-info-bg: #14233f;
     --c-error: #ff8a96;
     --c-error-bg: #331519;
+    --backdrop: radial-gradient(70% 55% at 10% 0%, rgb(58 123 213 / 30%), transparent 70%),
+      radial-gradient(55% 45% at 100% 100%, rgb(255 181 71 / 14%), transparent 70%), var(--c-bg);
+    --glass-bg: rgb(24 28 36 / 62%);
+    --glass-bg-solid: rgb(22 26 33 / 97%);
+    --glass-border: rgb(255 255 255 / 12%);
+    --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 14%);
+    --glass-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px rgb(0 0 0 / 45%);
+    --fill: rgb(255 255 255 / 8%);
+    --fill-hover: rgb(255 255 255 / 14%);
+    --fill-strong: rgb(255 255 255 / 16%);
     --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 30%);
   }
+}
+
+/* Lite glass: while recording (the screen behind moves, so blur would be redrawn every frame),
+   and the in-app "Reduce transparency" switch. */
+:root[data-recording] {
+  --glass-blur: 8px;
+  --glass-saturate: 140%;
+  --glass-bg: var(--glass-bg-solid);
 }
 
 *,
@@ -98,7 +138,9 @@
 
 body {
   margin: 0;
-  background: var(--c-bg);
+  min-height: 100vh;
+  background: var(--backdrop);
+  background-attachment: fixed;
   color: var(--c-text);
   font: 400 var(--t-md) / 1.5 var(--font);
   -webkit-font-smoothing: antialiased;
@@ -106,6 +148,7 @@ body {
 
 h1,
 h2,
+h3,
 p {
   margin: 0;
 }
@@ -117,12 +160,52 @@ input {
   color: inherit;
 }
 
+/* .glass: floating controls only. Solid first; glass where the browser can blur. */
+.glass {
+  background: var(--glass-bg-solid);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-highlight), var(--glass-shadow);
+}
+@supports (backdrop-filter: blur(1px)) {
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  }
+}
+/* Reduce transparency: the system setting (Chromium) or Reclux's own switch (every browser, incl. Firefox) */
+:root[data-solid] .glass {
+  background: var(--glass-bg-solid);
+  backdrop-filter: none;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass {
+    background: var(--glass-bg-solid);
+    backdrop-filter: none;
+  }
+}
+@media (prefers-contrast: more) {
+  .glass {
+    background: var(--c-surface);
+    backdrop-filter: none;
+    border-color: CanvasText;
+  }
+}
+@media (forced-colors: active) {
+  .glass {
+    backdrop-filter: none;
+    border: 1px solid CanvasText;
+  }
+}
+
 /* The browser's own dropdown arrow sits in a different place in each browser and ignores padding,
    so draw it here. The two gradients form a "v", and currentColor keeps it right in dark mode. */
 select {
   appearance: none;
   min-height: var(--tap);
-  padding: 0 calc(var(--s-3) + 20px) 0 var(--s-3);
+  padding: 0 calc(var(--s-3) + 20px) 0 var(--s-4);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-pill);
+  background-color: var(--fill);
   background-image: linear-gradient(45deg, transparent 46%, currentColor 46%, currentColor 60%, transparent 60%),
     linear-gradient(-45deg, transparent 46%, currentColor 46%, currentColor 60%, transparent 60%);
   background-position: right calc(var(--s-3) + 6px) center, right var(--s-3) center;
@@ -130,12 +213,25 @@ select {
   background-repeat: no-repeat;
   cursor: pointer;
 }
+select option {
+  background: var(--c-surface);
+  color: var(--c-text);
+}
 
 /* [data-ring]: focus the app moved by itself (e.g. to Cancel). Browsers hide the ring then after a mouse click, so draw it anyway. */
 :focus-visible,
 [data-ring]:focus {
   outline: 3px solid var(--c-focus);
   outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {

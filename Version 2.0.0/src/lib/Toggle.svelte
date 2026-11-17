@@ -27,10 +27,10 @@
     justify-content: space-between;
     gap: var(--s-3);
     min-height: var(--tap);
-    padding: var(--s-2) var(--s-3);
-    border: 1px solid var(--c-border);
-    border-radius: var(--r-md);
-    background: var(--c-surface);
+    padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--r-pill);
+    background: var(--fill);
     cursor: pointer;
   }
   .text {
@@ -57,7 +57,8 @@
     height: 26px;
     margin: 0;
     border-radius: var(--r-pill);
-    background: var(--c-border);
+    background: var(--fill-hover);
+    box-shadow: inset 0 0 0 1px var(--glass-border);
     transition: background var(--ease);
     cursor: inherit;
   }
@@ -74,7 +75,15 @@
     transition: transform var(--ease);
   }
   input:checked {
-    background: var(--c-accent);
+    background: var(--c-lux);
+  }
+  input:checked::before {
+    background: var(--c-on-lux);
+  }
+  @media (forced-colors: active) {
+    input {
+      border: 1px solid ButtonText;
+    }
   }
   input:checked::before {
     transform: translateX(18px);

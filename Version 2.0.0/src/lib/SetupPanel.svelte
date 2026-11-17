@@ -1,14 +1,12 @@
 <script lang="ts">
   import Banner from './Banner.svelte';
   import Button from './Button.svelte';
-  import Icon from './Icon.svelte';
   import QualityPicker from './QualityPicker.svelte';
   import Toggle from './Toggle.svelte';
   import { MAX_SECONDS, findPreset, fmtSize, presetId, sizeMB } from './presets';
   import { refreshDisk, session } from './session.svelte';
 
-  let { onstart }: { onstart: () => void } = $props();
-
+  // The recorder page's "Settings": the same choices as the popup, for when you want to change them here.
   const preset = $derived(findPreset(session.presetId));
   // Re-check the free space on load and whenever the quality changes.
   $effect(() => {
@@ -52,9 +50,6 @@
     </Banner>
   {/if}
 
-  <Button variant="primary" icon="record" block onclick={onstart}>Start recording</Button>
-
-  <p class="offline"><Icon name="shield" size={16} /> Works offline · Saved on this device</p>
 </div>
 
 <style>
@@ -71,20 +66,7 @@
     font-size: var(--t-sm);
     font-weight: 600;
   }
-  select {
-    border: 1px solid var(--c-border);
-    border-radius: var(--r-md);
-    background-color: var(--c-surface);
-  }
   .hint {
-    font-size: var(--t-xs);
-    color: var(--c-text-muted);
-  }
-  .offline {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--s-2);
     font-size: var(--t-xs);
     color: var(--c-text-muted);
   }

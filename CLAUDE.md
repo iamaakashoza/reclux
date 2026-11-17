@@ -31,8 +31,8 @@ When testing a recording automatically, do not use `--use-fake-device-for-media-
 
 Entrypoints (`src/entrypoints/`):
 - `background.ts` — only opens `welcome.html` on first install.
-- `popup/` — quick settings, then opens `recorder.html` in a tab. Recording cannot start in the popup: it closes on blur and `getDisplayMedia` needs a click on a real page.
-- `recorder/` — the page that actually records. All recording state lives here.
+- `popup/` — Screen 1: Quality, FPS, audio, then opens `recorder.html` in a tab. Recording cannot start in the popup: it closes on blur and `getDisplayMedia` needs a click on a real page.
+- `recorder/` — the page that actually records. All recording state lives here. Flow: start card → countdown → `RecordingBar` (Screen 2) → `Editor` + `Timeline` (Screen 3) → save `Modal` (Screen 4) → `Export` (Screen 5, Save As via `downloads`, waits until the copy completes).
 - `welcome/` — first-run guide.
 
 Popup and recorder share one origin, so settings pass through one `localStorage` key (`src/lib/settings.ts`), not messaging. Quality is locked to 720p/1080p × 50/60 fps (`presets.ts`, picked with `QualityPicker.svelte`); on first run, a PC with no hardware H.264 encoder for 1080p60 starts on 720p.
@@ -50,7 +50,7 @@ Recording pipeline (`src/lib/`):
 
 Browser differences live in `wxt.config.ts` (`power` omitted on Firefox, min Chrome 116, min Firefox 140) and in runtime feature checks — not separate code paths.
 
-UI: shared components in `src/lib/*.svelte` (`Logo.svelte` is the logo), design tokens in `src/styles/tokens.css`.
+UI: shared components in `src/lib/*.svelte` (`Logo.svelte` is the logo), design tokens in `src/styles/tokens.css`. Liquid glass (report §36): `.glass` only on floating controls (bars, start card, modal sheet), content stays solid, never glass on glass. `html[data-recording]` makes glass lighter while recording; `html[data-solid]` (the saved "Reduce transparency" switch) and `prefers-reduced-transparency` turn it solid. Modals use `<dialog>` (`Modal.svelte`), never `confirm()`.
 
 ## Other files
 

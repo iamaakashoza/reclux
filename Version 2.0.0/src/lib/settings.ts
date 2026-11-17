@@ -8,9 +8,11 @@ interface Settings {
   format: Format;
   mic: boolean;
   system: boolean;
+  /** "Reduce transparency": solid surfaces instead of glass. Firefox has no system setting for it. */
+  solid: boolean;
 }
 
-const DEFAULTS: Settings = { presetId: DEFAULT_PRESET, format: 'mp4', mic: true, system: true };
+const DEFAULTS: Settings = { presetId: DEFAULT_PRESET, format: 'mp4', mic: true, system: true, solid: false };
 
 const KEY = 'reclux.settings';
 
@@ -25,14 +27,23 @@ export function loadSettings(): Settings {
     format: s.format === 'webm' ? 'webm' : DEFAULTS.format,
     mic: typeof s.mic === 'boolean' ? s.mic : DEFAULTS.mic,
     system: typeof s.system === 'boolean' ? s.system : DEFAULTS.system,
+    solid: s.solid === true,
   };
 }
 
-export function saveSettings(s: Settings) {
+/** Saves the given choices, keeping the others (each page only edits some of them). */
+export function saveSettings(s: Partial<Settings>) {
   try {
-    localStorage.setItem(KEY, JSON.stringify(s));
+    localStorage.setItem(KEY, JSON.stringify({ ...loadSettings(), ...s }));
   } catch {} // private window or blocked storage: just do not remember
+  applyLook();
 }
+
+/** Solid or glass surfaces, on every page. Also follows changes made in another Reclux page. */
+export function applyLook() {
+  document.documentElement.toggleAttribute('data-solid', loadSettings().solid);
+}
+addEventListener('storage', applyLook);
 
 /**
  * First run only: if this computer has no hardware H.264 encoder for 1080p60, start on 720p instead.

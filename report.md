@@ -2544,3 +2544,51 @@ Research behind it: `reports/Reclux V2 warning glass and logo.md` (LogoBook, App
 ### Not done yet
 - The website (`website` branch) still shows the V1 logo. Update it with the V2 launch.
 - No trademark search (design judgement only).
+
+---
+
+## 36. V2 Phase 4: liquid-glass UI, Screens 1–5 (done) 🫧
+
+Built from the owner's 5 sketches and the glass research (`reports/Reclux V2 warning glass and logo.md`, Topic 2).
+
+### The flow
+
+```
+ Popup (1) ──Start recording──► Recorder tab: "Ready to record" ──Record──► browser picker
+     ──► 3·2·1 ──► Recording bar (2) ──Stop──► Editor (3) ──Save changes──► "Save this video?" (4)
+     ──Save video──► Export (5) ──Export video──► Save As window (Downloads, D:, E:…)
+                              └─Delete video──► "Delete this video?" ──► back to "Ready to record"
+```
+
+| Screen | What it has |
+|---|---|
+| 1 · Popup | "What are you recording today?", Quality 720p/1080p, FPS 50/60, Microphone, System audio, Start recording |
+| 2 · Recording bar | ● Recording chip, Pause ⇄ Play, red Stop, 00:00:00 timer, size, quality · fps, mic. Paused = "Paused" on a warning-light chip |
+| 3 · Editor | "Edit · Reclux-recording_001.mp4", Undo/Redo, Save changes; video in the middle; Split (Ctrl+B), Trim (In–Out), Delete, Play + 00:11 / 04:00, Zoom − +; timeline with ruler, clip and playhead |
+| 4 · Save popup | Glass sheet over a dimmed page; Cancel / Save video. Says "Replace the original?" once edits exist |
+| 5 · Export | Video left, details right (file name, format, quality, fps, length, size); Export video, Delete video, Back to editing, New recording |
+
+### Design system
+- **Glass only on floating controls** (bars, start card, modal sheet). Video, timeline and export details stay solid, as Apple's rules ask.
+- **One tinted action per view** in red (Record, Stop, Save changes, Export). Amber (brand) for "on" switches and the clip.
+- **Capsules** for buttons and bars, concentric corners, still gradient backdrop (glacier top-left, amber bottom-right).
+- **Lighter glass while recording**, a **Reduce transparency** switch (saved, works in Firefox too), and solid surfaces for `prefers-reduced-transparency`, `prefers-contrast: more` and Windows high contrast.
+- **No `confirm()` boxes** any more: they froze automated tests and looked out of place. Real `<dialog>` modals instead.
+- **File names:** Reclux-recording_001, _002…
+
+### Fixed along the way
+- **Export could break on long videos:** "Save as" returns when copying *starts*. Deleting or starting over before it finished could cut the file. Export now waits until the browser says the copy is complete, and the tab asks before closing meanwhile.
+
+### Tested (headless Chrome, test picture instead of the picker, every step screenshotted)
+| Check | Result |
+|---|---|
+| Full flow, desktop 1440×900 and tablet 820×1180, dark and light | ✅ no page errors |
+| Recordings in the run | ✅ 0 frames skipped each, ~60 new pictures/s |
+| Editor at tablet width, timeline zoom to 0.5 s ticks | ✅ after 2 fixes (video overflowed the tools; repeated labels) |
+| Popup, welcome page, Reduce transparency | ✅ |
+| Type check, Chromium build | ✅ |
+
+### Not done yet (next phases)
+- Split / Trim / Delete / Undo are shown but switched off until Phase 6.
+- The recording bar lives in the recorder tab; Phase 5 moves it into a floating window / onto the web page, with the webcam circle.
+- Contrast is checked by eye only, not measured. The real Save As window and real picker need the owner's Brave test.

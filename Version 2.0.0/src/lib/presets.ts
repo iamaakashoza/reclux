@@ -33,5 +33,9 @@ export const fmtTime = (s: number) => {
   return h ? `${h}:${m}:${sec}` : `${m}:${sec}`;
 };
 
+/** Always hours:minutes:seconds, for the recording bar (00:02:45). */
+export const fmtClock = (s: number) =>
+  [s / 3600, (s % 3600) / 60, s % 60].map((n) => String(Math.floor(n)).padStart(2, '0')).join(':');
+
 export const MAX_SECONDS = 2 * 60 * 60;
 export const WARN_SECONDS = MAX_SECONDS - 15 * 60;

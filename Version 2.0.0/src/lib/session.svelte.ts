@@ -23,6 +23,7 @@ export const session = $state({
   name: '',
   fileName: '', // name of the file in private storage
   saved: false,
+  exporting: false, // the browser is still writing the exported file
   finishing: false,
   finishShare: 0, // 0 to 1, while the file is being finished
   notices: [] as string[],
@@ -216,14 +217,22 @@ export async function stop() {
   }
 }
 
-/** Show a finished file on the Finished screen. */
+/** Next file name: Reclux-recording_001, _002… The count is kept in this browser. */
+function nextName() {
+  let n = 1;
+  try {
+    n = (Number(localStorage.getItem('reclux.count')) || 0) + 1;
+    localStorage.setItem('reclux.count', String(n));
+  } catch {}
+  return `Reclux-recording_${String(n).padStart(3, '0')}`;
+}
+
+/** Show a finished file in the editor. */
 function show(file: File) {
   keepAwake(false);
   cap?.close();
   cap = undefined;
-  const d = new Date();
-  const p = (n: number) => String(n).padStart(2, '0');
-  session.name = `Reclux ${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}.${p(d.getMinutes())}`;
+  session.name = nextName();
   session.url = URL.createObjectURL(file); // points at the file on disk, not a copy in RAM
   session.bytes = file.size;
   session.phase = 'finished';
@@ -266,16 +275,38 @@ export function reset() {
 export async function save() {
   const clean = session.name.replace(/[\\/:*?"<>|]/g, '-').trim() || 'Reclux recording';
   const filename = `${clean}.${session.ext}`;
+  if (session.exporting) return;
+  session.exporting = true;
   try {
-    await browser.downloads.download({ url: session.url, filename, saveAs: true });
+    const id = await browser.downloads.download({ url: session.url, filename, saveAs: true });
+    // download() returns when copying STARTS. A 2-hour file takes a while, and deleting it from Reclux
+    // before then would break the copy, so wait until the browser says it is done.
+    if ((await downloadEnd(id)) !== 'complete') throw new Error('the copy was interrupted. Please try again.');
     session.saved = true;
     // So the next launch does not offer this recording again as "unsaved".
     if (session.fileName) markSaved(session.fileName);
   } catch (e) {
     const msg = (e as Error).message;
     if (!/cancel/i.test(msg)) session.error = `Could not save: ${msg}`;
+  } finally {
+    session.exporting = false;
   }
 }
+
+/** Resolves with "complete" or "interrupted" when the browser has finished the download. */
+const downloadEnd = (id: number) =>
+  new Promise<string>((resolve) => {
+    const done = (state?: string) => {
+      if (!state || state === 'in_progress') return;
+      browser.downloads.onChanged.removeListener(onChanged);
+      resolve(state);
+    };
+    const onChanged = (d: { id: number; state?: { current?: string } }) => {
+      if (d.id === id) done(d.state?.current);
+    };
+    browser.downloads.onChanged.addListener(onChanged);
+    void browser.downloads.search({ id }).then(([d]) => done(d?.state)); // it may already be finished
+  });
 
 /** Look for recordings left behind by a crash or a closed tab. */
 export async function refreshRecoverable() {
