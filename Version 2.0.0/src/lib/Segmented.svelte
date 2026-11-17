@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Icon from './Icon.svelte';
 
   let {
     value = $bindable(),
@@ -8,7 +7,7 @@
     legend,
   }: {
     value: string;
-    options: { value: string; label: string; icon?: string }[];
+    options: { value: string; label: string }[];
     name: string;
     legend: string;
   } = $props();
@@ -20,7 +19,6 @@
     {#each options as o (o.value)}
       <label class:on={value === o.value}>
         <input type="radio" {name} value={o.value} bind:group={value} />
-        {#if o.icon}<Icon name={o.icon} />{/if}
         <span>{o.label}</span>
       </label>
     {/each}

@@ -2,7 +2,6 @@
 // and hardware encoders use far less on normal content, so real files stay much smaller than the size shown.
 export interface Preset {
   id: string;
-  label: string;
   height: 720 | 1080;
   fps: 50 | 60;
   mbps: number;
@@ -10,10 +9,10 @@ export interface Preset {
 
 // V2: quality is locked to 720p/1080p × 50/60 fps (owner's final spec, report §34).
 export const PRESETS: Preset[] = [
-  { id: '720p50', label: '720p · 50 fps', height: 720, fps: 50, mbps: 11 },
-  { id: '720p60', label: '720p · 60 fps', height: 720, fps: 60, mbps: 13 },
-  { id: '1080p50', label: '1080p · 50 fps', height: 1080, fps: 50, mbps: 17 },
-  { id: '1080p60', label: '1080p · 60 fps', height: 1080, fps: 60, mbps: 20 },
+  { id: '720p50', height: 720, fps: 50, mbps: 11 },
+  { id: '720p60', height: 720, fps: 60, mbps: 13 },
+  { id: '1080p50', height: 1080, fps: 50, mbps: 17 },
+  { id: '1080p60', height: 1080, fps: 60, mbps: 20 },
 ];
 
 export const DEFAULT_PRESET = '1080p60';

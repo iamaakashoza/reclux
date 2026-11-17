@@ -14,6 +14,6 @@ export interface OverlayState {
 
 /** Page → recorder. */
 export type OverlayMessage =
-  | { type: 'cursor'; vx: number; vy: number; sx: number; sy: number; wx: number; wy: number; down: boolean }
+  | { type: 'cursor'; vx: number; vy: number; sx: number; sy: number; wx: number; wy: number }
   | { type: 'pos'; x: number; y: number }
   | { type: 'cmd'; cmd: 'pause' | 'resume' | 'stop' | 'camera' };

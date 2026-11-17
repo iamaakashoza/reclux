@@ -17,7 +17,8 @@
 
   // Record: the browser's screen picker, and the floating controls window, both need this same click.
   const record = () => {
-    void start();
+    // Picker cancelled or blocked: recording never started, so close the floating window again.
+    void start().then(() => session.phase === 'idle' && closeFloating());
     openFloating();
   };
 
@@ -95,7 +96,12 @@
       </Banner>
     {/if}
     {#each session.notices as n (n)}
-      <Banner kind="info" title="Heads up">{n}</Banner>
+      <Banner kind="info" title="Heads up">
+        {n}
+        {#snippet actions()}
+          <Button onclick={() => (session.notices = session.notices.filter((x) => x !== n))}>Dismiss</Button>
+        {/snippet}
+      </Banner>
     {/each}
 
     {#if session.phase === 'idle'}
@@ -221,8 +227,13 @@
     margin: 0 auto;
     padding: var(--s-4) var(--s-5) var(--s-5);
   }
+  /* Editor: notices keep their own height, the editor takes the rest. */
   .full main {
-    align-content: stretch;
+    display: flex;
+    flex-direction: column;
+  }
+  .full main > :global(.editor) {
+    flex: 1;
   }
   .start {
     display: grid;

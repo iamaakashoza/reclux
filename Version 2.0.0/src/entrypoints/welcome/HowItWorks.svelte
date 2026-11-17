@@ -92,7 +92,7 @@
         <span class="key"><Icon name="mic" size={16} /></span>
       </span>
     </div>
-    <p><span class="n">3</span><span><strong>Pause, Stop or Mute</strong> from the recorder page.</span></p>
+    <p><span class="n">3</span><span><strong>Pause, Stop or Mute</strong> from the floating controls or the recorder page.</span></p>
   </li>
   <li>
     <div class="art" aria-hidden="true">
@@ -102,7 +102,7 @@
         <span class="tick"><Icon name="check" size={14} /></span>
       </span>
     </div>
-    <p><span class="n">4</span><span><strong>Press Save file.</strong> Choose any folder or drive.</span></p>
+    <p><span class="n">4</span><span><strong>Edit, then Export video.</strong> Trim, split and zoom, then choose any folder or drive.</span></p>
   </li>
 </ol>
 

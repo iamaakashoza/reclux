@@ -5,6 +5,7 @@
   import Icon from '../../lib/Icon.svelte';
   import Logo from '../../lib/Logo.svelte';
   import HowItWorks from './HowItWorks.svelte';
+  import PageFeatures from '../../lib/PageFeatures.svelte';
   import QualityPicker from '../../lib/QualityPicker.svelte';
   import Toggle from '../../lib/Toggle.svelte';
   import { loadSettings, saveSettings, suggestedPreset } from '../../lib/settings';
@@ -74,9 +75,9 @@
           <li><Icon name="download" size={18} /><span><strong>Downloads:</strong> shows the “Save as” window, so you can pick the folder.</span></li>
           <li><Icon name="folder" size={18} /><span><strong>Unlimited storage:</strong> keeps long recordings safely while you record.</span></li>
           {#if !isFirefox}
-            <li><Icon name="sliders" size={18} /><span><strong>CPU:</strong> tells you if your computer is too slow to keep up.</span></li>
             <li><Icon name="play" size={18} /><span><strong>Power:</strong> keeps the computer awake while recording.</span></li>
           {/if}
+          <li><Icon name="camera" size={18} /><span><strong>Web pages (only if you turn on Webcam or Cursor zoom):</strong> shows the webcam circle and follows your cursor while recording. Asked when you switch them on, never at install.</span></li>
         </ul>
         <p class="small">Your browser always asks before Reclux can see your screen or microphone.</p>
       </details>
@@ -98,6 +99,10 @@
           <Toggle icon="mic" label="Microphone" bind:checked={s.mic} />
           <Toggle icon="speaker" label="System audio" bind:checked={s.system} />
         </div>
+        <div class="field">
+          <span class="label">Extras</span>
+          <PageFeatures bind:camera={s.camera} bind:zoom={s.zoom} />
+        </div>
         {#if isFirefox}
           <Banner kind="info" title="Firefox">
             Firefox always saves MP4, because WebM is too slow to encode there. System audio is not available in Firefox.
@@ -107,8 +112,8 @@
     {:else if step === 2}
       <h2 id="step-title" tabindex="-1" bind:this={heading}>How a recording works</h2>
       <HowItWorks {isFirefox} />
-      <Banner kind="warn" title="Always press Save file">
-        Until you save, the video lives in the browser’s private storage on this computer. Clearing the browser’s data would delete it.
+      <Banner kind="warn" title="Always export your video">
+        Until you export it, the video lives in the browser’s private storage on this computer. Clearing the browser’s data would delete it.
         If something goes wrong, Reclux offers to recover it next time.
       </Banner>
     {:else}

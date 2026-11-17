@@ -2684,3 +2684,29 @@ Built from the owner's 5 sketches and the glass research (`reports/Reclux V2 war
 - Building re-encodes the whole video. With a hardware encoder that is faster than real time; without one (or in headless tests: 6 s took 9 s) a long video takes a while. Upgrade path: copy untouched stretches without re-encoding.
 - Sound cuts land on the nearest ~20 ms sound block (fine for speech).
 - The preview may show one frame of a cut part when it jumps (the built file is exact).
+
+## 39. V2 Phase 7: real-user walkthrough, ponytail audit, bug fixes (done) 🧹
+
+### Ponytail audit (over-engineering)
+Cut: unused `actual` capture report, unused cursor `down` flag and listener, unused preset `label`, unused Segmented icons, a duplicate clock formatter in the page overlay (now `fmtClock`), a leftover `endMonitor()` wrapper. About −35 lines.
+Kept for the owner's call: **gsap** (only the welcome animations use it; CSS animations could replace it, one dependency less).
+
+### Bugs found and fixed
+| Bug | Fix |
+|---|---|
+| Cancelling the browser's screen picker left the floating controls window open | Closed again when recording never started |
+| A recovered recording got zoom blocks from the previous recording's cursor path | Cursor path cleared on recover |
+| On the editor, a recording notice stretched to ~170 px and could not be closed | Notices keep their height and have **Dismiss** |
+| After Delete video / New recording, old notices stayed on the start screen | Cleared when a recording is thrown away |
+| Welcome guide: promised a CPU warning that V2 removed; said "Save file" | Copy updated: Export video, floating controls, editing; Webcam / Cursor zoom in "Your defaults"; web page access explained |
+
+### Re-tested after the fixes
+| Check | Result |
+|---|---|
+| Full walkthrough, light and dark, desktop 1440 and tablet 820: popup → welcome → start → countdown → recording → paused → editor → save → export → delete | ✅ no page errors, 0 frames skipped |
+| Real extension (headless Brave): page overlay, circle drag, floating window, cursor zoom → 2 blocks | ✅ |
+| Real extension: split / delete / undo / redo, zoom, build, exact cut and zoom in the new file | ✅ |
+| Type check, Chromium and Firefox builds, both `.check.mjs` | ✅ |
+
+### Still needs the owner (real browsers)
+Real camera and page-access prompt, floating window over desktop apps, Firefox (circle, bar, editing and export), multi-monitor cursor zoom, a long (30+ min) edit-and-export to see build time on this PC.

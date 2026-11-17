@@ -2,6 +2,7 @@
 // cursor zoom, and, where there is no floating window (Firefox), a small control bar.
 // Injected only while recording and only after the user allowed page access. Nothing is collected when idle.
 import { OVERLAY_PORT, type OverlayMessage, type OverlayState } from '../lib/overlay-protocol';
+import { fmtClock } from '../lib/presets';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -67,8 +68,6 @@ export default defineContentScript({
       cam.style.left = `${Math.min(innerWidth - 92, Math.max(92, x * innerWidth))}px`;
       cam.style.top = `${Math.min(innerHeight - 92, Math.max(92, y * innerHeight))}px`;
     };
-    const clock = (s: number) =>
-      [s / 3600, (s % 3600) / 60, s % 60].map((n) => String(Math.floor(n)).padStart(2, '0')).join(':');
 
     port.onMessage.addListener((s: OverlayState) => {
       state = s;
@@ -83,7 +82,7 @@ export default defineContentScript({
       status.textContent =
         s.phase === 'countdown' ? `Starting in ${s.count}` : s.phase === 'finishing' ? 'Finishing…' : paused ? 'Paused' : '● Recording';
       status.classList.toggle('paused', paused);
-      bar.querySelector('.time')!.textContent = clock(s.elapsed);
+      bar.querySelector('.time')!.textContent = fmtClock(s.elapsed);
       pauseBtn.innerHTML = paused ? PLAY : PAUSE;
       pauseBtn.setAttribute('aria-label', paused ? 'Resume recording' : 'Pause recording');
       pauseBtn.disabled = s.phase !== 'recording' && s.phase !== 'paused';
@@ -92,7 +91,6 @@ export default defineContentScript({
     port.onDisconnect.addListener(() => {
       host.remove();
       removeEventListener('pointermove', onMove, true);
-      removeEventListener('pointerdown', onDown, true);
       w.__reclux = false;
     });
 
@@ -126,14 +124,13 @@ export default defineContentScript({
 
     // Cursor positions for cursor zoom, about 20 a second, only from the window the user is working in.
     let last = 0;
-    const report = (e: PointerEvent, down: boolean) => {
+    const onMove = (e: PointerEvent) => {
       if (state?.phase !== 'recording' || !document.hasFocus()) return;
       const now = performance.now();
-      if (!down && now - last < 50) return;
+      if (now - last < 50) return;
       last = now;
       send({
         type: 'cursor',
-        down,
         vx: e.clientX / innerWidth, // inside the page: matches a recorded tab
         vy: e.clientY / innerHeight,
         sx: e.screenX / screen.width, // on the screen: matches a recorded screen
@@ -142,9 +139,6 @@ export default defineContentScript({
         wy: (e.screenY - screenY) / outerHeight,
       });
     };
-    const onMove = (e: PointerEvent) => report(e, false);
-    const onDown = (e: PointerEvent) => report(e, true);
     addEventListener('pointermove', onMove, { capture: true, passive: true });
-    addEventListener('pointerdown', onDown, { capture: true, passive: true });
   },
 });

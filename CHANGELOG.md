@@ -7,6 +7,31 @@ Download Reclux and see the install steps at [reclux.netlify.app](https://reclux
 - **Chrome, Edge, Brave, Opera:** extract the new .zip over the same folder, then press reload on Reclux in your browser's extensions page.
 - **Firefox:** load the new .zip the next time you add Reclux.
 
+## 2.0.0 (17 November 2026)
+
+A new look, a video editor, a webcam circle and cursor zoom. Downloads: `reclux-extension-v2.zip` (Chrome, Edge, Brave, Opera) and `reclux-firefox-extension-v2.zip`.
+
+### New
+- **Liquid-glass design** on every screen, with a new logo. "Reduce transparency" switches to solid surfaces.
+- **Floating controls** (Chrome, Edge, Brave, Opera): a small window on top of every app with Pause, Stop, timer, webcam and mic. Firefox gets a small bar on web pages instead.
+- **Webcam circle:** a round webcam on the screen while you record. Drag it anywhere, or hide it.
+- **Cursor zoom:** while you work in one area of a web page, the video zooms in there, and glides back out when you stop. You can change, add or remove each zoom in the editor.
+- **Editor:** Split (Ctrl+B), Trim In / Out (I / O), Delete, Undo and Redo, a zoomable timeline, and a preview that plays your edit.
+- **Export screen:** your video on the left, its name and details on the right. Choose any folder or drive.
+- **Smart audio ducking:** while you speak, system sound in the recording drops to 20%, then glides back.
+- Webcam and Cursor zoom ask for access to web pages only when you switch them on, never at install.
+
+### Changed
+- **Quality is now 720p or 1080p, at 50 or 60 fps.** On a computer without a hardware video encoder, Reclux starts on 720p.
+- **No more "What to record" step.** Your browser's own window asks: a tab, a window or the whole screen.
+- **No more "Your computer is struggling" warning.** It mostly measured how the browser captures a still screen, not your computer. Recording now never falls behind.
+- Recordings are named `Reclux-recording_001`, `_002` and so on.
+- Saving an edited video replaces the original only after the new one is complete. Cancel keeps the original.
+
+### Fixed
+- Exporting a long video no longer lets you delete it before the copy has finished.
+- Recording no longer freezes on "Starting" when the browser is slow to answer.
+
 ## 1.0.0 (4 November 2026)
 
 First full release. Recording works the same as 0.2.2. What changed is the name and the files.

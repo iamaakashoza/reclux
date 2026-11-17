@@ -22,7 +22,6 @@ export const session = $state({
   count: 3,
   elapsed: 0,
   bytes: 0,
-  actual: '',
   ext: 'mp4' as Format,
   url: '',
   name: '',
@@ -60,7 +59,7 @@ $effect.root(() => {
     untrack(() => overlays?.update());
   });
 });
-export const refreshPageAccess = async () => (session.pageAccess = await hasPageAccess());
+const refreshPageAccess = async () => (session.pageAccess = await hasPageAccess());
 void refreshPageAccess();
 // The popup may change them while this page is open and idle.
 addEventListener('storage', () => {
@@ -164,11 +163,6 @@ async function focusMe() {
   if (tab.windowId !== undefined) await browser.windows.update(tab.windowId, { focused: true }).catch(() => {});
 }
 
-// No "your computer is struggling" warning in V2: V1's rule mostly measured the browser's change-driven
-// screen capture, not the computer (report §34). Frames the pump had to skip are only logged, for testing.
-function endMonitor() {
-  clearInterval(diskTimer);
-}
 
 export async function start() {
   if (busy || session.phase !== 'idle') return;
@@ -191,7 +185,6 @@ export async function start() {
   busy = false;
 
   session.notices = [...cap.notices];
-  session.actual = cap.actual;
   session.ducked = cap.ducks ? false : null;
   cap.video.addEventListener('ended', stop); // user clicked the browser's "Stop sharing"
 
@@ -274,7 +267,9 @@ export async function stop() {
     session.finishing = true;
     if (session.phase === 'recording') tick();
     stopTimer();
-    endMonitor();
+    clearInterval(diskTimer);
+    // No "your computer is struggling" warning in V2: V1's rule mostly measured the browser's change-driven
+    // screen capture, not the computer (report §34). Frames the pump had to skip are only logged, for testing.
     const { fresh, lost } = rec.stats();
     console.info(`Reclux: ${fresh} new pictures from the capture, ${lost} frames skipped.`);
     try {
@@ -325,7 +320,7 @@ export function toggleMute() {
 
 export function reset() {
   stopTimer();
-  endMonitor();
+  clearInterval(diskTimer);
   endOverlays();
   keepAwake(false);
   const r = rec;
@@ -339,12 +334,12 @@ export function reset() {
   if (session.url) URL.revokeObjectURL(session.url);
   session.finishing = false;
   Object.assign(session, {
+    notices: [], // they were about the recording that is gone now
     phase: 'idle',
     elapsed: 0,
     bytes: 0,
     url: '',
     saved: false,
-    actual: '',
     name: '',
     fileName: '',
     ducked: null,
@@ -429,7 +424,7 @@ export async function recover(item: Stored) {
     const file = await getStored(item.name);
     session.fileName = item.name;
     session.ext = item.name.endsWith('.webm') ? 'webm' : 'mp4';
-    session.actual = 'Recovered file';
+    cursor = []; // a recovered file has no cursor path (the last one belongs to another recording)
     show(file);
     session.name = `Recovered ${new Date(item.modified).toLocaleString().replace(/[/:,]/g, '.')}`.trim();
     session.elapsed = await durationOf(session.url);

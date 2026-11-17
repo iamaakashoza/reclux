@@ -120,16 +120,9 @@ export async function openCapture(
     }
 
     const video = display.getVideoTracks()[0]!;
-    const shown = display;
-    const shownMic = mic;
     return {
       stream,
       video,
-      /** Size and fps the browser says it delivers. A report, not a measurement. Read live, so it stays right after the frame rate is lowered. */
-      get actual() {
-        const s = video.getSettings();
-        return `${s.width}×${s.height} · ${Math.round(s.frameRate ?? 0)} fps`;
-      },
       /** The webcam (to ask permission once, and for the circle in the floating window). */
       camera,
       /** True when system sound dips while the mic hears speech (both must be on). */
@@ -140,8 +133,8 @@ export async function openCapture(
       },
       close: () => {
         stopDucking?.();
-        shown.getTracks().forEach((t) => t.stop());
-        shownMic?.getTracks().forEach((t) => t.stop());
+        display?.getTracks().forEach((t) => t.stop());
+        mic?.getTracks().forEach((t) => t.stop());
         camera?.getTracks().forEach((t) => t.stop());
         void ctx.close();
       },
