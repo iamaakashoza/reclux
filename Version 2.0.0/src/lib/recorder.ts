@@ -31,7 +31,7 @@ const CODECS = {
   mp4: { v: 'avc', a: ['aac', 'opus'] },
   webm: { v: 'vp9', a: ['opus'] },
 } as const;
-const AUDIO_BITRATE = 128_000;
+export const AUDIO_BITRATE = 128_000;
 const ENCODER_WARMUP_MS = 3000; // never hold the start back longer than this
 // The pump may fall this far behind (a short stall) and catch up with repeats. Beyond it, it jumps to "now"
 // instead of piling frames up, which is what made V1's encoder fall seconds behind (report §34).
@@ -46,7 +46,7 @@ const PROBE_MS = 3000;
 const answer = (probe: Promise<boolean>) =>
   Promise.race([probe.catch(() => false), new Promise<boolean>((r) => setTimeout(() => r(false), PROBE_MS))]);
 
-async function pickFormat(want: Format, w: number, h: number, bitrate: number, audio: boolean) {
+export async function pickFormat(want: Format, w: number, h: number, bitrate: number, audio: boolean) {
   for (const ext of want === 'webm' ? (['webm', 'mp4'] as const) : (['mp4'] as const)) {
     const c = CODECS[ext];
     const opts = { width: w, height: h, quality: new Quality({ bitrate }) };
@@ -63,7 +63,7 @@ async function pickFormat(want: Format, w: number, h: number, bitrate: number, a
 }
 
 /** A background worker writes each piece into the file. Its answers slow us down if the disk is slow. */
-async function openSink(name: string, onSize: (bytes: number) => void) {
+export async function openSink(name: string, onSize: (bytes: number) => void) {
   const worker = new Worker(new URL('./writer.worker.ts', import.meta.url), { type: 'module' });
   const call = (msg: unknown) =>
     new Promise<{ size?: number }>((resolve, reject) => {
@@ -81,6 +81,23 @@ async function openSink(name: string, onSize: (bytes: number) => void) {
     close: async () => {
       await call({ type: 'close' });
       worker.terminate();
+    },
+  };
+}
+
+/** Video encoder settings, shared by the recording and the edited export. */
+export function videoEncoding(ext: Format, hardware: boolean, fps: number, mbps: number) {
+  // Hardware VP9 runs without a frame rate hint (below), so it assumes 30 fps and spends the bitrate per frame.
+  const bitrate = (hardware && ext === 'webm' ? 30 / fps : 1) * mbps * 1e6;
+  // "constant" keeps small text sharper on hardware H.264 for nearly the same file size (report §32).
+  const bitrateMode = hardware && ext === 'mp4' ? 'constant' : 'variable';
+  return {
+    codec: CODECS[ext].v,
+    quality: new Quality({ bitrate, bitrateMode }),
+    ...(hardware ? { hardwareAcceleration: 'prefer-hardware' as const } : {}),
+    // Told 50 or 60 fps, this VP9 chip is refused and slow software takes over, yet it copes without the hint (report §31).
+    onEncoderConfig: (c: VideoEncoderConfig) => {
+      if (hardware && ext === 'webm') delete c.framerate;
     },
   };
 }
@@ -228,11 +245,6 @@ export async function startRecorder(
   const s = cap.video.getSettings();
 
   const { ext, hardware, sound } = await pickFormat(want, s.width ?? 1920, s.height ?? 1080, preset.mbps * 1e6, !!audio);
-  const codec = CODECS[ext];
-  // Hardware VP9 runs without a frame rate hint (below), so it assumes 30 fps and spends the bitrate per frame.
-  const bitrate = ((hardware && ext === 'webm' ? 30 / preset.fps : 1) * preset.mbps * 1e6);
-  // "constant" keeps small text sharper on hardware H.264 for nearly the same file size (report §32).
-  const bitrateMode = hardware && ext === 'mp4' ? 'constant' : 'variable';
   const name = `reclux-${Date.now()}.${ext}`;
   const release = await holdStored(name);
 
@@ -247,17 +259,11 @@ export async function startRecorder(
     let gotPacket = () => {};
     const firstPacket = new Promise<void>((r) => (gotPacket = r));
     const videoSource = new VideoSampleSource({
-      codec: codec.v,
-      quality: new Quality({ bitrate, bitrateMode }),
+      ...videoEncoding(ext, hardware, preset.fps, preset.mbps),
       sizeChangeBehavior: 'contain', // a resized window must not stop the recording
       // "realtime" lets a busy encoder skip a frame instead of queueing it, so it never falls behind (report §34).
       latencyMode: 'realtime',
-      ...(hardware ? { hardwareAcceleration: 'prefer-hardware' as const } : {}),
       onEncodedPacket: () => gotPacket(),
-      // Told 50 or 60 fps, this VP9 chip is refused and slow software takes over, yet it copes without the hint (report §31).
-      onEncoderConfig: (c) => {
-        if (hardware && ext === 'webm') delete c.framerate;
-      },
     });
     // The frame rate stored in the file.
     output.addVideoTrack(videoSource, { frameRate: preset.fps });

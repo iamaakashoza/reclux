@@ -1,17 +1,37 @@
 <script lang="ts">
-  // Screen 3 timeline: a ruler, the clip, and a playhead. Click or drag anywhere to move the playhead;
-  // arrow keys move it by 1 s (Shift: 5 s). Zoom stretches the timeline; it scrolls sideways when wider than the view.
+  // Screen 3 timeline: a ruler, the kept parts of the video, the zoom lane, and a playhead. Click or drag anywhere
+  // to move the playhead; arrow keys move it by 1 s (Shift: 5 s). Zoom stretches the timeline; it scrolls sideways
+  // when wider than the view. All times here are times of the edited video.
   import { fmtTime } from './presets';
-  import type { Zoom } from './zoom';
 
+  type Piece = { i: number; k: number; at: number; len: number; scale: number; first: boolean; last: boolean };
   let {
     duration,
     current,
     zoom,
     label,
+    parts,
+    active,
     zooms = [],
+    picked = -1,
     onseek,
-  }: { duration: number; current: number; zoom: number; label: string; zooms?: Zoom[]; onseek: (t: number) => void } = $props();
+    onpick,
+    ongrab,
+    onedge,
+  }: {
+    duration: number;
+    current: number;
+    zoom: number;
+    label: string;
+    parts: { at: number; len: number }[];
+    active: number; // the part under the playhead (Split, Trim and Delete act on it)
+    zooms?: Piece[];
+    picked?: number; // the selected zoom
+    onseek: (t: number) => void;
+    onpick: (i: number) => void;
+    ongrab: () => void; // a zoom edge drag begins (one Undo step)
+    onedge: (i: number, side: 'start' | 'end', t: number) => void;
+  } = $props();
 
   let view: HTMLDivElement | undefined = $state();
   let viewWidth = $state(800);
@@ -38,6 +58,20 @@
   };
   const move = (e: PointerEvent) => {
     if ((e.currentTarget as HTMLElement).hasPointerCapture(e.pointerId)) onseek(timeAt(e.clientX));
+  };
+  // Dragging a zoom's edge changes when it starts or ends. Followed on the window: the handle itself can move
+  // to another piece of the block while dragging across a cut.
+  const grab = (e: PointerEvent, i: number, side: 'start' | 'end') => {
+    e.stopPropagation();
+    e.preventDefault();
+    ongrab();
+    const move = (m: PointerEvent) => onedge(i, side, timeAt(m.clientX));
+    const up = () => {
+      removeEventListener('pointermove', move);
+      removeEventListener('pointerup', up);
+    };
+    addEventListener('pointermove', move);
+    addEventListener('pointerup', up);
   };
   const key = (e: KeyboardEvent) => {
     const by = e.shiftKey ? 5 : 1;
@@ -81,13 +115,29 @@
         </span>
       {/each}
     </div>
-    <div class="clip" style:left="{x(0)}px" style:width="{width}px" aria-hidden="true">
-      <span>{label}</span>
-    </div>
-    {#each zooms as z, i (i)}
-      <div class="zoom" style:left="{x(z.start)}px" style:width="{(z.end - z.start) * pxPerSec}px" aria-hidden="true">
-        <span>Zoom {z.scale}×</span>
+    {#each parts as p, i (i)}
+      <div class="clip" class:active={i === active && parts.length > 1} style:left="{x(p.at)}px" style:width="{Math.max(2, p.len * pxPerSec - 2)}px" aria-hidden="true">
+        <span>{i === 0 ? label : `Part ${i + 1}`}</span>
       </div>
+    {/each}
+    {#each zooms as z (`${z.i}-${z.k}`)}
+      <button
+        type="button"
+        class="zoom"
+        class:picked={z.i === picked}
+        style:left="{x(z.at)}px"
+        style:width="{z.len * pxPerSec}px"
+        aria-label="Zoom {z.i + 1}, {z.scale}×, at {fmtTime(Math.floor(z.at))}"
+        aria-pressed={z.i === picked}
+        onpointerdown={(e) => e.stopPropagation()}
+        onclick={() => onpick(z.i)}
+      >
+        <span>Zoom {z.scale}×</span>
+        {#if z.i === picked}
+          {#if z.first}<i class="edge start" onpointerdown={(e) => grab(e, z.i, 'start')} aria-hidden="true"></i>{/if}
+          {#if z.last}<i class="edge end" onpointerdown={(e) => grab(e, z.i, 'end')} aria-hidden="true"></i>{/if}
+        {/if}
+      </button>
     {/each}
     <div class="playhead" style:left="{x(current)}px" aria-hidden="true"></div>
   </div>
@@ -124,10 +174,34 @@
     border-radius: var(--r-pill);
     background: color-mix(in srgb, var(--c-focus) 28%, var(--c-surface));
     border: 1px solid color-mix(in srgb, var(--c-focus) 70%, transparent);
-    font-size: 11px;
-    font-weight: 700;
+    color: var(--c-text);
+    font: 700 11px var(--font);
     overflow: clip;
     white-space: nowrap;
+    cursor: pointer;
+  }
+  .zoom.picked {
+    overflow: visible;
+    background: color-mix(in srgb, var(--c-focus) 55%, var(--c-surface));
+    border-color: var(--c-focus);
+    z-index: 1;
+  }
+  /* Drag handles on the selected zoom's ends. */
+  .edge {
+    position: absolute;
+    top: -3px;
+    bottom: -3px;
+    width: 10px;
+    border-radius: var(--r-pill);
+    background: var(--c-focus);
+    cursor: ew-resize;
+    touch-action: none;
+  }
+  .edge.start {
+    left: -5px;
+  }
+  .edge.end {
+    right: -5px;
   }
   .ruler {
     position: absolute;
@@ -170,6 +244,11 @@
     font-weight: 600;
     overflow: clip; /* clip, not hidden: hidden would stop the name below from sticking in view */
     white-space: nowrap;
+  }
+  /* The part Split, Trim and Delete act on. */
+  .clip.active {
+    border: 2px solid var(--c-lux);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--c-lux) 35%, transparent);
   }
   .clip span {
     position: sticky;

@@ -2642,3 +2642,45 @@ Built from the owner's 5 sketches and the glass research (`reports/Reclux V2 war
 - A real camera, real page-access prompt, and the floating window over desktop apps.
 - Firefox: the circle frame's camera access inside web pages has not been tried.
 - Zoom position on multi-monitor setups (screen coordinates assume one screen). `ponytail` note in `zoom.ts`: zoom values are starting guesses.
+
+## 38. V2 Phase 6: editor tools and export with edits (done) ✂️
+
+### How editing works
+
+```
+ Timeline:  [ Part 1 ][ Part 2 (outlined = the one under the playhead) ][ Part 3 ]
+            [  Zoom 1.6×  ]            [ Zoom 2× ]   ← click one to change it
+ Tools:     Split (Ctrl+B) · Trim In (I) · Trim Out (O) · Delete · Undo (Ctrl+Z) · Redo (Ctrl+Shift+Z)
+```
+
+| Tool | What it does |
+|---|---|
+| Split | Cuts the part under the playhead in two. |
+| Trim In / Out | Cuts the start (up to the playhead) or the end (from the playhead) of that part. The sketch's one "Trim [In–Out]" became two buttons, so each does one predictable thing. |
+| Delete | Removes the outlined part; the rest closes up. The last part cannot be deleted. |
+| Zooms | Click a block: −/+ size (1.2×–3×), click the video to pick the spot, drag the ends (or Start here / End here), Remove. **Add zoom** puts a 3 s zoom at the playhead (also for desktop apps, where the cursor is not followed). |
+| Undo / Redo | Every cut and zoom change. |
+| Preview | Plays the edit as it will be: skips cut parts, zooms live. |
+
+### Save changes (Screen 4)
+- No edits and no zooms → straight to Export, the file is untouched.
+- With edits → "Replace the original video?" → **Building your video… N%** (Cancel any time) → Export.
+- Building = decode only the kept parts, draw zoomed moments enlarged (same math as the preview), encode again with the recording's own settings (hardware first), write to private storage. The original is deleted only after the new file is complete; Cancel, an error or a crash leave the original as it was (a crash leaves only a `.tmp`, cleaned up on the next start).
+- Code: `edit.ts` (cut list, checked by `node src/lib/edit.check.mjs`), `render.ts` (building), `session.applyEdit`.
+
+### Tested (real extension, headless Brave)
+| Check | Result |
+|---|---|
+| Split, split, delete → 2 parts, 8 s → 6 s; Undo → 3 parts; Redo → 2 | ✅ |
+| Add zoom, size 2×, aim by clicking the video, drag its end on the timeline | ✅ |
+| Built file: 6.00 s; picture at new 4.5 s = original 6.5 s (cut is exact) | ✅ |
+| Built file: zoomed moment shows the aimed area; other moments not zoomed | ✅ (pixel colours checked) |
+| Only the new file is left in storage | ✅ |
+| Cancel while building: original kept, nothing left over, still plays | ✅ |
+| Tablet (820 px): no sideways scroll | ✅ |
+| Type check, Chromium and Firefox builds, both `.check.mjs` | ✅ |
+
+### Limits (ponytail notes)
+- Building re-encodes the whole video. With a hardware encoder that is faster than real time; without one (or in headless tests: 6 s took 9 s) a long video takes a while. Upgrade path: copy untouched stretches without re-encoding.
+- Sound cuts land on the nearest ~20 ms sound block (fine for speech).
+- The preview may show one frame of a cut part when it jumps (the built file is exact).

@@ -22,6 +22,7 @@ npm run build:firefox   # -> .output/reclux-firefox-extension
 npm run zip / zip:firefox
 npm run check           # svelte-check type check
 node src/lib/zoom.check.mjs   # assert-based check of the cursor-zoom logic
+node src/lib/edit.check.mjs   # assert-based check of the cut list (split / trim / delete)
 ```
 
 There is no test suite. Verify with `npm run check` plus a manual load of `.output/reclux-extension-all-in-one` via "Load unpacked". Brave is the main test browser.
@@ -54,7 +55,9 @@ Recording pipeline (`src/lib/`):
 - `awake.ts` — `chrome.power`; Chromium only.
 - `overlay.ts` + `overlay-protocol.ts` — recorder side of the page overlay: optional `<all_urls>` access (asked from the Webcam/Cursor zoom switches, `PageFeatures.svelte`), `scripting.executeScript` into tabs, a Port per page for state, commands and cursor positions. `wxt.config.ts` deletes the `host_permissions` WXT would add, so there is no install warning.
 - `pip.ts` + `Floating.svelte` — the floating controls window (Document Picture-in-Picture, Chromium only), opened from the same click as Record. Shows the webcam circle itself when page access was refused.
-- `zoom.ts` — cursor path → zoom blocks (`autoZoom`), and the eased view at a time (`zoomAt`) used by the editor preview and (Phase 6) the export.
+- `zoom.ts` — cursor path → zoom blocks (`autoZoom`), and the eased view at a time (`zoomAt`) used by the editor preview and the export.
+- `edit.ts` — the cut list (kept parts in source seconds) and output↔source time mapping. Editor keeps it plus Undo/Redo snapshots.
+- `render.ts` — "Save changes" with edits: decodes the kept parts, draws zoomed moments on a canvas, re-encodes (`videoEncoding`/`pickFormat` shared with `recorder.ts`) into `<name>.tmp`, then `session.applyEdit` swaps it in for the original (report §38).
 - The webcam is a live circle, captured with the screen (owner's call, report §37); only cursor zoom is applied after recording.
 
 Browser differences live in `wxt.config.ts` (`power` omitted on Firefox, min Chrome 116, min Firefox 140) and in runtime feature checks — not separate code paths.

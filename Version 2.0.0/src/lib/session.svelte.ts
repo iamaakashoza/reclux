@@ -9,6 +9,8 @@ import { findUnsaved, getStored, holdStored, markSaved, removeStored, type Store
 import { hasPageAccess, startOverlays } from './overlay';
 import type { OverlayMessage, OverlayState } from './overlay-protocol';
 import { autoZoom, type CursorPoint, type Zoom } from './zoom';
+import type { Clip } from './edit';
+import { renderEdit } from './render';
 import { untrack } from 'svelte';
 
 type Phase = 'idle' | 'countdown' | 'recording' | 'paused' | 'finished';
@@ -350,6 +352,27 @@ export function reset() {
     zooms: [],
   });
   void refreshRecoverable();
+}
+
+/**
+ * "Save changes" with edits: builds the edited video and puts it in place of the original recording.
+ * The original is only deleted once the new file is complete, so a failure or Cancel loses nothing.
+ */
+export async function applyEdit(clips: Clip[], onProgress: (share: number) => void, cancelled: () => boolean) {
+  const out = await renderEdit(session.fileName, clips, $state.snapshot(session.zooms), findPreset(session.presetId), onProgress, cancelled);
+  releaseFile?.();
+  await removeStored(session.fileName);
+  releaseFile = out.release;
+  URL.revokeObjectURL(session.url);
+  Object.assign(session, {
+    fileName: out.name,
+    ext: out.ext,
+    url: URL.createObjectURL(out.file),
+    bytes: out.file.size,
+    elapsed: Math.round(out.duration),
+    zooms: [], // now part of the picture
+    saved: false,
+  });
 }
 
 /** Opens a "Save as" window, so the user can pick any folder or drive (D:, E:…). */

@@ -68,7 +68,7 @@ function merge(blocks: Zoom[]) {
 }
 
 /** Moves the centre so the zoomed view never shows past the edge of the video. */
-function fit(z: Zoom): Zoom {
+export function fit(z: Zoom): Zoom {
   const half = 0.5 / z.scale;
   const clamp = (v: number) => Math.min(1 - half, Math.max(half, v));
   return { ...z, x: clamp(z.x), y: clamp(z.y) };
