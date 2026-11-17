@@ -1,0 +1,29 @@
+{
+  "name": "reclux",
+  "description": "Offline-first screen recorder",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox --mv3",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox --mv3",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox --mv3",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "postinstall": "wxt prepare"
+  },
+  "devDependencies": {
+    "@wxt-dev/module-svelte": "^2.0.4",
+    "svelte": "^5.53.7",
+    "svelte-check": "^4.4.4",
+    "typescript": "^5.9.3",
+    "vite": "^8.1.5",
+    "wxt": "^0.21.3"
+  },
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "mediabunny": "^1.62.1"
+  }
+}

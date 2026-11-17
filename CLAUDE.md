@@ -4,9 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Reclux is an offline-first screen recorder browser extension (Manifest V3). No account, no upload, no server. Built with WXT, Svelte 5 (runes), TypeScript, and Mediabunny for encoding/muxing.
 
+## Folders
+
+- `Version 2.0.0/` — the live project. All work happens here; run every command below inside it. Paths in this file (`src/…`, `.output/…`, `brand/…`) are relative to it.
+- `Version 1.0.0/` — frozen archive of the 1.0.0 release (also git tag `v1.0.0`). Do not edit; it still builds on its own.
+- Top level: `CLAUDE.md`, `README.md`, `CHANGELOG.md`, `report.md` are shared by both versions.
+
 ## Commands
 
 ```
+cd "Version 2.0.0"
 npm ci
 npm run dev             # Chromium dev build. Load .output/reclux-extension-all-in-one-dev by hand (web-ext, which opened a browser, was removed)
 npm run dev:firefox
@@ -57,5 +64,5 @@ UI: shared components in `src/lib/*.svelte` (`Logo.svelte` is the logo), design 
 
 - Comments are short plain English explaining *why* (the owner is a designer, not a developer).
 - Deliberate shortcuts are marked `// ponytail: <limit>, <upgrade path>`.
-- The version stays 1.0.0 (`package.json`, website, GitHub Release) until the owner says to change it. Download names: `reclux-extension-v1.zip`, `reclux-firefox-extension-v1.zip`.
+- The version stays 2.0.0 (`package.json` in `Version 2.0.0/`, website, GitHub Release) until the owner says to change it. Download names: `reclux-extension-v2.zip`, `reclux-firefox-extension-v2.zip`. V1 keeps its v1 names.
 - Commits use the GitHub no-reply address; never put a real email in commits or published files.
