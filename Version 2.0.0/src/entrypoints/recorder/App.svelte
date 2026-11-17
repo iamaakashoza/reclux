@@ -13,6 +13,13 @@
   import { loadSettings, saveSettings } from '../../lib/settings';
   import { onMount, tick } from 'svelte';
   import { discardRecoverable, recover, refreshRecoverable, reset, session, start } from '../../lib/session.svelte';
+  import { canFloat, closeFloating, openFloating } from '../../lib/pip';
+
+  // Record: the browser's screen picker, and the floating controls window, both need this same click.
+  const record = () => {
+    void start();
+    openFloating();
+  };
 
   // A crash or closed tab can leave a recording behind. Offer to get it back.
   onMount(refreshRecoverable);
@@ -25,6 +32,10 @@
   // Lighter glass while recording: the screen behind moves, so blur would be redrawn every frame.
   $effect(() => {
     document.documentElement.toggleAttribute('data-recording', live);
+  });
+  // The floating window only lives while recording.
+  $effect(() => {
+    if (session.phase === 'idle' || session.phase === 'finished') closeFloating();
   });
 
   // When the screen changes, move keyboard focus to its first button, so it is not lost when the old one disappears.
@@ -104,8 +115,9 @@
         <p class="chips">
           <span>{preset.height}p</span><span>{preset.fps} fps</span>
           <span>Mic {session.mic ? 'on' : 'off'}</span><span>System audio {session.system ? 'on' : 'off'}</span>
+          {#if session.camera}<span>Webcam</span>{/if}{#if session.zoom}<span>Cursor zoom</span>{/if}
         </p>
-        <Button variant="primary" size="lg" icon="record" onclick={start}>Record</Button>
+        <Button variant="primary" size="lg" icon="record" onclick={record}>Record</Button>
         <p class="hint">Your browser asks what to share: a tab, a window or your whole screen.</p>
         <details>
           <summary>Settings <Icon name="chevron" size={16} /></summary>
@@ -127,6 +139,10 @@
             : 'Recording. Work in your other tab or window; come back here to pause or stop.'}
         </p>
         <RecordingBar />
+        {#if !session.floating && canFloat()}
+          <Button icon="window" onclick={openFloating}>Pop out controls</Button>
+          <p class="hint">A small window that stays on top of every app, so you can pause and stop from anywhere.</p>
+        {/if}
         {#if session.free !== null && session.free < LOW_FREE}
           <Banner kind="warn" title="Disk space is running low">
             About {fmtSize(session.free / 1e6)} left on the drive that holds your browser. If it gets close to full,

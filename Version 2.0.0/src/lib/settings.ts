@@ -10,9 +10,13 @@ interface Settings {
   system: boolean;
   /** "Reduce transparency": solid surfaces instead of glass. Firefox has no system setting for it. */
   solid: boolean;
+  /** Webcam circle while recording (needs web page access to show on pages). */
+  camera: boolean;
+  /** Cursor zoom: follow the cursor on web pages and zoom there in the editor. */
+  zoom: boolean;
 }
 
-const DEFAULTS: Settings = { presetId: DEFAULT_PRESET, format: 'mp4', mic: true, system: true, solid: false };
+const DEFAULTS: Settings = { presetId: DEFAULT_PRESET, format: 'mp4', mic: true, system: true, solid: false, camera: false, zoom: true };
 
 const KEY = 'reclux.settings';
 
@@ -28,6 +32,8 @@ export function loadSettings(): Settings {
     mic: typeof s.mic === 'boolean' ? s.mic : DEFAULTS.mic,
     system: typeof s.system === 'boolean' ? s.system : DEFAULTS.system,
     solid: s.solid === true,
+    camera: s.camera === true,
+    zoom: s.zoom !== false,
   };
 }
 

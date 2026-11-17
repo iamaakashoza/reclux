@@ -2,14 +2,16 @@
   // Screen 3 timeline: a ruler, the clip, and a playhead. Click or drag anywhere to move the playhead;
   // arrow keys move it by 1 s (Shift: 5 s). Zoom stretches the timeline; it scrolls sideways when wider than the view.
   import { fmtTime } from './presets';
+  import type { Zoom } from './zoom';
 
   let {
     duration,
     current,
     zoom,
     label,
+    zooms = [],
     onseek,
-  }: { duration: number; current: number; zoom: number; label: string; onseek: (t: number) => void } = $props();
+  }: { duration: number; current: number; zoom: number; label: string; zooms?: Zoom[]; onseek: (t: number) => void } = $props();
 
   let view: HTMLDivElement | undefined = $state();
   let viewWidth = $state(800);
@@ -70,7 +72,7 @@
   onpointermove={move}
   onkeydown={key}
 >
-  <div class="inner" style:width="{width + 2 * PAD}px">
+  <div class="inner" class:lanes={zooms.length > 0} style:width="{width + 2 * PAD}px">
     <div class="ruler" aria-hidden="true">
       {#each ticks as t (t)}
         {@const major = Math.abs(t / step - Math.round(t / step)) < 1e-6}
@@ -82,6 +84,11 @@
     <div class="clip" style:left="{x(0)}px" style:width="{width}px" aria-hidden="true">
       <span>{label}</span>
     </div>
+    {#each zooms as z, i (i)}
+      <div class="zoom" style:left="{x(z.start)}px" style:width="{(z.end - z.start) * pxPerSec}px" aria-hidden="true">
+        <span>Zoom {z.scale}×</span>
+      </div>
+    {/each}
     <div class="playhead" style:left="{x(current)}px" aria-hidden="true"></div>
   </div>
 </div>
@@ -102,6 +109,25 @@
   .inner {
     position: relative;
     height: 112px;
+  }
+  .inner.lanes {
+    height: 140px;
+  }
+  /* Cursor zoom blocks: a lane under the clip. */
+  .zoom {
+    position: absolute;
+    top: 106px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--s-2);
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--c-focus) 28%, var(--c-surface));
+    border: 1px solid color-mix(in srgb, var(--c-focus) 70%, transparent);
+    font-size: 11px;
+    font-weight: 700;
+    overflow: clip;
+    white-space: nowrap;
   }
   .ruler {
     position: absolute;

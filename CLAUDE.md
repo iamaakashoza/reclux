@@ -20,10 +20,13 @@ npm run dev:firefox
 npm run build           # -> .output/reclux-extension-all-in-one (Chrome, Brave, Edge, Opera)
 npm run build:firefox   # -> .output/reclux-firefox-extension
 npm run zip / zip:firefox
-npm run check           # svelte-check type check — the only automated verification
+npm run check           # svelte-check type check
+node src/lib/zoom.check.mjs   # assert-based check of the cursor-zoom logic
 ```
 
 There is no test suite. Verify with `npm run check` plus a manual load of `.output/reclux-extension-all-in-one` via "Load unpacked". Brave is the main test browser.
+
+Automated runs: Google Chrome 137+ ignores `--load-extension`, but **headless Brave still loads an unpacked extension** (`brave.exe --headless=new --load-extension=<dir> --remote-debugging-port=…`), so the real extension (popup, recorder, floating window, page overlay) can be driven over CDP. Page access cannot be clicked there: test on a copy of the build with `host_permissions: ["<all_urls>"]` added. Headless screenshots do not paint CSS transforms on `<video>` (the zoom preview), so check those by measuring boxes, not pixels.
 
 When testing a recording automatically, do not use `--use-fake-device-for-media-stream`: it also replaces the screen with a fake 20 fps video. Report §31 lists what is and is not covered.
 
@@ -34,6 +37,8 @@ Entrypoints (`src/entrypoints/`):
 - `popup/` — Screen 1: Quality, FPS, audio, then opens `recorder.html` in a tab. Recording cannot start in the popup: it closes on blur and `getDisplayMedia` needs a click on a real page.
 - `recorder/` — the page that actually records. All recording state lives here. Flow: start card → countdown → `RecordingBar` (Screen 2) → `Editor` + `Timeline` (Screen 3) → save `Modal` (Screen 4) → `Export` (Screen 5, Save As via `downloads`, waits until the copy completes).
 - `welcome/` — first-run guide.
+- `bubble/` — the webcam circle page, shown as an iframe inside web pages (so the camera permission belongs to Reclux, not the site). Listed in `web_accessible_resources`.
+- `overlay.content.ts` — injected (runtime registration, never at install) into open tabs only while recording and only with page access: webcam circle (drag, hide), cursor positions, and a control bar where there is no floating window (Firefox).
 
 Popup and recorder share one origin, so settings pass through one `localStorage` key (`src/lib/settings.ts`), not messaging. Quality is locked to 720p/1080p × 50/60 fps (`presets.ts`, picked with `QualityPicker.svelte`); on first run, a PC with no hardware H.264 encoder for 1080p60 starts on 720p.
 
@@ -47,6 +52,10 @@ Recording pipeline (`src/lib/`):
 - `track-processor.ts` — polyfill for `MediaStreamTrackProcessor` on Firefox (hidden `<video>` read on a worker clock, since hidden-tab timers are throttled).
 - `ticker.worker.ts` — that worker clock. Used anywhere a timer must keep running in a hidden tab (Firefox frames, the frame pump, ducking).
 - `awake.ts` — `chrome.power`; Chromium only.
+- `overlay.ts` + `overlay-protocol.ts` — recorder side of the page overlay: optional `<all_urls>` access (asked from the Webcam/Cursor zoom switches, `PageFeatures.svelte`), `scripting.executeScript` into tabs, a Port per page for state, commands and cursor positions. `wxt.config.ts` deletes the `host_permissions` WXT would add, so there is no install warning.
+- `pip.ts` + `Floating.svelte` — the floating controls window (Document Picture-in-Picture, Chromium only), opened from the same click as Record. Shows the webcam circle itself when page access was refused.
+- `zoom.ts` — cursor path → zoom blocks (`autoZoom`), and the eased view at a time (`zoomAt`) used by the editor preview and (Phase 6) the export.
+- The webcam is a live circle, captured with the screen (owner's call, report §37); only cursor zoom is applied after recording.
 
 Browser differences live in `wxt.config.ts` (`power` omitted on Firefox, min Chrome 116, min Firefox 140) and in runtime feature checks — not separate code paths.
 

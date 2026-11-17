@@ -5,6 +5,7 @@
   import Button from '../../lib/Button.svelte';
   import Icon from '../../lib/Icon.svelte';
   import Logo from '../../lib/Logo.svelte';
+  import PageFeatures from '../../lib/PageFeatures.svelte';
   import QualityPicker from '../../lib/QualityPicker.svelte';
   import Toggle from '../../lib/Toggle.svelte';
   import { loadSettings, saveSettings, suggestedPreset } from '../../lib/settings';
@@ -22,10 +23,11 @@
 <main>
   <header><Logo height={20} /></header>
   <h1>What are you recording today?</h1>
-  <QualityPicker name="popup" bind:value={s.presetId} />
+  <div class="pair"><QualityPicker name="popup" bind:value={s.presetId} /></div>
   <div class="audio">
     <Toggle icon="mic" label="Microphone" bind:checked={s.mic} />
     <Toggle icon="speaker" label="System audio" bind:checked={s.system} />
+    <PageFeatures bind:camera={s.camera} bind:zoom={s.zoom} compact />
   </div>
   <Button variant="primary" size="lg" icon="record" block onclick={openRecorder}>Start recording</Button>
   <p class="offline"><Icon name="shield" size={14} /> Works offline · Saved on this device</p>
@@ -34,7 +36,7 @@
 <style>
   main {
     display: grid;
-    gap: var(--s-4);
+    gap: var(--s-3);
     width: 22.5rem;
     padding: var(--s-4) var(--s-5) var(--s-4);
   }
@@ -43,6 +45,12 @@
     font-weight: 700;
     letter-spacing: -0.015em;
     line-height: 1.25;
+  }
+  /* Quality and FPS side by side, so Start recording stays inside the browser's 600 px popup limit. */
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s-3);
   }
   .audio {
     display: grid;

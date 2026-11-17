@@ -7,6 +7,13 @@ const firefox = process.argv.some((a: string, i: number, all: string[]) => a ===
 
 export default defineConfig({
   srcDir: 'src',
+  hooks: {
+    // WXT adds the overlay's <all_urls> as a required host permission, which would show "Read and change all your
+    // data on all websites" at install. Keep it optional instead: asked only when Webcam or Cursor zoom is turned on.
+    'build:manifestGenerated': (_wxt, manifest) => {
+      delete manifest.host_permissions;
+    },
+  },
   modules: ['@wxt-dev/module-svelte'],
   // Folder and .zip names people see: the build folder, and the files on the website.
   outDirTemplate: firefox ? 'reclux-firefox-extension{{modeSuffix}}' : 'reclux-extension-all-in-one{{modeSuffix}}',
@@ -33,6 +40,12 @@ export default defineConfig({
     // unlimitedStorage: without it the private recording storage is capped (about 10 GB here), too small for 2 hours of 1080p60.
     // power: keeps the PC awake while recording (a hidden tab cannot use the web wake lock). No install warning.
     // Firefox has no power API, so it is left out there.
-    permissions: ['downloads', 'unlimitedStorage', ...(browser === 'firefox' ? [] : ['power'])],
+    // scripting: puts the webcam circle and cursor tracking on web pages while recording. No install warning by itself.
+    permissions: ['downloads', 'unlimitedStorage', 'scripting', ...(browser === 'firefox' ? [] : ['power'])],
+    // Web page access is asked only when the user turns on Webcam or Cursor zoom, never at install (report §37).
+    optional_host_permissions: ['<all_urls>'],
+    // The webcam circle is a Reclux page shown inside the web page, so the camera permission stays with Reclux,
+    // never with the website.
+    web_accessible_resources: [{ resources: ['bubble.html', 'chunks/*', 'assets/*'], matches: ['<all_urls>'] }],
   }),
 });

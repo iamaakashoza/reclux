@@ -2592,3 +2592,53 @@ Built from the owner's 5 sketches and the glass research (`reports/Reclux V2 war
 - Split / Trim / Delete / Undo are shown but switched off until Phase 6.
 - The recording bar lives in the recorder tab; Phase 5 moves it into a floating window / onto the web page, with the webcam circle.
 - Contrast is checked by eye only, not measured. The real Save As window and real picker need the owner's Brave test.
+
+---
+
+## 37. V2 Phase 5: webcam circle, floating controls, cursor zoom (done) 🎥
+
+### Owner's decision (17 Nov 2026)
+- **Webcam = live circle.** The circle on screen is recorded as part of the screen, like Loom and Screenity. Drag it anytime while recording; it cannot be moved afterwards. It costs the computer almost nothing (the browser draws it, nothing is re-encoded). This replaces "webcam added at export": a circle shown live would have appeared twice.
+- **Cursor zoom stays "after recording":** cursor positions are saved while recording and become zoom blocks in the editor (applied at export in Phase 6).
+
+### How it works
+
+```
+ Click Record ──► browser picker + floating window (Chromium)
+      │
+      ├─ Web pages (with page access): webcam circle (drag / hide), cursor positions
+      │     Firefox (no floating window): + a small control bar bottom-left
+      ├─ Floating window: ● Recording · pause · stop · timer · size · webcam · mic
+      │     (shows the webcam circle itself if page access was refused)
+      └─ Stop (from anywhere) ──► Reclux tab comes to the front ──► editor with zoom blocks
+```
+
+| Piece | Detail |
+|---|---|
+| Popup / Settings | New switches **Webcam** and **Cursor zoom**. Turning one on asks the browser for page access once. Nothing is asked at install (no "read and change all your data" warning). |
+| Webcam circle | 180 px, mirrored, white ring, bottom-right by default; drag anywhere, × to hide; position shared across tabs. A Reclux page in a frame, so websites never get the camera. |
+| Camera permission | Asked together with the mic in one prompt, from the Reclux tab. |
+| Cursor zoom | ~20 positions a second from the window you work in. Rule: working in one area for ≥ 1 s → zoom 1.6× there; still for 1.5 s or jumping far → zoom out. Glides in and out over 0.5 s. |
+| Editor | Zoom blocks in a lane under the clip; the preview zooms while playing. |
+
+### Fixed along the way
+- **WXT added a required `<all_urls>` host permission** (an install warning). Removed at build time; page access is optional only.
+- **A stalled "can this browser encode?" answer froze the start on "0"** (seen after a denied camera). Each check now gives up after 3 s and falls back (hardware → software), or shows an error, never hangs.
+- **The popup grew past the browser's 600 px limit** with the new switches. Quality and FPS now sit side by side.
+
+### Tested (real extension, headless Brave, fake camera, test page)
+| Check | Result |
+|---|---|
+| Circle on a web page, drag to top-left, hide button | ✅ |
+| Floating window opens from the Record click, countdown in it | ✅ |
+| No floating window (as in Firefox): bar on the page | ✅ |
+| No page access: circle inside the floating window | ✅ |
+| Overlay removed from the page after Stop | ✅ |
+| Cursor work in 2 areas → 2 zoom blocks; preview scale 1.6× applied | ✅ (measured; headless screenshots don't paint video transforms) |
+| `node src/lib/zoom.check.mjs` | ✅ |
+| Recordings | ✅ 0 frames skipped |
+
+### Not tested yet (needs the owner's Brave and Firefox)
+- A real camera, real page-access prompt, and the floating window over desktop apps.
+- Firefox: the circle frame's camera access inside web pages has not been tried.
+- Zoom position on multi-monitor setups (screen coordinates assume one screen). `ponytail` note in `zoom.ts`: zoom values are starting guesses.

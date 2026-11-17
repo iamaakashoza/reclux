@@ -6,7 +6,8 @@
     label,
     icon,
     hint,
-  }: { checked?: boolean; label: string; icon: string; hint?: string } = $props();
+    onchange,
+  }: { checked?: boolean; label: string; icon: string; hint?: string; onchange?: (on: boolean) => void } = $props();
 </script>
 
 <label>
@@ -17,7 +18,7 @@
       {#if hint}<small>{hint}</small>{/if}
     </span>
   </span>
-  <input type="checkbox" role="switch" bind:checked />
+  <input type="checkbox" role="switch" bind:checked onchange={() => onchange?.(checked)} />
 </label>
 
 <style>

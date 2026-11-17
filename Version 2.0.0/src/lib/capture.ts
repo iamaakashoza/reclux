@@ -52,11 +52,13 @@ export async function openCapture(
   p: Preset,
   wantMic: boolean,
   wantSystem: boolean,
+  wantCamera: boolean,
   onDuck: (ducked: boolean) => void,
 ) {
   const ctx = new AudioContext(); // created before any await, inside the click
   let display: MediaStream | undefined;
   let mic: MediaStream | undefined;
+  let camera: MediaStream | undefined;
   try {
     display = await navigator.mediaDevices.getDisplayMedia({
       video: {
@@ -78,12 +80,22 @@ export async function openCapture(
     if (wantSystem && !system.length) {
       notices.push('No system audio was shared. Next time, turn on the audio switch in the browser’s sharing window.');
     }
-    if (wantMic) {
+    // Mic and camera in one request, so the browser asks once. If that fails, try each alone,
+    // so a blocked camera does not also lose the mic.
+    const MIC = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
+    const CAM = { width: { ideal: 480 }, height: { ideal: 480 }, facingMode: 'user' };
+    const ask = (c: MediaStreamConstraints) => navigator.mediaDevices.getUserMedia(c);
+    if (wantMic || wantCamera) {
       try {
-        mic = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+        const both = await ask({ audio: wantMic && MIC, video: wantCamera && CAM });
+        if (wantMic) mic = new MediaStream(both.getAudioTracks());
+        if (wantCamera) camera = new MediaStream(both.getVideoTracks());
       } catch {
-        notices.push('Microphone is blocked, so Reclux is recording without it.');
+        if (wantMic) mic = await ask({ audio: MIC }).catch(() => undefined);
+        if (wantCamera) camera = await ask({ video: CAM }).catch(() => undefined);
       }
+      if (wantMic && !mic) notices.push('Microphone is blocked, so Reclux is recording without it.');
+      if (wantCamera && !camera) notices.push('Camera is blocked, so there is no webcam circle. Allow the camera for Reclux to use it.');
     }
     // With no system audio the mic is the only way sound gets in, and it can hear the speakers.
     if (!system.length && mic) {
@@ -118,6 +130,8 @@ export async function openCapture(
         const s = video.getSettings();
         return `${s.width}×${s.height} · ${Math.round(s.frameRate ?? 0)} fps`;
       },
+      /** The webcam (to ask permission once, and for the circle in the floating window). */
+      camera,
       /** True when system sound dips while the mic hears speech (both must be on). */
       ducks: !!stopDucking,
       notices,
@@ -128,12 +142,14 @@ export async function openCapture(
         stopDucking?.();
         shown.getTracks().forEach((t) => t.stop());
         shownMic?.getTracks().forEach((t) => t.stop());
+        camera?.getTracks().forEach((t) => t.stop());
         void ctx.close();
       },
     };
   } catch (e) {
     display?.getTracks().forEach((t) => t.stop());
     mic?.getTracks().forEach((t) => t.stop());
+    camera?.getTracks().forEach((t) => t.stop());
     void ctx.close();
     throw e;
   }

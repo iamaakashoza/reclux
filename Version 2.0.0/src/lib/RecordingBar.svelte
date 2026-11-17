@@ -12,7 +12,9 @@
 <section class="bar glass" aria-label="Recording controls">
   <div class="top">
     <span class="status" class:paused role="status">
-      {#if session.finishing}
+      {#if session.phase === 'countdown'}
+        Starting in {session.count}…
+      {:else if session.finishing}
         Finishing the file… {Math.round(session.finishShare * 100)}%
       {:else if paused}
         <Icon name="pause" size={14} /> Paused
@@ -28,7 +30,7 @@
       aria-label={paused ? 'Resume recording' : 'Pause recording'}
       title={paused ? 'Resume' : 'Pause'}
       onclick={paused ? resume : pause}
-      disabled={session.finishing}
+      disabled={session.finishing || session.phase === 'countdown'}
     >
       <Icon name={paused ? 'play' : 'pause'} size={22} />
     </button>
@@ -40,6 +42,16 @@
       <span>{fmtSize(session.bytes / 1e6)}</span>
       <span>{p.height}p · {p.fps} fps</span>
     </span>
+    {#if session.camera}<button
+      class="ctl small"
+      aria-label={session.camVisible ? 'Hide webcam' : 'Show webcam'}
+      aria-pressed={!session.camVisible}
+      title={session.camVisible ? 'Hide webcam' : 'Show webcam'}
+      onclick={() => (session.camVisible = !session.camVisible)}
+      disabled={session.finishing}
+    >
+      <Icon name="camera" size={18} />
+    </button>{/if}
     {#if session.mic}<button
       class="ctl small"
       aria-label={session.muted ? 'Unmute microphone' : 'Mute microphone'}

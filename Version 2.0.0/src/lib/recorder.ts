@@ -40,20 +40,26 @@ const MAX_BEHIND_SECONDS = 0.25;
 // Hardware keeps text sharp: measured 41 dB against 28 dB for software H.264 at the same bitrate (report §31).
 // WebM is only used with a hardware VP9 encoder: software VP9 managed about 5 fps at 1080p (report §31).
 // Firefox's hardware answer cannot be trusted before 143, so Firefox always gets MP4 (H.264 was 26+ fps there).
+// A browser's "can you encode this?" answer can stall (seen with a busy or flaky graphics driver).
+// Never wait forever: no answer in time counts as "no".
+const PROBE_MS = 3000;
+const answer = (probe: Promise<boolean>) =>
+  Promise.race([probe.catch(() => false), new Promise<boolean>((r) => setTimeout(() => r(false), PROBE_MS))]);
+
 async function pickFormat(want: Format, w: number, h: number, bitrate: number, audio: boolean) {
   for (const ext of want === 'webm' ? (['webm', 'mp4'] as const) : (['mp4'] as const)) {
     const c = CODECS[ext];
     const opts = { width: w, height: h, quality: new Quality({ bitrate }) };
-    const hardware = !isPolyfill && (await canEncodeVideo(c.v, { ...opts, hardwareAcceleration: 'prefer-hardware' }));
-    const video = hardware || (ext === 'mp4' && (await canEncodeVideo(c.v, opts)));
+    const hardware = !isPolyfill && (await answer(canEncodeVideo(c.v, { ...opts, hardwareAcceleration: 'prefer-hardware' })));
+    const video = hardware || (ext === 'mp4' && (await answer(canEncodeVideo(c.v, opts))));
     let sound: AudioCodec | undefined;
     for (const a of c.a) {
       if (sound) break;
-      if (await canEncodeAudio(a, { numberOfChannels: 2, sampleRate: 48000, quality: new Quality({ bitrate: AUDIO_BITRATE }) })) sound = a;
+      if (await answer(canEncodeAudio(a, { numberOfChannels: 2, sampleRate: 48000, quality: new Quality({ bitrate: AUDIO_BITRATE }) }))) sound = a;
     }
     if (video && (sound || !audio)) return { ext, hardware, sound: sound ?? 'opus' };
   }
-  throw new Error('This browser cannot encode MP4 video.');
+  throw new Error('the browser did not confirm it can encode MP4 video. Restart the browser and try again.');
 }
 
 /** A background worker writes each piece into the file. Its answers slow us down if the disk is slow. */

@@ -6,6 +6,9 @@ import { MAX_SECONDS, findPreset, fmtSize, sizeMB } from './presets';
 import { startRecorder, type Recorder } from './recorder';
 import { loadSettings, saveSettings } from './settings';
 import { findUnsaved, getStored, holdStored, markSaved, removeStored, type Stored } from './store';
+import { hasPageAccess, startOverlays } from './overlay';
+import type { OverlayMessage, OverlayState } from './overlay-protocol';
+import { autoZoom, type CursorPoint, type Zoom } from './zoom';
 import { untrack } from 'svelte';
 
 type Phase = 'idle' | 'countdown' | 'recording' | 'paused' | 'finished';
@@ -34,15 +37,29 @@ export const session = $state({
   // Free space for recordings (null = browser cannot tell). lowDisk = less than a full 2 hours would need.
   free: null as number | null,
   lowDisk: false,
+  // Webcam circle and cursor zoom (Phase 5)
+  pageAccess: false, // the user allowed Reclux on web pages (circle + cursor)
+  floating: false, // the floating controls window is open
+  camVisible: true, // the circle is shown (it can be hidden while recording)
+  camPos: { x: 0.86, y: 0.8 }, // circle centre on web pages, as a share of the window (bottom-right, as in the sketch)
+  cameraStream: null as MediaStream | null, // only kept when the circle lives in the floating window
+  zooms: [] as Zoom[], // cursor zoom blocks for the editor
 });
 
 // Remember the choices (only while idle, so nothing changes under a live recording).
 $effect.root(() => {
   $effect(() => {
-    const { presetId, format, mic, system } = session;
-    if (untrack(() => session.phase) === 'idle') saveSettings({ presetId, format, mic, system });
+    const { presetId, format, mic, system, camera, zoom } = session;
+    if (untrack(() => session.phase) === 'idle') saveSettings({ presetId, format, mic, system, camera, zoom });
+  });
+  // Keep the web-page overlays in step with the recording.
+  $effect(() => {
+    void [session.phase, session.count, session.elapsed, session.bytes, session.camVisible, session.camPos, session.floating];
+    untrack(() => overlays?.update());
   });
 });
+export const refreshPageAccess = async () => (session.pageAccess = await hasPageAccess());
+void refreshPageAccess();
 // The popup may change them while this page is open and idle.
 addEventListener('storage', () => {
   if (session.phase === 'idle') Object.assign(session, loadSettings());
@@ -73,6 +90,8 @@ let cap: Capture | undefined;
 let rec: Recorder | undefined;
 let releaseFile: (() => void) | undefined;
 let busy = false;
+let overlays: ReturnType<typeof startOverlays> | undefined;
+let cursor: CursorPoint[] = [];
 
 // Clock counts only time spent recording, so Pause does not add time.
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -96,6 +115,52 @@ const runClock = () => {
   last = performance.now();
   every(250, tick);
 };
+/** Seconds of recording so far, to the millisecond (for cursor positions). */
+const recTime = () => (activeMs + (session.phase === 'recording' ? performance.now() - last : 0)) / 1000;
+
+function overlayState(): OverlayState {
+  const p = findPreset(session.presetId);
+  const phase = session.finishing ? 'finishing' : session.phase === 'paused' ? 'paused' : session.phase === 'countdown' ? 'countdown' : 'recording';
+  return {
+    phase,
+    count: session.count,
+    elapsed: session.elapsed,
+    camera: session.camera && session.camVisible,
+    pos: { ...session.camPos },
+    bar: !session.floating,
+    info: `${fmtSize(session.bytes / 1e6)} · ${p.height}p · ${p.fps} fps`,
+  };
+}
+
+function onOverlay(m: OverlayMessage) {
+  if (m.type === 'pos') session.camPos = { x: m.x, y: m.y };
+  else if (m.type === 'cmd') {
+    if (m.cmd === 'pause') pause();
+    else if (m.cmd === 'resume') resume();
+    else if (m.cmd === 'stop') void stop();
+    else session.camVisible = !session.camVisible;
+  } else if (session.zoom && session.phase === 'recording') {
+    // Use the coordinates that match what is being recorded: a tab, a window or the whole screen.
+    const surface = (cap?.video.getSettings() as { displaySurface?: string } | undefined)?.displaySurface;
+    const [x, y] = surface === 'browser' ? [m.vx, m.vy] : surface === 'window' ? [m.wx, m.wy] : [m.sx, m.sy];
+    if (x >= 0 && x <= 1 && y >= 0 && y <= 1) cursor.push({ t: recTime(), x, y });
+  }
+}
+
+function endOverlays() {
+  overlays?.stop();
+  overlays = undefined;
+}
+
+/** Brings the Reclux tab to the front (Stop may have been pressed in the floating window or on a web page). */
+async function focusMe() {
+  const tab = await Promise.resolve()
+    .then(() => browser.tabs.getCurrent())
+    .catch(() => undefined);
+  if (tab?.id === undefined) return;
+  await browser.tabs.update(tab.id, { active: true }).catch(() => {});
+  if (tab.windowId !== undefined) await browser.windows.update(tab.windowId, { focused: true }).catch(() => {});
+}
 
 // No "your computer is struggling" warning in V2: V1's rule mostly measured the browser's change-driven
 // screen capture, not the computer (report §34). Frames the pump had to skip are only logged, for testing.
@@ -111,7 +176,7 @@ export async function start() {
   session.finishShare = 0;
   const preset = findPreset(session.presetId);
   try {
-    cap = await openCapture(preset, session.mic, session.system, (d) => (session.ducked = d));
+    cap = await openCapture(preset, session.mic, session.system, session.camera, (d) => (session.ducked = d));
   } catch (e) {
     if ((e as DOMException).name === 'NotAllowedError') {
       session.notices = ['Screen sharing was cancelled or blocked.'];
@@ -127,6 +192,15 @@ export async function start() {
   session.actual = cap.actual;
   session.ducked = cap.ducks ? false : null;
   cap.video.addEventListener('ended', stop); // user clicked the browser's "Stop sharing"
+
+  // Webcam circle and cursor zoom. Asking for the camera above also lets the circle on web pages use it.
+  await refreshPageAccess();
+  session.camVisible = true;
+  session.cameraStream = session.camera && !session.pageAccess ? (cap.camera ?? null) : null;
+  if (session.pageAccess) cap.camera?.getTracks().forEach((t) => t.stop()); // the circle on the page opens its own
+  cursor = [];
+  session.zooms = [];
+  if (session.pageAccess && (session.camera || session.zoom)) overlays = startOverlays(overlayState, onOverlay);
 
   activeMs = 0;
   session.elapsed = 0;
@@ -235,7 +309,11 @@ function show(file: File) {
   session.name = nextName();
   session.url = URL.createObjectURL(file); // points at the file on disk, not a copy in RAM
   session.bytes = file.size;
+  endOverlays();
+  session.cameraStream = null;
+  session.zooms = session.zoom ? autoZoom(cursor, activeMs / 1000) : [];
   session.phase = 'finished';
+  void focusMe();
 }
 
 export function toggleMute() {
@@ -246,6 +324,7 @@ export function toggleMute() {
 export function reset() {
   stopTimer();
   endMonitor();
+  endOverlays();
   keepAwake(false);
   const r = rec;
   rec = undefined;
@@ -267,6 +346,8 @@ export function reset() {
     name: '',
     fileName: '',
     ducked: null,
+    cameraStream: null,
+    zooms: [],
   });
   void refreshRecoverable();
 }

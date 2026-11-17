@@ -7,6 +7,7 @@
   import Timeline from './Timeline.svelte';
   import { fmtTime } from './presets';
   import { session } from './session.svelte';
+  import { zoomAt } from './zoom';
 
   let { onsaved }: { onsaved: () => void } = $props();
 
@@ -16,7 +17,21 @@
   let mediaDuration = $state(0);
   let zoom = $state(1);
   let asking = $state(false);
+  let vw = $state(16);
+  let vh = $state(9);
   const edited = false; // Phase 6: true once a cut exists
+
+  // Cursor zoom preview. currentTime only updates ~4 times a second, so read it every frame while playing.
+  let t = $state(0);
+  $effect(() => {
+    if (paused) return void (t = current);
+    let id = requestAnimationFrame(function frame() {
+      t = video?.currentTime ?? 0;
+      id = requestAnimationFrame(frame);
+    });
+    return () => cancelAnimationFrame(id);
+  });
+  const view = $derived(zoomAt(session.zooms, t));
 
   const duration = $derived(Number.isFinite(mediaDuration) && mediaDuration > 0 ? mediaDuration : session.elapsed);
   const fileLabel = $derived(`${session.name}.${session.ext}`);
@@ -59,16 +74,21 @@
   </header>
 
   <div class="stage">
-    <!-- svelte-ignore a11y_media_has_caption -->
-    <video
-      bind:this={video}
-      src={session.url}
-      bind:currentTime={current}
-      bind:paused
-      bind:duration={mediaDuration}
-      onclick={toggle}
-      preload="metadata"
-    ></video>
+    <div class="frame" style:--ar={vw / vh || 16 / 9}>
+      <!-- svelte-ignore a11y_media_has_caption -->
+      <video
+        bind:this={video}
+        src={session.url}
+        bind:currentTime={current}
+        bind:paused
+        bind:duration={mediaDuration}
+        bind:videoWidth={vw}
+        bind:videoHeight={vh}
+        onclick={toggle}
+        preload="metadata"
+        style:transform="scale({view.scale}) translate({(0.5 - view.x) * 100}%, {(0.5 - view.y) * 100}%)"
+      ></video>
+    </div>
   </div>
 
   <div class="tools glass" role="toolbar" aria-label="Editing tools">
@@ -88,7 +108,7 @@
     </div>
   </div>
 
-  <Timeline {duration} {current} {zoom} label={fileLabel} onseek={seek} />
+  <Timeline {duration} {current} {zoom} label={fileLabel} zooms={session.zooms} onseek={seek} />
 </section>
 
 <Modal bind:open={asking} title={edited ? 'Replace the original video?' : 'Save this video?'}>
@@ -147,21 +167,25 @@
     align-items: center;
     gap: var(--s-1);
   }
-  /* Flex (not grid) so the video's max-height: 100% resolves against the space left for it. */
+  /* The frame keeps the video's shape and fits the space left for it; zoom happens inside it. */
   .stage {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
     min-height: 160px;
-    overflow: hidden;
+    container-type: size;
   }
-  video {
-    max-width: 100%;
-    max-height: 100%;
-    min-height: 0;
+  .frame {
+    width: min(100cqw, 100cqh * var(--ar));
+    aspect-ratio: var(--ar);
+    overflow: hidden;
     border-radius: var(--r-lg);
     background: #000;
     box-shadow: var(--shadow);
+  }
+  video {
+    display: block;
+    width: 100%;
+    height: 100%;
     cursor: pointer;
   }
   .transport {

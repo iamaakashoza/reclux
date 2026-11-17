@@ -2,6 +2,7 @@
   import Banner from './Banner.svelte';
   import Button from './Button.svelte';
   import QualityPicker from './QualityPicker.svelte';
+  import PageFeatures from './PageFeatures.svelte';
   import Toggle from './Toggle.svelte';
   import { MAX_SECONDS, findPreset, fmtSize, presetId, sizeMB } from './presets';
   import { refreshDisk, session } from './session.svelte';
@@ -37,6 +38,11 @@
       hint={session.system ? 'Your browser asks too. Keep its audio switch on.' : undefined}
       bind:checked={session.system}
     />
+  </div>
+
+  <div class="field">
+    <span class="label">Extras</span>
+    <PageFeatures bind:camera={session.camera} bind:zoom={session.zoom} />
   </div>
 
   {#if session.lowDisk}
