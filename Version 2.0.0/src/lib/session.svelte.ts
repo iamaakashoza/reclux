@@ -6,7 +6,7 @@ import { MAX_SECONDS, findPreset, fmtSize, sizeMB } from './presets';
 import { startRecorder, type Recorder } from './recorder';
 import { loadSettings, saveSettings } from './settings';
 import { findUnsaved, getStored, holdStored, markSaved, removeStored, type Stored } from './store';
-import { hasPageAccess, startOverlays } from './overlay';
+import { hasPageAccess, shareCamera, startOverlays } from './overlay';
 import type { OverlayMessage, OverlayState } from './overlay-protocol';
 import { autoZoom, type CursorPoint, type Zoom } from './zoom';
 import type { Clip } from './edit';
@@ -15,11 +15,13 @@ import { untrack } from 'svelte';
 
 type Phase = 'idle' | 'countdown' | 'recording' | 'paused' | 'finished';
 
+const COUNTDOWN = 5; // seconds (owner's call, 18 Nov 2026)
+
 export const session = $state({
   phase: 'idle' as Phase,
   ...loadSettings(),
   muted: false,
-  count: 3,
+  count: COUNTDOWN,
   elapsed: 0,
   bytes: 0,
   ext: 'mp4' as Format,
@@ -40,22 +42,25 @@ export const session = $state({
   lowDisk: false,
   // Webcam circle and cursor zoom (Phase 5)
   pageAccess: false, // the user allowed Reclux on web pages (circle + cursor)
-  floating: false, // the floating controls window is open
+  floating: false, // the always-on-top controls window (Keep on top) is open
+  mini: false, // this page is the small Reclux window (opened by Start recording), not a tab
   camVisible: true, // the circle is shown (it can be hidden while recording)
   camPos: { x: 0.86, y: 0.8 }, // circle centre on web pages, as a share of the window (bottom-right, as in the sketch)
-  cameraStream: null as MediaStream | null, // only kept when the circle lives in the floating window
+  cameraStream: null as MediaStream | null, // the webcam, opened once by Reclux and shown by every circle
   zooms: [] as Zoom[], // cursor zoom blocks for the editor
 });
 
 // Remember the choices (only while idle, so nothing changes under a live recording).
 $effect.root(() => {
   $effect(() => {
-    const { presetId, format, mic, system, camera, zoom } = session;
-    if (untrack(() => session.phase) === 'idle') saveSettings({ presetId, format, mic, system, camera, zoom });
+    const { presetId, format, mic, system, camera } = session;
+    if (untrack(() => session.phase) === 'idle') saveSettings({ presetId, format, mic, system, camera });
   });
   // Keep the web-page overlays in step with the recording.
   $effect(() => {
     void [session.phase, session.count, session.elapsed, session.bytes, session.camVisible, session.camPos, session.floating];
+    // A hidden circle gets no picture, which also lets the camera light go off in most browsers.
+    session.cameraStream?.getVideoTracks().forEach((t) => (t.enabled = session.camVisible));
     untrack(() => overlays?.update());
   });
 });
@@ -92,7 +97,10 @@ let rec: Recorder | undefined;
 let releaseFile: (() => void) | undefined;
 let busy = false;
 let overlays: ReturnType<typeof startOverlays> | undefined;
+let unshareCamera: (() => void) | undefined;
 let cursor: CursorPoint[] = [];
+// The recorder being made ready during the countdown (an Error if that failed).
+let pending: Promise<Recorder | Error> | undefined;
 
 // Clock counts only time spent recording, so Pause does not add time.
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -126,9 +134,11 @@ function overlayState(): OverlayState {
     phase,
     count: session.count,
     elapsed: session.elapsed,
-    camera: session.camera && session.camVisible,
+    camera: session.camera && session.camVisible && !!session.cameraStream,
+    webcam: session.camera && !!session.cameraStream,
     pos: { ...session.camPos },
-    bar: !session.floating,
+    // The bar on web pages, only where no Reclux window shows the controls (a recorder tab without Keep on top).
+    bar: !session.floating && !session.mini,
     info: `${fmtSize(session.bytes / 1e6)} · ${p.height}p · ${p.fps} fps`,
   };
 }
@@ -140,7 +150,7 @@ function onOverlay(m: OverlayMessage) {
     else if (m.cmd === 'resume') resume();
     else if (m.cmd === 'stop') void stop();
     else session.camVisible = !session.camVisible;
-  } else if (session.zoom && session.phase === 'recording') {
+  } else if (session.phase === 'recording') {
     // Use the coordinates that match what is being recorded: a tab, a window or the whole screen.
     const surface = (cap?.video.getSettings() as { displaySurface?: string } | undefined)?.displaySurface;
     const [x, y] = surface === 'browser' ? [m.vx, m.vy] : surface === 'window' ? [m.wx, m.wy] : [m.sx, m.sy];
@@ -151,6 +161,27 @@ function onOverlay(m: OverlayMessage) {
 function endOverlays() {
   overlays?.stop();
   overlays = undefined;
+  unshareCamera?.();
+  unshareCamera = undefined;
+}
+
+// The countdown's tick: a short click made on the spot (no sound file). Not in the video: recording starts after it.
+let tickCtx: AudioContext | undefined;
+function tickSound(last: boolean) {
+  try {
+    const ctx = (tickCtx ??= new AudioContext());
+    const t = ctx.currentTime;
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = 'triangle';
+    o.frequency.value = last ? 1500 : 1000;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.3, t + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
+    o.connect(g).connect(ctx.destination);
+    o.start(t);
+    o.stop(t + 0.08);
+  } catch {} // no sound is fine
 }
 
 /** Brings the Reclux tab to the front (Stop may have been pressed in the floating window or on a web page). */
@@ -174,8 +205,11 @@ export async function start() {
   try {
     cap = await openCapture(preset, session.mic, session.system, session.camera, (d) => (session.ducked = d));
   } catch (e) {
-    if ((e as DOMException).name === 'NotAllowedError') {
+    const name = (e as DOMException).name;
+    if (name === 'NotAllowedError') {
       session.notices = ['Screen sharing was cancelled or blocked.'];
+    } else if (name === 'InvalidStateError') {
+      // Firefox: sharing must start from a click on this page. The small window shows its button for that.
     } else {
       session.error = `Could not start: ${(e as Error).message}`;
     }
@@ -188,51 +222,58 @@ export async function start() {
   session.ducked = cap.ducks ? false : null;
   cap.video.addEventListener('ended', stop); // user clicked the browser's "Stop sharing"
 
-  // Webcam circle and cursor zoom. Asking for the camera above also lets the circle on web pages use it.
+  // Webcam circle and cursor zoom. The camera was asked for once, above, and every circle shows that same camera.
+  // A circle opening its own camera on a web page made the browser ask again on that page, and the circle stayed
+  // empty until that easy-to-miss question was answered (the 30-40 s delay, Issue 5a).
   await refreshPageAccess();
   session.camVisible = true;
-  session.cameraStream = session.camera && !session.pageAccess ? (cap.camera ?? null) : null;
-  if (session.pageAccess) cap.camera?.getTracks().forEach((t) => t.stop()); // the circle on the page opens its own
+  session.cameraStream = session.camera ? (cap.camera ?? null) : null;
+  if (session.cameraStream && session.pageAccess) unshareCamera = shareCamera(session.cameraStream);
   cursor = [];
   session.zooms = [];
-  if (session.pageAccess && (session.camera || session.zoom)) overlays = startOverlays(overlayState, onOverlay);
+  // Page access = the circle on web pages and cursor zoom (it has no switch of its own).
+  if (session.pageAccess) overlays = startOverlays(overlayState, onOverlay);
 
   activeMs = 0;
   session.elapsed = 0;
   session.bytes = 0;
   session.saved = false;
-  session.count = 3;
+  session.count = COUNTDOWN;
   session.phase = 'countdown';
+  // The encoder gets ready during the countdown, so recording starts the moment it reaches 0.
+  pending = startRecorder(
+    cap,
+    session.format,
+    preset,
+    (bytes) => (session.bytes = bytes),
+    (e) => {
+      session.error = `Recording stopped: ${e.message}`;
+      void stop();
+    },
+  ).catch((e) => e as Error);
+  tickSound(false);
   every(1000, () => {
-    if (--session.count > 0) return;
+    if (--session.count > 0) return tickSound(session.count === 1);
     stopTimer();
     void begin();
   });
 }
 
 async function begin() {
-  const preset = findPreset(session.presetId);
-  let started: Recorder;
-  try {
-    started = await startRecorder(
-      cap!,
-      session.format,
-      preset,
-      (bytes) => (session.bytes = bytes),
-      (e) => {
-        session.error = `Recording stopped: ${e.message}`;
-        void stop();
-      },
-    );
-  } catch (e) {
-    session.error = `Could not start recording: ${(e as Error).message}`;
+  const ready = pending;
+  pending = undefined;
+  const started = await ready;
+  if (!started) return; // cancelled: reset() threw it away
+  if (started instanceof Error) {
+    session.error = `Could not start recording: ${started.message}`;
     reset();
     return;
   }
   if (session.phase !== 'countdown') {
-    await started.cancel(); // the user cancelled while the encoder was starting
+    await started.cancel(); // the user cancelled while the encoder was getting ready
     return;
   }
+  started.go();
   rec = started;
   releaseFile = rec.release;
   session.fileName = rec.name;
@@ -308,7 +349,7 @@ function show(file: File) {
   session.bytes = file.size;
   endOverlays();
   session.cameraStream = null;
-  session.zooms = session.zoom ? autoZoom(cursor, activeMs / 1000) : [];
+  session.zooms = autoZoom(cursor, activeMs / 1000); // no page access = no cursor path = no zooms
   session.phase = 'finished';
   void focusMe();
 }
@@ -322,6 +363,11 @@ export function reset() {
   stopTimer();
   clearInterval(diskTimer);
   endOverlays();
+  // Cancelled during the countdown: throw away the recorder that was getting ready.
+  void pending?.then((r) => {
+    if (!(r instanceof Error)) void r.cancel();
+  });
+  pending = undefined;
   keepAwake(false);
   const r = rec;
   rec = undefined;

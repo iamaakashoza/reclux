@@ -8,7 +8,8 @@
   import PageFeatures from '../../lib/PageFeatures.svelte';
   import QualityPicker from '../../lib/QualityPicker.svelte';
   import Toggle from '../../lib/Toggle.svelte';
-  import { loadSettings, saveSettings, suggestedPreset } from '../../lib/settings';
+  import { loadSettings, saveSettings, suggestedPreset, systemAudioWorks } from '../../lib/settings';
+  import { openRecorder } from '../../lib/window';
 
   // The wizard saves the same choices the popup and recorder page use.
   const s = $state(loadSettings());
@@ -28,7 +29,6 @@
     heading?.focus();
   }
 
-  const openRecorder = () => (location.href = browser.runtime.getURL('/recorder.html'));
 </script>
 
 <main>
@@ -77,7 +77,7 @@
           {#if !isFirefox}
             <li><Icon name="play" size={18} /><span><strong>Power:</strong> keeps the computer awake while recording.</span></li>
           {/if}
-          <li><Icon name="camera" size={18} /><span><strong>Web pages (only if you turn on Webcam or Cursor zoom):</strong> shows the webcam circle and follows your cursor while recording. Asked when you switch them on, never at install.</span></li>
+          <li><Icon name="camera" size={18} /><span><strong>Web pages (only if you pick Webcam):</strong> shows the webcam circle and follows your cursor for cursor zoom while recording. Asked when you pick Webcam, never at install.</span></li>
         </ul>
         <p class="small">Your browser always asks before Reclux can see your screen or microphone.</p>
       </details>
@@ -97,11 +97,10 @@
         <div class="field">
           <span class="label">Audio</span>
           <Toggle icon="mic" label="Microphone" bind:checked={s.mic} />
-          <Toggle icon="speaker" label="System audio" bind:checked={s.system} />
+          {#if systemAudioWorks}<Toggle icon="speaker" label="System audio" bind:checked={s.system} />{/if}
         </div>
         <div class="field">
-          <span class="label">Extras</span>
-          <PageFeatures bind:camera={s.camera} bind:zoom={s.zoom} />
+          <PageFeatures bind:camera={s.camera} legend="What you record" />
         </div>
         {#if isFirefox}
           <Banner kind="info" title="Firefox">
@@ -118,12 +117,12 @@
       </Banner>
     {:else}
       <h2 id="step-title" tabindex="-1" bind:this={heading}>You are ready</h2>
-      <p class="lead">Press the button below to open the recorder.</p>
+      <p class="lead">Press the button below. Your browser asks what to share, then Reclux counts down from 5 and records.</p>
       <Banner kind="info" title="Tip: pin Reclux to the toolbar">
         Click the puzzle icon in your browser’s toolbar, then the pin next to Reclux. You can then start from the popup.
       </Banner>
       <div class="end">
-        <Button variant="primary" icon="record" onclick={openRecorder}>Open recorder</Button>
+        <Button variant="primary" icon="record" onclick={() => void openRecorder()}>Start recording</Button>
       </div>
     {/if}
   </section>

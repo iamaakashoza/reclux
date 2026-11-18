@@ -35,11 +35,11 @@ When testing a recording automatically, do not use `--use-fake-device-for-media-
 
 Entrypoints (`src/entrypoints/`):
 - `background.ts` — only opens `welcome.html` on first install.
-- `popup/` — Screen 1: Quality, FPS, audio, then opens `recorder.html` in a tab. Recording cannot start in the popup: it closes on blur and `getDisplayMedia` needs a click on a real page.
-- `recorder/` — the page that actually records. All recording state lives here. Flow: start card → countdown → `RecordingBar` (Screen 2) → `Editor` + `Timeline` (Screen 3) → save `Modal` (Screen 4) → `Export` (Screen 5, Save As via `downloads`, waits until the copy completes).
+- `popup/` — Screen 1: "What are you recording today?" Normal | Webcam, Quality, FPS, audio (no System audio in Firefox: it never shares it), fixed 360 × 560 in every browser. Start recording opens `recorder.html#start` as a small popup window (`lib/window.ts`). Recording cannot start in the popup: it closes when the share picker takes focus.
+- `recorder/` — the page that actually records. All recording state lives here. Small window (`#start`, report §40): share picker at once without a click (Chromium allows it; Firefox needs one "Choose what to share" click) → 5 s countdown with tick in a centred window → the same window shrinks to the controls (`Floating`) bottom-right → after Stop it maximises into `Editor` + `Timeline` (Screen 3) → save `Modal` (Screen 4) → `Export` (Screen 5, Save As via `downloads`, waits until the copy completes). Opened as a tab (recovery), it shows the old start card with Record.
 - `welcome/` — first-run guide.
-- `bubble/` — the webcam circle page, shown as an iframe inside web pages (so the camera permission belongs to Reclux, not the site). Listed in `web_accessible_resources`.
-- `overlay.content.ts` — injected (runtime registration, never at install) into open tabs only while recording and only with page access: webcam circle (drag, hide), cursor positions, and a control bar where there is no floating window (Firefox).
+- `bubble/` — the webcam circle page, shown as an iframe inside web pages. It never opens the camera itself (that asked again on every site, the 30–40 s delay): it shows the recorder's camera, directly via `extension.getViews()` in Chromium, over a local WebRTC link in Firefox (`shareCamera` in `overlay.ts`). Listed in `web_accessible_resources`.
+- `overlay.content.ts` — injected (runtime registration, never at install) into open tabs only while recording and only with page access: webcam circle (drag, hide), cursor positions, and a control bar only when the recorder is a tab without Keep on top.
 
 Popup and recorder share one origin, so settings pass through one `localStorage` key (`src/lib/settings.ts`), not messaging. Quality is locked to 720p/1080p × 50/60 fps (`presets.ts`, picked with `QualityPicker.svelte`); on first run, a PC with no hardware H.264 encoder for 1080p60 starts on 720p.
 
@@ -54,7 +54,7 @@ Recording pipeline (`src/lib/`):
 - `ticker.worker.ts` — that worker clock. Used anywhere a timer must keep running in a hidden tab (Firefox frames, the frame pump, ducking).
 - `awake.ts` — `chrome.power`; Chromium only.
 - `overlay.ts` + `overlay-protocol.ts` — recorder side of the page overlay: optional `<all_urls>` access (asked from the Webcam/Cursor zoom switches, `PageFeatures.svelte`), `scripting.executeScript` into tabs, a Port per page for state, commands and cursor positions. `wxt.config.ts` deletes the `host_permissions` WXT would add, so there is no install warning.
-- `pip.ts` + `Floating.svelte` — the floating controls window (Document Picture-in-Picture, Chromium only), opened from the same click as Record. Shows the webcam circle itself when page access was refused.
+- `pip.ts` + `Floating.svelte` — the always-on-top controls (Document Picture-in-Picture), opened only by the Keep on top / Pop out button, never with the share picker (opening both made Chrome/Edge cancel the picker, report §40). Sized to the bar. `Floating` (bar + webcam circle when there is no page access) is also the small window's content while recording.
 - `zoom.ts` — cursor path → zoom blocks (`autoZoom`), and the eased view at a time (`zoomAt`) used by the editor preview and the export.
 - `edit.ts` — the cut list (kept parts in source seconds) and output↔source time mapping. Editor keeps it plus Undo/Redo snapshots.
 - `render.ts` — "Save changes" with edits: decodes the kept parts, draws zoomed moments on a canvas, re-encodes (`videoEncoding`/`pickFormat` shared with `recorder.ts`) into `<name>.tmp`, then `session.applyEdit` swaps it in for the original (report §38).

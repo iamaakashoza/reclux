@@ -2710,3 +2710,56 @@ Kept for the owner's call: **gsap** (only the welcome animations use it; CSS ani
 
 ### Still needs the owner (real browsers)
 Real camera and page-access prompt, floating window over desktop apps, Firefox (circle, bar, editing and export), multi-monitor cursor zoom, a long (30+ min) edit-and-export to see build time on this PC.
+
+## 40. V2 bug fixes, phase 1 (18 Nov 2026) 🐞
+
+Owner's bug list `reclux_v2_claude_code_prompt.txt` (8 issues, 5 browsers). Every root cause below was reproduced in the real browser first (Chrome 158, Brave 1.99 / Chromium 157, Edge 157, Opera 140 / Chromium 157, Firefox 160), then fixed and re-tested.
+
+### What the browsers allow (measured, decides the new flow)
+| Question | Chrome | Brave | Edge | Opera | Firefox |
+|---|---|---|---|---|---|
+| A Reclux page may open the share picker with **no click** | ✅ | ✅ | ✅ | ✅ | ❌ "requires transient activation" |
+| …also from a small popup window | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Web Audio (tick, mic mixing) with no click | ✅ | ✅ | ✅ | ✅ | ✅ after the one click |
+| Document PiP (always on top) | ✅ needs a click | ✅ | ✅ | ✅ | ✅ (new in Firefox) |
+| System audio in the share | ✅ | ✅ | ✅ | ✅ | ❌ never (0 sound tracks) |
+
+### Root causes and fixes
+| Issue | Root cause | Fix |
+|---|---|---|
+| 3 Recorder page before recording | The flow needed a second click (Record) on `recorder.html`. | Owner's choice: Start recording opens a small centred window (`recorder.html#start`) that asks to share at once → 5 s countdown with a tick (Web Audio click, not recorded) → recording at 0 (encoder is made ready during the countdown) → window shrinks to the controls bottom-right → maximises into the editor after Stop. Firefox: one "Choose what to share" click. The window opens 820 × 640 because Chrome fits its picker inside the asking window. |
+| 4 Chrome/Edge "cancelled or blocked" + vanishing window | Record opened the share picker **and** the PiP window in one click. The PiP window took focus and Chromium closed the picker as "Permission denied by user" (1.5 s later, nobody touched it); Reclux then closed the PiP window. A race: it also hit Brave in tests. | The picker is never opened together with PiP. PiP opens only from Keep on top / Pop out controls. |
+| 5a / 6 / 7b / 8a Webcam after 30–40 s | The circle on a web page opened the camera itself. Browsers treat that as a new camera request **for that page** and show a second, easy-to-miss prompt there ("until I close this site"); the circle stayed black until answered. | The camera is asked once (by Reclux) and every circle shows that same camera: Chromium hands the stream over directly (`extension.getViews`), Firefox gets it over a WebRTC link inside the computer (Firefox has no `getViews` in such a frame). Circle playing 0.3 s (Chromium) / 1.4 s (Firefox) after opening the page. |
+| 5a note "pause at the share window" | Not a pause: before, recording only began after the picker, the camera prompt, the 3 s countdown **and** encoder start-up (up to ~3 s more). | Encoder start-up now runs during the countdown. |
+| 5b / 8b Controls window cut off | PiP window was a fixed 480 × 150; the bar is ~500 px wide. | Every controls window is sized from the real bar (browser borders measured, not guessed). |
+| 5c Blue square, sticky drag | The press on the circle kept the page's default action (start a text selection): the blue box, which could also take over the drag. Circle also jumped to centre on the pointer. | `preventDefault` + `user-select: none`, grab offset kept, moved with a transform. |
+| 7a Opera "Sharing tab" bar | Opera's own infobar on the capturing **tab** (not Reclux UI), laid out badly by Opera. | The recorder is no longer a tab; Opera shows no such bar in the small window. |
+| 8 Firefox alerts | Both intended. Alert 1 told Firefox users to flip an audio switch Firefox does not have. | Owner's choice: Firefox hides System audio (feature check `suppressLocalAudioPlayback`), so no Alert 1; Alert 2 (headphones tip) kept. |
+| 2 Popup size / corners / arrow | Each browser sizes its popup to the page, so content differences gave different sizes. The outer frame and its corners are drawn by the browser (Chromium ~4–8 px, Firefox its own panel radius); no extension can style it. An arrow cannot be drawn outside the popup's own box. | Fixed 360 × 560 page (measured in the real popup of all 5 browsers); our card has 8 px corners. Opera already draws its own ▲ arrow; others draw none. |
+
+### Owner's choices (18 Nov 2026)
+Small window + Keep on top; popup keeps Quality/FPS/Mic/System audio under Normal | Webcam; cursor zoom on whenever page access exists; Firefox hides System audio.
+
+### Tested (real extension, all 5 browsers; picker auto-accepted in automation, real picker for Issue 4)
+Popup 360 × 560 in the real toolbar popup (all 5) · Issue 4: picker stays open 6 s+ in Chrome and Edge · small window → countdown (5 ticks, 1 s apart) → recording → controls fit, not cut · circle on a web page at once · drag without selection · Keep on top sized to the bar, small window minimised · Stop → editor maximised → file plays · Firefox: one click, no System audio, no Alert 1.
+Limits: the controls window is a normal window (goes behind other apps) unless Keep on top is pressed; a second Start recording while recording opens a second window.
+
+### Verification by 5 agents (one per browser, all at once)
+All checklist items passed in all 5 browsers (popup, small window, countdown + ticks, controls fit, Normal/Webcam, circle, drag, pause/mute, cancel, refused share, Keep on top, editor/export, tab mode, welcome, no console errors; Issue 4 with the real picker in Chrome and Edge). Found and fixed afterwards (re-tested on a quiet machine):
+
+| Found by | Bug | Fix |
+|---|---|---|
+| Opera, Chrome | Closing the small window during the countdown left a 28-byte file offered as "never saved" | The file counts as "nothing to recover" until recording really starts (`markSaved` in `recorder.ts`) |
+| Opera | Page bar showed a webcam button in Normal mode (tab mode) | `webcam` flag in the overlay state |
+| Opera, Edge, Brave | Window covered/minimised when recording starts kept the countdown size, bar cut off | Re-fit on `visibilitychange` |
+| Firefox | After closing Keep on top the small window came back tiny (Firefox calls a minimised window "visible") | `fitWindow` skips a minimised window |
+| Chrome | After Cancel the window once grew taller than the screen (stale `outerWidth` right after a resize) | Frame size from the browser's window bounds, clamped to the screen |
+| Edge | `windows.update` throws at once on an impossible size | Size clamped, call wrapped |
+| Firefox, Brave | "Recording starts in 0 s" while the encoder is still getting ready on a busy PC | Shows "Starting…" |
+| Edge, Brave | Popup question read twice by screen readers | Hidden group label is "Recording type" |
+| Brave | Window nudged 7–18 px while the picker was open | No re-size right after the window opens |
+
+Left as known (not fixed in this phase):
+- **First frame (20 ms) shows the countdown** when recording the entire screen: the encoder warm-up frame is taken during the countdown. Hiding it needs a negative timestamp (MP4 edit list) that Windows' own players were not checked with; file compatibility comes first.
+- **No software fallback when the hardware encoder cannot start** ("Encoder initialization error", seen once in ~14 runs with five browsers recording at once; also possible with OBS/Discord holding the encoder). Pre-existing.
+- Firefox circle took 4.7–6.2 s under 100% CPU (1.1 s on a quiet PC). One Brave drag stopped following mid-drag twice under load, not reproduced in 13 retries.

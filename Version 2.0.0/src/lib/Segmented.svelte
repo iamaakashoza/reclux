@@ -5,16 +5,18 @@
     options,
     name,
     legend,
+    hideLegend = false, // when a heading above already asks the question
   }: {
     value: string;
     options: { value: string; label: string }[];
     name: string;
     legend: string;
+    hideLegend?: boolean;
   } = $props();
 </script>
 
 <fieldset>
-  <legend>{legend}</legend>
+  <legend class:visually-hidden={hideLegend}>{legend}</legend>
   <div class="row">
     {#each options as o (o.value)}
       <label class:on={value === o.value}>

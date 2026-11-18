@@ -25,9 +25,10 @@ export default defineContentScript({
     const root = host.attachShadow({ mode: 'closed' });
     root.innerHTML = `<style>
       * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
-      .cam { position: absolute; width: 180px; height: 180px; margin: -90px 0 0 -90px; border-radius: 50%;
+      .cam { position: absolute; left: 0; top: 0; width: 180px; height: 180px; border-radius: 50%;
         border: 3px solid rgb(255 255 255 / 85%); box-shadow: 0 8px 28px rgb(0 0 0 / 35%); pointer-events: auto;
-        cursor: grab; touch-action: none; background: #0e1116; }
+        cursor: grab; touch-action: none; background: #0e1116; user-select: none; -webkit-user-select: none;
+        will-change: transform; }
       .cam.drag { cursor: grabbing; }
       .cam iframe { width: 100%; height: 100%; border: 0; border-radius: 50%; pointer-events: none; display: block; }
       .hide { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border: 0; border-radius: 50%;
@@ -63,20 +64,23 @@ export default defineContentScript({
     const PLAY = '<svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>';
     let state: OverlayState | undefined;
 
+    // Circle centre in px. Moved with a transform, so dragging never makes the page lay itself out again.
+    let at = { x: 0, y: 0 };
     const place = (x: number, y: number) => {
       // Keep the whole circle on screen, also after the window is resized.
-      cam.style.left = `${Math.min(innerWidth - 92, Math.max(92, x * innerWidth))}px`;
-      cam.style.top = `${Math.min(innerHeight - 92, Math.max(92, y * innerHeight))}px`;
+      at = { x: Math.min(innerWidth - 92, Math.max(92, x)), y: Math.min(innerHeight - 92, Math.max(92, y)) };
+      cam.style.transform = `translate(${at.x - 90}px, ${at.y - 90}px)`;
     };
 
     port.onMessage.addListener((s: OverlayState) => {
       state = s;
       cam.hidden = !s.camera;
-      // Only load the camera page when it is shown, so the camera light is off while hidden.
+      // Only load the circle's page while the circle is shown.
       if (s.camera && !frame.src) frame.src = browser.runtime.getURL('/bubble.html');
       if (!s.camera && frame.src) frame.removeAttribute('src');
-      if (!dragging) place(s.pos.x, s.pos.y);
+      if (!drag) place(s.pos.x * innerWidth, s.pos.y * innerHeight);
       bar.hidden = !s.bar;
+      bar.querySelector<HTMLButtonElement>('.camera')!.hidden = !s.webcam;
       const paused = s.phase === 'paused';
       const status = bar.querySelector<HTMLSpanElement>('.status')!;
       status.textContent =
@@ -103,24 +107,29 @@ export default defineContentScript({
     };
 
     // Drag the circle anywhere. Its position is shared with the other tabs.
-    let dragging = false;
+    // The press must not do what a press on a page normally does (start selecting text): that selection was the
+    // blue square, and it could steal the drag so the circle stuck (Issue 5c).
+    let drag: { dx: number; dy: number } | undefined; // where the circle was grabbed, so it does not jump
     cam.addEventListener('pointerdown', (e) => {
-      if ((e.target as HTMLElement).closest('.hide')) return;
-      dragging = true;
+      if (e.button !== 0 || (e.target as HTMLElement).closest('.hide')) return;
+      e.preventDefault();
+      drag = { dx: e.clientX - at.x, dy: e.clientY - at.y };
       cam.classList.add('drag');
       cam.setPointerCapture(e.pointerId);
     });
     cam.addEventListener('pointermove', (e) => {
-      if (dragging) place(e.clientX / innerWidth, e.clientY / innerHeight);
+      if (drag) place(e.clientX - drag.dx, e.clientY - drag.dy);
     });
-    const endDrag = (e: PointerEvent) => {
-      if (!dragging) return;
-      dragging = false;
+    const endDrag = () => {
+      if (!drag) return;
+      drag = undefined;
       cam.classList.remove('drag');
-      send({ type: 'pos', x: e.clientX / innerWidth, y: e.clientY / innerHeight });
+      send({ type: 'pos', x: at.x / innerWidth, y: at.y / innerHeight });
     };
     cam.addEventListener('pointerup', endDrag);
     cam.addEventListener('pointercancel', endDrag);
+    cam.addEventListener('lostpointercapture', endDrag);
+    cam.addEventListener('dragstart', (e) => e.preventDefault());
 
     // Cursor positions for cursor zoom, about 20 a second, only from the window the user is working in.
     let last = 0;

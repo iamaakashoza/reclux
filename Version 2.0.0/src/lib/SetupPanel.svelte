@@ -5,6 +5,7 @@
   import PageFeatures from './PageFeatures.svelte';
   import Toggle from './Toggle.svelte';
   import { MAX_SECONDS, findPreset, fmtSize, presetId, sizeMB } from './presets';
+  import { systemAudioWorks } from './settings';
   import { refreshDisk, session } from './session.svelte';
 
   // The recorder page's "Settings": the same choices as the popup, for when you want to change them here.
@@ -32,17 +33,18 @@
   <div class="field">
     <span class="label">Audio</span>
     <Toggle icon="mic" label="Microphone" bind:checked={session.mic} />
-    <Toggle
-      icon="speaker"
-      label="System audio"
-      hint={session.system ? 'Your browser asks too. Keep its audio switch on.' : undefined}
-      bind:checked={session.system}
-    />
+    {#if systemAudioWorks}
+      <Toggle
+        icon="speaker"
+        label="System audio"
+        hint={session.system ? 'Your browser asks too. Keep its audio switch on.' : undefined}
+        bind:checked={session.system}
+      />
+    {/if}
   </div>
 
   <div class="field">
-    <span class="label">Extras</span>
-    <PageFeatures bind:camera={session.camera} bind:zoom={session.zoom} />
+    <PageFeatures bind:camera={session.camera} legend="What you record" />
   </div>
 
   {#if session.lowDisk}

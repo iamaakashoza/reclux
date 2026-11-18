@@ -25,7 +25,7 @@ import {
 import type { Capture, Format } from './capture';
 import type { Preset } from './presets';
 import { isPolyfill } from './track-processor'; // also gives Firefox the frame reader it lacks
-import { getStored, holdStored, removeStored, replaceStored } from './store';
+import { getStored, holdStored, markSaved, removeStored, replaceStored } from './store';
 
 const CODECS = {
   mp4: { v: 'avc', a: ['aac', 'opus'] },
@@ -247,6 +247,9 @@ export async function startRecorder(
   const { ext, hardware, sound } = await pickFormat(want, s.width ?? 1920, s.height ?? 1080, preset.mbps * 1e6, !!audio);
   const name = `reclux-${Date.now()}.${ext}`;
   const release = await holdStored(name);
+  // The file is made during the countdown. If the window is closed before 0, it holds no recording, so it must not
+  // be offered as "never saved" later: marked as nothing to recover until recording starts (go, below).
+  markSaved(name);
 
   try {
     const sink = await openSink(name, onSize);
@@ -281,10 +284,15 @@ export async function startRecorder(
 
     const pump = startPump(cap.video, videoSource, preset.fps, (e) => onError(new Error(`video: ${e.name} ${e.message}`.trim())));
     await pump.warmUp(firstPacket);
-    audioSource?.resume();
-    pump.run();
 
+    // Everything above runs during the countdown, so recording really starts the moment it reaches 0.
     return {
+      /** Start recording (the end of the countdown). */
+      go: () => {
+        markSaved(name, false);
+        audioSource?.resume();
+        pump.run();
+      },
       /** File name in private storage. */
       name,
       /** The format really used. It can differ from the one asked for. */

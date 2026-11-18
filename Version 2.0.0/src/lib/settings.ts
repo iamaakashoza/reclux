@@ -10,13 +10,20 @@ interface Settings {
   system: boolean;
   /** "Reduce transparency": solid surfaces instead of glass. Firefox has no system setting for it. */
   solid: boolean;
-  /** Webcam circle while recording (needs web page access to show on pages). */
+  /** "Webcam" recording (the circle) instead of "Normal". Needs web page access to show on pages. */
   camera: boolean;
-  /** Cursor zoom: follow the cursor on web pages and zoom there in the editor. */
-  zoom: boolean;
 }
 
-const DEFAULTS: Settings = { presetId: DEFAULT_PRESET, format: 'mp4', mic: true, system: true, solid: false, camera: false, zoom: true };
+// Cursor zoom has no switch: it is on whenever Reclux has access to web pages (owner's call, 18 Nov 2026).
+
+/**
+ * Can this browser record system sound with the screen? Firefox never shares it (tested in Firefox 160: no sound
+ * track, no switch in its window), so its System audio switch is hidden. Chromium browsers know this sharing
+ * option (suppressLocalAudioPlayback) and Firefox does not, so it tells them apart without reading the browser name.
+ */
+export const systemAudioWorks = 'suppressLocalAudioPlayback' in (navigator.mediaDevices?.getSupportedConstraints() ?? {});
+
+const DEFAULTS: Settings = { presetId: DEFAULT_PRESET, format: 'mp4', mic: true, system: systemAudioWorks, solid: false, camera: false };
 
 const KEY = 'reclux.settings';
 
@@ -30,10 +37,9 @@ export function loadSettings(): Settings {
     presetId: PRESETS.some((p) => p.id === s.presetId) ? s.presetId! : DEFAULTS.presetId,
     format: s.format === 'webm' ? 'webm' : DEFAULTS.format,
     mic: typeof s.mic === 'boolean' ? s.mic : DEFAULTS.mic,
-    system: typeof s.system === 'boolean' ? s.system : DEFAULTS.system,
+    system: systemAudioWorks && (typeof s.system === 'boolean' ? s.system : DEFAULTS.system),
     solid: s.solid === true,
     camera: s.camera === true,
-    zoom: s.zoom !== false,
   };
 }
 

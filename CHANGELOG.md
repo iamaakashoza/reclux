@@ -7,6 +7,25 @@ Download Reclux and see the install steps at [reclux.netlify.app](https://reclux
 - **Chrome, Edge, Brave, Opera:** extract the new .zip over the same folder, then press reload on Reclux in your browser's extensions page.
 - **Firefox:** load the new .zip the next time you add Reclux.
 
+## 2.0.0 fixes (18 November 2026, not released yet)
+
+The version stays 2.0.0 until the owner says otherwise.
+
+### Changed
+- **Start recording starts right away.** No more recorder page: a small Reclux window opens in the middle of the screen, your browser asks what to share, a 5-second countdown ticks, and recording starts at 0. The same window then becomes the recording controls (bottom-right) and, after Stop, the editor. Firefox needs one "Choose what to share" click first (a Firefox rule).
+- **Popup:** "What are you recording today?" Normal or Webcam. The Webcam and Cursor zoom switches are gone; cursor zoom works whenever Reclux may show things on web pages. Same size (360 × 560) in every browser.
+- **Keep on top:** the always-on-top controls now open from a button in the controls window.
+- **Firefox:** no System audio switch (Firefox cannot record it) and no alert about it.
+
+### Fixed
+- Chrome and Edge: "Screen sharing was cancelled or blocked" and a controls window that vanished after 2–3 seconds.
+- The webcam circle took 30–40 seconds to appear (the browser asked for the camera a second time, on the web page).
+- Dragging the webcam circle selected page text (a blue box) and could stick. It now follows the pointer smoothly.
+- The recording controls window cut off both sides of the bar.
+- Opera: the broken "Sharing this tab" bar on the recorder page (the recorder is no longer a tab).
+- Closing the Reclux window during the countdown no longer leaves an empty "never saved" recording.
+- In Normal mode the small bar on web pages no longer shows a webcam button.
+
 ## 2.0.0 (17 November 2026)
 
 A new look, a video editor, a webcam circle and cursor zoom. Downloads: `reclux-extension-v2.zip` (Chrome, Edge, Brave, Opera) and `reclux-firefox-extension-v2.zip`.

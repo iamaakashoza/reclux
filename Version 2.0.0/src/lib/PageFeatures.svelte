@@ -1,24 +1,39 @@
 <script lang="ts">
-  // Webcam circle and Cursor zoom switches. Both show things on web pages, so turning one on asks the
-  // browser for page access (once). Without it: the circle shows in the floating window, cursor zoom is off.
+  // "What are you recording?": Normal (screen only) or Webcam (screen + the webcam circle).
+  // The circle is shown on web pages, so picking Webcam asks the browser for page access (once). That access also
+  // turns on cursor zoom. Without it, the circle shows in the Reclux window instead.
   import Button from './Button.svelte';
-  import Toggle from './Toggle.svelte';
+  import Segmented from './Segmented.svelte';
   import { askPageAccess, hasPageAccess } from './overlay';
 
-  let { camera = $bindable(), zoom = $bindable(), compact = false }: { camera: boolean; zoom: boolean; compact?: boolean } = $props();
+  let { camera = $bindable(), legend, hideLegend = false }: { camera: boolean; legend: string; hideLegend?: boolean } = $props();
 
   let access = $state(true);
   void hasPageAccess().then((a) => (access = a));
   // Straight from the click: the browser only shows its question then.
   const ask = async () => (access = await askPageAccess());
-  const turned = (on: boolean) => on && !access && void ask();
+  const KINDS = [
+    { value: 'normal', label: 'Normal' },
+    { value: 'webcam', label: 'Webcam' },
+  ];
 </script>
 
-<Toggle icon="camera" label="Webcam" hint={compact ? undefined : 'A circle you can drag, recorded with the screen'} bind:checked={camera} onchange={turned} />
-<Toggle icon="zoom" label="Cursor zoom" hint={compact ? undefined : 'Zooms where you work on web pages'} bind:checked={zoom} onchange={turned} />
-{#if (camera || zoom) && !access}
+<Segmented
+  {legend}
+  {hideLegend}
+  name="kind"
+  options={KINDS}
+  bind:value={
+    () => (camera ? 'webcam' : 'normal'),
+    (v) => {
+      camera = v === 'webcam';
+      if (camera && !access) void ask();
+    }
+  }
+/>
+{#if camera && !access}
   <p class="need">
-    {compact ? 'Needs access to web pages. Nothing is collected or sent.' : 'Reclux needs access to web pages to show the circle and follow your cursor. Nothing is collected or sent.'}
+    The circle needs access to web pages. Nothing is sent.
     <Button variant="ghost" onclick={ask}>Allow</Button>
   </p>
 {/if}

@@ -7,6 +7,7 @@ export interface OverlayState {
   count: number; // countdown number
   elapsed: number; // seconds recorded
   camera: boolean; // show the webcam circle
+  webcam: boolean; // Webcam mode (the bar's webcam button), even while the circle is hidden
   pos: { x: number; y: number }; // circle centre, as a share of the window (0–1)
   bar: boolean; // show the in-page control bar (no floating window, e.g. Firefox)
   info: string; // "12 MB · 1080p · 60 fps"
@@ -17,3 +18,13 @@ export type OverlayMessage =
   | { type: 'cursor'; vx: number; vy: number; sx: number; sy: number; wx: number; wy: number }
   | { type: 'pos'; x: number; y: number }
   | { type: 'cmd'; cmd: 'pause' | 'resume' | 'stop' | 'camera' };
+
+/** The circle's frame on a web page → recorder: "send me the camera" (Firefox, see shareCamera in overlay.ts). */
+export const CAMERA_PORT = 'reclux-camera';
+
+/** A WebRTC link inside this computer, ready once it has found its local addresses. */
+export const gathered = (pc: RTCPeerConnection) =>
+  new Promise<void>((done) => {
+    if (pc.iceGatheringState === 'complete') return done();
+    pc.addEventListener('icegatheringstatechange', () => pc.iceGatheringState === 'complete' && done());
+  });

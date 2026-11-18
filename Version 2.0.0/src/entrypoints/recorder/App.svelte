@@ -1,9 +1,14 @@
 <script lang="ts">
   // The recorder page: start card → countdown → recording bar (Screen 2) → editor (Screens 3–4) → export (Screen 5).
+  // Two ways to be open:
+  //  - the small Reclux window (Start recording in the popup): asks to share at once, counts down in the middle of the
+  //    screen, shrinks into the recording controls at the bottom-right, and grows into the editor after Stop;
+  //  - a normal tab (recovering a lost recording, or opened by hand): the start card with its Record button.
   import Banner from '../../lib/Banner.svelte';
   import Button from '../../lib/Button.svelte';
   import Editor from '../../lib/Editor.svelte';
   import Export from '../../lib/Export.svelte';
+  import Floating from '../../lib/Floating.svelte';
   import Icon from '../../lib/Icon.svelte';
   import Logo from '../../lib/Logo.svelte';
   import RecordingBar from '../../lib/RecordingBar.svelte';
@@ -14,21 +19,33 @@
   import { onMount, tick } from 'svelte';
   import { discardRecoverable, recover, refreshRecoverable, reset, session, start } from '../../lib/session.svelte';
   import { canFloat, closeFloating, openFloating } from '../../lib/pip';
+  import { START, countdownSize, fitWindow, growWindow, minimiseWindow, pickerSize } from '../../lib/window';
 
-  // Record: the browser's screen picker, and the floating controls window, both need this same click.
-  const record = () => {
-    // Picker cancelled or blocked: recording never started, so close the floating window again.
-    void start().then(() => session.phase === 'idle' && closeFloating());
-    openFloating();
+  const mini = location.hash === START;
+  session.mini = mini;
+  if (mini) history.replaceState(null, '', location.pathname); // a reload must not start again
+
+  // Record = the browser's share picker only. The floating window used to open from this same click, and taking the
+  // focus from the picker made Chrome and Edge close it as "denied" (Issue 4). It now opens only from Keep on top.
+  const record = async () => {
+    await start();
+    // Picked: bring this window back over the shared tab or window, so the countdown is seen.
+    if (mini && session.phase === 'countdown') void minimiseWindow(false);
   };
 
-  // A crash or closed tab can leave a recording behind. Offer to get it back.
-  onMount(refreshRecoverable);
+  onMount(() => {
+    // A crash or closed tab can leave a recording behind. Offer to get it back.
+    void refreshRecoverable();
+    // The small window asks to share straight away. Firefox refuses without a click here, so it shows a button.
+    if (mini) void record();
+  });
 
   const live = $derived(session.phase === 'recording' || session.phase === 'paused');
   const preset = $derived(findPreset(session.presetId));
   let view = $state<'edit' | 'export'>('edit');
   let solid = $state(loadSettings().solid);
+  // The small window while recording: only the controls.
+  const compact = $derived(mini && live);
 
   // Lighter glass while recording: the screen behind moves, so blur would be redrawn every frame.
   $effect(() => {
@@ -37,6 +54,51 @@
   // The floating window only lives while recording.
   $effect(() => {
     if (session.phase === 'idle' || session.phase === 'finished') closeFloating();
+  });
+
+  // The small window's size follows what it shows.
+  let main: HTMLElement | undefined = $state();
+  let placed = false;
+  let opened = true; // the window was just made at picker size: re-sizing it now would nudge the open picker
+  $effect(() => {
+    if (!mini) return;
+    if (session.phase === 'finished') {
+      void growWindow();
+      return;
+    }
+    if (!compact) {
+      placed = false;
+      if (session.phase === 'idle' && opened) opened = false;
+      else void (session.phase === 'idle' ? pickerSize() : countdownSize());
+      return;
+    }
+    if (!main) return;
+    // Recording: exactly the size of the controls (bar, circle, notices). Bottom-right the first time; after that it
+    // stays where the user put it.
+    const el = main;
+    const fit = () => {
+      // Set aside for Keep on top: leave it so (Firefox would bring a minimised window back when it is resized).
+      if (document.hidden || session.floating) return;
+      const r = el.getBoundingClientRect();
+      void fitWindow(r.width, r.height, placed ? 'keep' : 'corner');
+      placed = true;
+    };
+    const ro = new ResizeObserver(fit);
+    ro.observe(el);
+    // Covered by other windows when recording began (fit skipped): fit it when it is seen again.
+    document.addEventListener('visibilitychange', fit);
+    return () => {
+      ro.disconnect();
+      document.removeEventListener('visibilitychange', fit);
+    };
+  });
+  // Keep on top: the always-on-top controls replace this window until they are closed.
+  let wasFloating = false;
+  $effect(() => {
+    const f = session.floating;
+    if (!mini || f === wasFloating) return;
+    wasFloating = f;
+    if (f || live) void minimiseWindow(f);
   });
 
   // When the screen changes, move keyboard focus to its first button, so it is not lost when the old one disappears.
@@ -69,24 +131,42 @@
   });
 </script>
 
-<div class="app" class:full={session.phase === 'finished'}>
-  <header>
-    <h1><Logo /></h1>
-    <span class="right">
-      <a class="guide" href="/welcome.html">Setup guide</a>
-      <button
-        class="look"
-        aria-pressed={solid}
-        title="Use solid surfaces instead of see-through glass"
-        onclick={() => saveSettings({ solid: (solid = !solid) })}
-      >
-        <Icon name="contrast" size={16} /> Reduce transparency
-      </button>
-      <span class="offline"><Icon name="shield" size={16} /> Works offline</span>
-    </span>
-  </header>
+{#snippet warnings()}
+  {#if session.free !== null && session.free < LOW_FREE}
+    <Banner kind="warn" title="Disk space is running low">
+      About {fmtSize(session.free / 1e6)} left on the drive that holds your browser. If it gets close to full,
+      Reclux stops safely and keeps what is recorded so far.
+    </Banner>
+  {/if}
+  {#if session.elapsed >= MAX_SECONDS}
+    <Banner kind="warn" title="2 hours reached">Reclux is still recording. Stop when you are ready.</Banner>
+  {:else if session.elapsed >= WARN_SECONDS}
+    <Banner kind="info" title="15 minutes left of 2 hours">Recording continues after that. Stop when you are ready.</Banner>
+  {/if}
+{/snippet}
 
-  <main>
+<div class="app" class:full={session.phase === 'finished'} class:mini={mini && session.phase !== 'finished'} class:compact>
+  {#if !mini || session.phase === 'finished'}
+    <header>
+      <h1><Logo /></h1>
+      <span class="right">
+        <a class="guide" href="/welcome.html">Setup guide</a>
+        <button
+          class="look"
+          aria-pressed={solid}
+          title="Use solid surfaces instead of see-through glass"
+          onclick={() => saveSettings({ solid: (solid = !solid) })}
+        >
+          <Icon name="contrast" size={16} /> Reduce transparency
+        </button>
+        <span class="offline"><Icon name="shield" size={16} /> Works offline</span>
+      </span>
+    </header>
+  {/if}
+
+  <main bind:this={main}>
+    <!-- The small window's countdown shows only the countdown. Notices wait for the controls window. -->
+    {#if !(mini && session.phase === 'countdown')}
     {#if session.error && session.phase !== 'finished'}
       <Banner kind="error" title="Something went wrong">
         {session.error}
@@ -103,8 +183,17 @@
         {/snippet}
       </Banner>
     {/each}
+    {/if}
 
-    {#if session.phase === 'idle'}
+    {#if session.phase === 'idle' && mini}
+      <!-- Behind the browser's share window. Seen when it was cancelled, and in Firefox, which needs this click. -->
+      <section class="ask" aria-labelledby="ask-title">
+        <Logo height={22} />
+        <h2 id="ask-title">Choose what to share</h2>
+        <p class="hint">Your browser asks: a tab, a window or your whole screen.</p>
+        <Button variant="primary" size="lg" icon="record" onclick={record}>Choose what to share</Button>
+      </section>
+    {:else if session.phase === 'idle'}
       {#each session.recoverable as item (item.name)}
         <Banner kind="warn" title="Found a recording that was never saved">
           From {new Date(item.modified).toLocaleString()} · {fmtSize(item.size / 1e6)}. It may have been cut short by a
@@ -120,8 +209,8 @@
         <h2 id="start-title">Ready to record</h2>
         <p class="chips">
           <span>{preset.height}p</span><span>{preset.fps} fps</span>
-          <span>Mic {session.mic ? 'on' : 'off'}</span><span>System audio {session.system ? 'on' : 'off'}</span>
-          {#if session.camera}<span>Webcam</span>{/if}{#if session.zoom}<span>Cursor zoom</span>{/if}
+          <span>Mic {session.mic ? 'on' : 'off'}</span>{#if session.system}<span>System audio on</span>{/if}
+          <span>{session.camera ? 'Webcam' : 'Normal'}</span>
         </p>
         <Button variant="primary" size="lg" icon="record" onclick={record}>Record</Button>
         <p class="hint">Your browser asks what to share: a tab, a window or your whole screen.</p>
@@ -133,10 +222,18 @@
       <p class="foot"><Icon name="shield" size={16} /> Works offline · Saved on this device</p>
     {:else if session.phase === 'countdown'}
       <section class="center" aria-label="Starting">
-        <div class="count glass" role="status" aria-live="assertive">{session.count}</div>
-        <p>Starting… switch to what you want to record.</p>
+        <div class="count glass" role="status" aria-live="assertive">{session.count || '…'}</div>
+        <!-- At 0 the encoder can still be getting ready on a busy computer. -->
+        <p>{session.count ? `Recording starts in ${session.count} s` : 'Starting…'}</p>
         <Button variant="ghost" onclick={reset}>Cancel</Button>
       </section>
+    {:else if compact}
+      <!-- The small window while recording: the controls, and the webcam circle when it is not on web pages. -->
+      <Floating />
+      {#if canFloat() && !session.floating}
+        <Button icon="window" onclick={openFloating}>Keep on top</Button>
+      {/if}
+      {@render warnings()}
     {:else if live}
       <section class="center" aria-label="Recording">
         <p class="live">
@@ -149,17 +246,7 @@
           <Button icon="window" onclick={openFloating}>Pop out controls</Button>
           <p class="hint">A small window that stays on top of every app, so you can pause and stop from anywhere.</p>
         {/if}
-        {#if session.free !== null && session.free < LOW_FREE}
-          <Banner kind="warn" title="Disk space is running low">
-            About {fmtSize(session.free / 1e6)} left on the drive that holds your browser. If it gets close to full,
-            Reclux stops safely and keeps what is recorded so far.
-          </Banner>
-        {/if}
-        {#if session.elapsed >= MAX_SECONDS}
-          <Banner kind="warn" title="2 hours reached">Reclux is still recording. Stop when you are ready.</Banner>
-        {:else if session.elapsed >= WARN_SECONDS}
-          <Banner kind="info" title="15 minutes left of 2 hours">Recording continues after that. Stop when you are ready.</Banner>
-        {/if}
+        {@render warnings()}
       </section>
     {:else if view === 'edit'}
       <Editor onsaved={() => (view = 'export')} />
@@ -227,6 +314,31 @@
     margin: 0 auto;
     padding: var(--s-4) var(--s-5) var(--s-5);
   }
+  /* The small window (share, countdown): everything in the middle. */
+  .mini {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .mini main {
+    align-content: center;
+    justify-items: center;
+    padding: var(--s-4);
+  }
+  /* The small window while recording: as small as its contents, which the window is then sized to. */
+  .app.compact {
+    display: block;
+    min-height: 0;
+  }
+  .compact main {
+    justify-items: center;
+    width: max-content;
+    max-width: none;
+    margin: 0;
+    padding: var(--s-2);
+    gap: var(--s-2);
+  }
+  .compact main > :global(.banner) {
+    max-width: 30rem;
+  }
   /* Editor: notices keep their own height, the editor takes the rest. */
   .full main {
     display: flex;
@@ -234,6 +346,16 @@
   }
   .full main > :global(.editor) {
     flex: 1;
+  }
+  .ask {
+    display: grid;
+    justify-items: center;
+    gap: var(--s-3);
+    text-align: center;
+  }
+  .ask h2 {
+    font-size: var(--t-lg);
+    font-weight: 700;
   }
   .start {
     display: grid;
@@ -320,13 +442,17 @@
     margin-top: 10vh;
     text-align: center;
   }
+  .mini .center {
+    margin-top: 0;
+  }
+  /* The countdown: big, on its own disc, in the middle (of the screen, in the small window). */
   .count {
     display: grid;
     place-items: center;
-    width: 160px;
-    height: 160px;
+    width: 220px;
+    height: 220px;
     border-radius: 50%;
-    font: 800 88px / 1 var(--font-mono);
+    font: 800 140px / 1 var(--font-mono);
   }
   .live {
     max-width: 36rem;

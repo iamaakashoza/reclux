@@ -14,9 +14,11 @@ let win: Window | undefined;
 export function openFloating() {
   const pip = api();
   if (!pip || win) return;
-  const withCam = session.camera && !session.pageAccess; // no circle on web pages: show it here instead
+  // As big as the controls on this page (the bar was cut off in a fixed 480 px window, Issue 5b).
+  const box = document.querySelector('.float')?.getBoundingClientRect();
+  const withCam = !!session.cameraStream && !session.pageAccess; // no circle on web pages: show it here instead
   pip
-    .requestWindow({ width: 480, height: withCam ? 360 : 150 })
+    .requestWindow({ width: Math.ceil(box?.width ?? 560), height: Math.ceil(box?.height ?? (withCam ? 360 : 150)) })
     .then((w) => {
       win = w;
       // Same styles as this page, and the same light/dark, solid and "recording" switches.

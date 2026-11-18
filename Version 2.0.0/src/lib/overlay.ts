@@ -1,6 +1,6 @@
 // Recorder side of the web-page overlay: asks for page access, puts the overlay into open tabs while recording,
 // sends it the live state, and receives cursor positions and button presses.
-import { OVERLAY_PORT, type OverlayMessage, type OverlayState } from './overlay-protocol';
+import { CAMERA_PORT, OVERLAY_PORT, gathered, type OverlayMessage, type OverlayState } from './overlay-protocol';
 
 const ACCESS = { origins: ['<all_urls>'] };
 const SCRIPT = '/content-scripts/overlay.js';
@@ -56,5 +56,39 @@ export function startOverlays(state: () => OverlayState, onMessage: (m: OverlayM
       ports.forEach((p) => p.disconnect());
       ports.clear();
     },
+  };
+}
+
+/**
+ * Lets every webcam circle on web pages show the camera this page already has, so the browser asks for the camera
+ * once (in Reclux) and never again per website. Chromium: the circle's frame finds this page and uses the stream
+ * as is (no copy, no cost). Firefox gives such a frame no way to reach this page, so there the picture goes over a
+ * WebRTC link inside the computer (nothing leaves it), one per circle on screen.
+ */
+export function shareCamera(stream: MediaStream) {
+  const w = window as unknown as { recluxCamera?: MediaStream };
+  w.recluxCamera = stream;
+  const links = new Set<RTCPeerConnection>();
+  const onConnect = (port: Port) => {
+    if (port.name !== CAMERA_PORT) return;
+    const pc = new RTCPeerConnection();
+    links.add(pc);
+    stream.getTracks().forEach((t) => pc.addTrack(t, stream));
+    port.onMessage.addListener((answer: RTCSessionDescriptionInit) => void pc.setRemoteDescription(answer).catch(() => {}));
+    port.onDisconnect.addListener(() => {
+      pc.close();
+      links.delete(pc);
+    });
+    void pc
+      .setLocalDescription()
+      .then(() => gathered(pc))
+      .then(() => port.postMessage(pc.localDescription!.toJSON()))
+      .catch(() => port.disconnect());
+  };
+  browser.runtime.onConnect.addListener(onConnect);
+  return () => {
+    delete w.recluxCamera;
+    browser.runtime.onConnect.removeListener(onConnect);
+    links.forEach((pc) => pc.close());
   };
 }

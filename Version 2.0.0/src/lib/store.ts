@@ -38,10 +38,15 @@ export function holdStored(name: string): Promise<() => void> {
   });
 }
 
-export const markSaved = (name: string) => localStorage.setItem(savedKey(name), '1');
+/** Marks a file as nothing to recover (saved, or not started yet), or `false` to clear that again. */
+export const markSaved = (name: string, on = true) =>
+  on ? localStorage.setItem(savedKey(name), '1') : localStorage.removeItem(savedKey(name));
 
-/** Files from an earlier session that were never saved. Already-saved leftovers are cleaned up. */
-export async function findUnsaved(): Promise<Stored[]> {
+/**
+ * Files from an earlier session that were never saved. Already-saved leftovers are cleaned up, unless `clean` is
+ * false: the toolbar popup only looks, because a Reclux window may be finishing a .tmp file right now.
+ */
+export async function findUnsaved(clean = true): Promise<Stored[]> {
   const d = await dir();
   const held = new Set((await navigator.locks.query()).held?.map((l) => l.name));
   const entries = (d as unknown as { entries(): AsyncIterable<[string, FileSystemHandle]> }).entries();
@@ -50,7 +55,7 @@ export async function findUnsaved(): Promise<Stored[]> {
     if (h.kind !== 'file' || held.has(lockName(name))) continue;
     // A half-written rebuild from a crash (the original is still there), or a file already saved.
     if (name.endsWith('.tmp') || localStorage.getItem(savedKey(name))) {
-      await removeStored(name);
+      if (clean) await removeStored(name);
       continue;
     }
     const f = await (h as FileSystemFileHandle).getFile();
