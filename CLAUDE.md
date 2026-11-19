@@ -13,7 +13,7 @@ Reclux is an offline-first screen recorder browser extension (Manifest V3). No a
 ## Commands
 
 ```
-cd "Version 2.0.0"
+cd "Version 2.0.0"          # needs Node.js 20+
 npm ci
 npm run dev             # Chromium dev build. Load .output/reclux-extension-all-in-one-dev by hand (web-ext, which opened a browser, was removed)
 npm run dev:firefox
@@ -69,7 +69,7 @@ UI: shared components in `src/lib/*.svelte` (`Logo.svelte` is the logo), design 
 - `report.md` — the research report and decision log (presets, bitrates, browser minimums, 2-hour rules). Code comments cite it as "report §N". Update it when decisions change.
 - `brand/` — logo master files (SVG), app icons and usage rules. `public/icon/` and `Logo.svelte` are copied from here.
 - Website: the `website` branch, which Netlify deploys on every push (report §30, §33). Privacy page: the separate `reclux-privacy` repo.
-- `docs/`, `spike/` are local-only (gitignored).
+- `docs/`, `spike/`, `reports/`, `research_notes/` are local-only (gitignored).
 
 ## Conventions
 
