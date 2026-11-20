@@ -1,20 +1,22 @@
 <script lang="ts">
-  // Screen 3: the editor. Video in the middle, tools and timeline below. Screen 4: "Save video?" before export.
-  // Split / Trim / Delete act on the part under the playhead (outlined on the timeline). Zooms are edited in the
-  // strip above the timeline. Saving with edits builds a new video and replaces the original (session.applyEdit).
+  // Screen 3: the editor. Full width, no boxed cards (owner's call, 19 Nov 2026): a bar on top, the video, the tools,
+  // the timeline. Split / Trim / Delete act on the selected part (under the playhead, outlined red on the timeline).
+  // Trim shows arrows on that part's ends to drag. − Zoom + stretches the timeline for exact cuts.
+  // Cursor zoom is made automatically while recording; a zoom block can be selected and deleted, nothing more.
+  // Save changes: no edits = straight to export; only automatic zooms = built in without asking (owner's call);
+  // cuts = "Replace the original video?" first, because the original is replaced.
   import Button from './Button.svelte';
   import Icon from './Icon.svelte';
   import Modal from './Modal.svelte';
   import Timeline from './Timeline.svelte';
   import { fmtTime } from './presets';
   import { applyEdit, session } from './session.svelte';
-  import { ZOOM_SCALE, fit, zoomAt, type Zoom } from './zoom';
+  import { zoomAt } from './zoom';
   import { clipAt, remove, split, toOutput, toSource, total, trimIn, trimOut, zoomPieces, type Clip } from './edit';
 
   let { onsaved }: { onsaved: () => void } = $props();
 
   let video: HTMLVideoElement | undefined = $state();
-  let frame: HTMLDivElement | undefined = $state();
   let src = $state(0); // playhead, in seconds of the original recording
   let paused = $state(true);
   let mediaDuration = $state(0);
@@ -31,12 +33,8 @@
   const active = $derived(clipAt(clips, current));
   const parts = $derived(clips.map((c, i) => ({ at: total(clips.slice(0, i)), len: c.end - c.start })));
   const pieces = $derived(
-    session.zooms.flatMap((z, i) => {
-      const ps = zoomPieces(clips, z);
-      return ps.map((p, k) => ({ ...p, i, k, scale: z.scale, first: k === 0, last: k === ps.length - 1 }));
-    }),
+    session.zooms.flatMap((z, i) => zoomPieces(clips, z).map((p, k) => ({ ...p, i, k, scale: z.scale }))),
   );
-  const edited = $derived(cuts !== null || session.zooms.length > 0);
   const fileLabel = $derived(`${session.name}.${session.ext}`);
 
   // Cursor zoom preview, in step with playback. currentTime only updates ~4 times a second, so read it every
@@ -78,7 +76,7 @@
   const snap = () => JSON.stringify({ cuts, zooms: session.zooms });
   const restore = (s: string) => {
     ({ cuts, zooms: session.zooms } = JSON.parse(s));
-    if (picked >= session.zooms.length) picked = -1;
+    picked = -1;
     seek(current);
   };
   const remember = () => {
@@ -105,69 +103,40 @@
     cuts = next;
     seek(current); // the playhead may sit in a part that is gone now
   };
-  const can = $derived({
-    split: split(clips, current) !== clips,
-    in: trimIn(clips, current) !== clips,
-    out: trimOut(clips, current) !== clips,
-    del: clips.length > 1,
-  });
+  let trimming = $state(false);
+  const trim = (side: 'in' | 'out', t: number) => {
+    const before = clips;
+    const i = clipAt(clips, t); // the trimmed part keeps its place in the list (t itself may now be in the next one)
+    cut(side === 'in' ? trimIn(clips, t) : trimOut(clips, t));
+    if (clips === before) return;
+    // Show where the part now starts or ends.
+    const p = parts[i];
+    if (p) seek(side === 'in' ? p.at : Math.max(p.at, p.at + p.len - 0.05));
+  };
 
-  // Zooms: pick one to change its size, spot, start and end, or remove it. Add one at the playhead.
-  const SHORTEST = 0.5;
+  // A zoom block can be selected (click it) and deleted.
   let picked = $state(-1);
-  const pz = $derived(session.zooms[picked]);
-  const setZoom = (patch: Partial<Zoom>) => {
-    session.zooms = session.zooms.map((z, i) => (i === picked ? fit({ ...z, ...patch }) : z));
-  };
-  const changeZoom = (patch: Partial<Zoom>) => {
-    remember();
-    setZoom(patch);
-  };
   const pick = (i: number) => {
-    picked = i;
+    picked = picked === i ? -1 : i;
     const p = pieces.find((p) => p.i === i); // its first visible piece (part of it may be cut out)
-    if (p) seek(p.at + p.len / 2); // show it zoomed in
+    if (picked >= 0 && p) seek(p.at + p.len / 2); // show it zoomed in
   };
-  const addZoom = () => {
-    const here = session.zooms.findIndex((z) => src >= z.start && src <= z.end);
-    if (here >= 0) return pick(here);
-    const z = { start: src, end: Math.min(srcDuration, src + 3), x: 0.5, y: 0.5, scale: ZOOM_SCALE };
-    if (z.end - z.start < SHORTEST) return;
-    remember();
-    session.zooms = [...session.zooms, z].sort((a, b) => a.start - b.start);
-    pick(session.zooms.findIndex((v) => v.start === z.start));
+  const del = () => {
+    if (picked >= 0) {
+      remember();
+      session.zooms = session.zooms.filter((_, i) => i !== picked);
+      picked = -1;
+    } else cut(remove(clips, active));
   };
-  const removeZoom = () => {
-    remember();
-    session.zooms = session.zooms.filter((_, i) => i !== picked);
-    picked = -1;
-  };
-  const edge = (i: number, side: 'start' | 'end', t: number) => {
-    const z = session.zooms[i]!;
-    const s = toSource(clips, t);
-    picked = i;
-    setZoom(side === 'start' ? { start: Math.min(s, z.end - SHORTEST) } : { end: Math.max(s, z.start + SHORTEST) });
-  };
-  // With a zoom picked, clicking the video chooses the spot it zooms into.
-  const clickVideo = (e: MouseEvent) => {
-    if (picked < 0 || !frame) return toggle();
-    const r = frame.getBoundingClientRect();
-    changeZoom({
-      x: view.x + ((e.clientX - r.left) / r.width - 0.5) / view.scale,
-      y: view.y + ((e.clientY - r.top) / r.height - 0.5) / view.scale,
-    });
-  };
+  const can = $derived({ split: split(clips, current) !== clips, del: picked >= 0 || clips.length > 1 });
 
-  // Screen 4, then (with edits) building the new video.
+  // Save changes (Screen 4 only when the original is replaced by cuts).
+  const cutsMade = $derived(cuts !== null);
   let asking = $state(false);
   let building = $state<number | null>(null); // share done
   let failed = $state('');
   let cancel = false;
-  const confirmSave = async () => {
-    if (!edited) {
-      asking = false;
-      return onsaved();
-    }
+  const build = async () => {
     video?.pause();
     cancel = false;
     failed = '';
@@ -182,16 +151,27 @@
       building = null;
     }
   };
+  const save = () => {
+    trimming = false;
+    if (cutsMade) asking = true; // the original is replaced: ask first
+    else if (session.zooms.length) void build(); // only the automatic cursor zoom: build it in, no question
+    else onsaved(); // nothing changed: straight to export
+  };
   const closeModal = () => {
     if (building !== null) cancel = true; // Esc while building = Cancel
     asking = false;
     failed = '';
   };
+  const modalOpen = $derived(asking || building !== null || failed !== '');
+  const modalTitle = $derived(
+    failed ? 'Could not build the video' : building !== null ? (cutsMade ? 'Building your video' : 'Adding cursor zoom') : 'Replace the original video?',
+  );
 
-  // Keys: Space play/pause, arrows step, Ctrl+B split, I / O trim, Delete, Ctrl+Z / Ctrl+Shift+Z (or Ctrl+Y), Esc.
+  // Keys: Space play/pause, arrows step, Ctrl+B split, I / O trim at the playhead, Delete, Ctrl+Z / Ctrl+Shift+Z
+  // (or Ctrl+Y), Esc ends trimming or deselects a zoom.
   const onkey = (e: KeyboardEvent) => {
     const el = e.target as HTMLElement;
-    if (asking || el.closest('input, textarea, select')) return;
+    if (modalOpen || el.closest('input, textarea, select')) return;
     const k = e.key.toLowerCase();
     const mod = e.ctrlKey || e.metaKey;
     const run = (fn: () => void) => {
@@ -204,8 +184,8 @@
     else if (mod || e.altKey) return;
     else if (k === 'i') run(() => cut(trimIn(clips, current)));
     else if (k === 'o') run(() => cut(trimOut(clips, current)));
-    else if (k === 'delete' || k === 'backspace') run(() => (picked >= 0 ? removeZoom() : cut(remove(clips, active))));
-    else if (k === 'escape' && picked >= 0) run(() => (picked = -1));
+    else if (k === 'delete' || k === 'backspace') run(del);
+    else if (k === 'escape' && (trimming || picked >= 0)) run(() => ((trimming = false), (picked = -1)));
     else if (el.closest('button, [role="slider"]')) return; // they use Space and the arrows themselves
     else if (k === ' ') run(toggle);
     else if (k === 'arrowleft' || k === 'arrowright') run(() => seek(current + (k === 'arrowleft' ? -1 : 1) * (e.shiftKey ? 5 : 1)));
@@ -221,11 +201,11 @@
       <Button icon="undo" label="Undo (Ctrl+Z)" disabled={!past.length} onclick={undo} />
       <Button icon="redo" label="Redo (Ctrl+Shift+Z)" disabled={!future.length} onclick={redo} />
     </div>
-    <Button variant="primary" icon="check" onclick={() => (asking = true)}>Save changes</Button>
+    <Button variant="primary" icon="check" onclick={save}>Save changes</Button>
   </header>
 
   <div class="stage">
-    <div class="frame" class:aiming={picked >= 0} bind:this={frame} style:--ar={vw / vh || 16 / 9}>
+    <div class="frame" style:--ar={vw / vh || 16 / 9}>
       <!-- svelte-ignore a11y_media_has_caption, a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
       <video
         bind:this={video}
@@ -234,7 +214,7 @@
         bind:duration={mediaDuration}
         bind:videoWidth={vw}
         bind:videoHeight={vh}
-        onclick={clickVideo}
+        onclick={toggle}
         preload="metadata"
         style:transform="scale({view.scale}) translate({(0.5 - view.x) * 100}%, {(0.5 - view.y) * 100}%)"
       ></video>
@@ -243,47 +223,21 @@
 
   <div class="tools glass" role="toolbar" aria-label="Editing tools">
     <div class="group">
-      <Button icon="split" label="Split at the playhead (Ctrl+B)" disabled={!can.split} onclick={() => cut(split(clips, current))}>
-        Split <kbd>Ctrl+B</kbd>
+      <Button icon="split" label="Split the selected part at the playhead (Ctrl+B)" disabled={!can.split} onclick={() => cut(split(clips, current))}>Split</Button>
+      <Button icon="trim" label="Trim: drag the arrows at the ends of the selected part (I / O trim at the playhead)" pressed={trimming} onclick={() => ((trimming = !trimming), (picked = -1))}>Trim</Button>
+      <Button variant="secondary" icon="trash" label={picked >= 0 ? 'Delete the selected zoom (Delete)' : 'Delete the selected part (Delete)'} disabled={!can.del} onclick={del}>
+        {picked >= 0 ? 'Delete zoom' : 'Delete'}
       </Button>
-      <span class="trim"><Icon name="trim" /> Trim</span>
-      <Button label="Trim In: cut this part’s start, up to the playhead (I)" disabled={!can.in} onclick={() => cut(trimIn(clips, current))}>
-        In <kbd>I</kbd>
-      </Button>
-      <Button label="Trim Out: cut this part’s end, from the playhead (O)" disabled={!can.out} onclick={() => cut(trimOut(clips, current))}>
-        Out <kbd>O</kbd>
-      </Button>
-      <Button icon="trash" label="Delete the outlined part (Delete)" disabled={!can.del} onclick={() => cut(remove(clips, active))}>Delete</Button>
     </div>
     <div class="transport">
       <Button icon={paused ? 'play' : 'pause'} label={paused ? 'Play (Space)' : 'Pause (Space)'} onclick={toggle} />
       <span class="time"><b>{fmtTime(Math.floor(current))}</b> / {fmtTime(Math.round(duration))}</span>
     </div>
-    <div class="group">
+    <div class="zoomctl" role="group" aria-label="Timeline zoom">
       <Button icon="minus" label="Zoom out the timeline" disabled={zoom <= 1} onclick={() => (zoom = Math.max(1, zoom / 2))} />
-      <span class="zoomlabel">Zoom</span>
-      <Button icon="plus" label="Zoom in the timeline" disabled={zoom >= 32} onclick={() => (zoom = Math.min(32, zoom * 2))} />
+      <span>Zoom</span>
+      <Button icon="plus" label="Zoom in the timeline, for exact cuts" disabled={zoom >= 32} onclick={() => (zoom = Math.min(32, zoom * 2))} />
     </div>
-  </div>
-
-  <div class="zooms" role="group" aria-label="Cursor zoom">
-    {#if pz}
-      <span class="what"><Icon name="zoom" size={18} /> Zoom {pz.scale}×</span>
-      <Button icon="minus" label="Zoom in less" disabled={pz.scale <= 1.2} onclick={() => changeZoom({ scale: Math.round((pz.scale - 0.2) * 10) / 10 })} />
-      <Button icon="plus" label="Zoom in more" disabled={pz.scale >= 3} onclick={() => changeZoom({ scale: Math.round((pz.scale + 0.2) * 10) / 10 })} />
-      <span class="hint">Click the video to pick the spot. Drag the ends on the timeline, or:</span>
-      <Button variant="ghost" disabled={src >= pz.end - SHORTEST} onclick={() => changeZoom({ start: src })}>Start here</Button>
-      <Button variant="ghost" disabled={src <= pz.start + SHORTEST} onclick={() => changeZoom({ end: src })}>End here</Button>
-      <Button variant="ghost" icon="trash" onclick={removeZoom}>Remove</Button>
-      <Button icon="check" onclick={() => (picked = -1)}>Done</Button>
-    {:else}
-      <span class="what">
-        <Icon name="zoom" size={18} />
-        {session.zooms.length ? `${session.zooms.length} zoom${session.zooms.length > 1 ? 's' : ''}` : 'No zooms'}
-      </span>
-      <span class="hint">{session.zooms.length ? 'Click one on the timeline to change it.' : 'Add one to zoom into a part of the screen.'}</span>
-      <Button icon="plus" onclick={addZoom}>Add zoom</Button>
-    {/if}
   </div>
 
   <Timeline
@@ -295,32 +249,29 @@
     {active}
     zooms={pieces}
     {picked}
+    {trimming}
     onseek={seek}
     onpick={pick}
-    ongrab={remember}
-    onedge={edge}
+    ontrim={trim}
   />
 </section>
 
-<Modal bind:open={() => asking, (v) => !v && closeModal()} title={edited ? 'Replace the original video?' : 'Save this video?'}>
+<Modal bind:open={() => modalOpen, (v) => !v && closeModal()} title={modalTitle}>
   {#if building !== null}
-    <p role="status">Building your video… {Math.round(building * 100)}%</p>
+    <p role="status">{cutsMade ? 'Building your video' : 'Adding the cursor zoom'}… {Math.round(building * 100)}%</p>
     <progress max="1" value={building}></progress>
-    <p class="note">Keep this tab open. Long videos take a while.</p>
+    <p class="note">Keep this tab open. Long videos take a while. Next: export.</p>
   {:else if failed}
-    <p>• Could not build the video: {failed}</p>
+    <p>• {failed}</p>
     <p>• Your original recording is unchanged.</p>
-  {:else if edited}
-    <p>• Reclux builds a new video with your cuts and zooms, then it replaces your original recording.</p>
-    <p>• This can’t be undone.</p>
   {:else}
-    <p>• No edits were made, so the video is kept exactly as recorded.</p>
-    <p>• Next, choose a file name and where to export it.</p>
+    <p>• Reclux builds a new video with your cuts{session.zooms.length ? ' and the cursor zoom' : ''}, then it replaces your original recording.</p>
+    <p>• This can’t be undone.</p>
   {/if}
   {#snippet actions()}
-    <Button onclick={closeModal}>Cancel</Button>
+    <Button variant="secondary" onclick={closeModal}>Cancel</Button>
     {#if building === null}
-      <Button variant="primary" onclick={confirmSave}>{failed ? 'Try again' : 'Save video'}</Button>
+      <Button variant="primary" onclick={() => void build()}>{failed ? 'Try again' : 'Save video'}</Button>
     {/if}
   {/snippet}
 </Modal>
@@ -328,23 +279,28 @@
 <style>
   .editor {
     display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto auto auto;
-    gap: var(--s-3);
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
     height: 100%;
     min-height: 0;
   }
+  /* Bars reach the window's edges: no rounded cards, no gaps at the sides (owner's call). */
   .top,
   .tools {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--s-2) var(--s-3);
-    padding: var(--s-2) var(--s-2) var(--s-2) var(--s-4);
-    border-radius: var(--r-pill);
+    padding: var(--s-2) var(--s-5);
+    border-radius: 0;
+    border-width: 0;
+    box-shadow: var(--glass-highlight);
+  }
+  .top {
+    border-bottom: 1px solid var(--c-border);
   }
   .tools {
-    padding: var(--s-2);
     justify-content: space-between;
+    border-top: 1px solid var(--c-border);
   }
   .title {
     display: flex;
@@ -366,21 +322,22 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--s-1);
+    gap: var(--s-2);
   }
   /* The frame keeps the video's shape and fits the space left for it; zoom happens inside it. */
   .stage {
     display: grid;
     place-items: center;
     min-height: 160px;
+    padding: var(--s-4) var(--s-5);
     container-type: size;
   }
   .frame {
     width: min(100cqw, 100cqh * var(--ar));
     aspect-ratio: var(--ar);
     overflow: hidden;
-    border-radius: var(--r-lg);
-    background: #000;
+    border-radius: var(--r-md);
+    background: var(--black);
     box-shadow: var(--shadow);
   }
   video {
@@ -388,14 +345,6 @@
     width: 100%;
     height: 100%;
     cursor: pointer;
-  }
-  /* A zoom is picked: clicking the video picks its spot. */
-  .aiming {
-    outline: 3px solid var(--c-focus);
-    outline-offset: 2px;
-  }
-  .aiming video {
-    cursor: crosshair;
   }
   .transport {
     display: flex;
@@ -410,59 +359,42 @@
   .time b {
     color: var(--c-text);
   }
-  kbd {
-    font: 500 var(--t-xs) var(--font);
-    color: var(--c-text-muted);
-  }
-  .trim,
-  .what {
-    display: inline-flex;
+  /* − Zoom +: one capsule, the word between its two buttons. */
+  .zoomctl {
+    display: flex;
     align-items: center;
     gap: var(--s-1);
-    padding: 0 var(--s-1) 0 var(--s-2);
+    padding: 0;
+    border-radius: var(--r-pill);
+    background: var(--fill);
+  }
+  .zoomctl span {
+    padding: 0 var(--s-1);
     font-size: var(--t-sm);
     font-weight: 600;
   }
-  .zoomlabel {
-    font-size: var(--t-xs);
-    font-weight: 600;
-    color: var(--c-text-muted);
-  }
-  /* Cursor zoom strip: solid, sits on the page (not a floating control). */
-  .zooms {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--s-2);
-    min-height: calc(var(--tap) + 2 * var(--s-1));
-    padding: var(--s-1) var(--s-2);
-    border-radius: var(--r-lg);
-    background: var(--c-surface);
-    border: 1px solid var(--c-border);
-  }
-  .hint {
-    flex: 1;
-    min-width: 12rem;
-    font-size: var(--t-xs);
-    color: var(--c-text-muted);
+  .zoomctl :global(button) {
+    background: transparent;
   }
   progress {
     width: 100%;
     height: 8px;
-    accent-color: var(--c-lux);
+    accent-color: var(--c-accent);
   }
   .note {
     font-size: var(--t-sm);
     color: var(--c-text-muted);
   }
-  /* Narrow windows and tablets: tools wrap into two rows, labels stay. */
+  /* Narrow windows and tablets: tools wrap and centre, labels stay. */
   @media (max-width: 760px) {
     .tools {
-      border-radius: var(--r-xl);
       justify-content: center;
     }
-    .top {
-      border-radius: var(--r-xl);
+    .top,
+    .tools,
+    .stage {
+      padding-left: var(--s-4);
+      padding-right: var(--s-4);
     }
   }
 </style>

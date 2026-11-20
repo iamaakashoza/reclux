@@ -2,8 +2,12 @@
   import type { Snippet } from 'svelte';
   import Icon from './Icon.svelte';
 
-  // Capsule buttons. Buttons sit on glass as plain fills (never glass on glass).
-  // primary = the one tinted action per view (Record, Stop, Export). Icon-only buttons need `label`.
+  // Capsule buttons (owner's call, 20 Nov 2026):
+  //  primary   = the one solid red action per view (Record, Save changes, Export)
+  //  secondary = a red outline: the other actions next to it (Cancel, Delete video, Recover it)
+  //  neutral   = a plain fill: tools (Undo, Split, Play, Zoom)
+  //  ghost     = text only: quiet links (Back to editing)
+  // Icon-only buttons need `label`.
   let {
     variant = 'neutral',
     icon,
@@ -12,15 +16,18 @@
     disabled = false,
     block = false,
     size = 'md',
+    pressed,
     children,
   }: {
-    variant?: 'primary' | 'neutral' | 'ghost' | 'danger';
+    variant?: 'primary' | 'secondary' | 'neutral' | 'ghost';
     icon?: string;
     label?: string;
     onclick?: (e: MouseEvent) => void;
     disabled?: boolean;
     block?: boolean;
     size?: 'md' | 'lg';
+    /** A switch-like button (Trim): shown dark while on. */
+    pressed?: boolean;
     children?: Snippet;
   } = $props();
 </script>
@@ -32,6 +39,7 @@
   class:round={!children}
   aria-label={children ? undefined : label}
   title={label}
+  aria-pressed={pressed}
   {onclick}
   {disabled}
 >
@@ -82,17 +90,27 @@
   .primary {
     background: var(--c-accent);
     color: var(--c-on-accent);
-    box-shadow: 0 6px 18px rgb(215 38 61 / 30%), inset 0 1px 0 rgb(255 255 255 / 25%);
+    box-shadow: 0 4px 14px rgb(242 11 24 / 26%);
   }
   .primary:hover:not(:disabled) {
     background: var(--c-accent-hover);
+  }
+  [aria-pressed='true'],
+  [aria-pressed='true']:hover:not(:disabled) {
+    background: var(--c-text);
+    color: var(--c-bg);
   }
   .ghost {
     background: transparent;
     color: var(--c-text-muted);
   }
-  .danger {
+  .secondary {
+    border: 1.5px solid var(--c-accent);
+    background: transparent;
     color: var(--c-accent-text);
+  }
+  .secondary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--c-accent) 8%, transparent);
   }
   .block {
     width: 100%;

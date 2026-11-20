@@ -8,8 +8,6 @@ interface Settings {
   format: Format;
   mic: boolean;
   system: boolean;
-  /** "Reduce transparency": solid surfaces instead of glass. Firefox has no system setting for it. */
-  solid: boolean;
   /** "Webcam" recording (the circle) instead of "Normal". Needs web page access to show on pages. */
   camera: boolean;
 }
@@ -23,7 +21,7 @@ interface Settings {
  */
 export const systemAudioWorks = 'suppressLocalAudioPlayback' in (navigator.mediaDevices?.getSupportedConstraints() ?? {});
 
-const DEFAULTS: Settings = { presetId: DEFAULT_PRESET, format: 'mp4', mic: true, system: systemAudioWorks, solid: false, camera: false };
+const DEFAULTS: Settings = { presetId: DEFAULT_PRESET, format: 'mp4', mic: true, system: systemAudioWorks, camera: false };
 
 const KEY = 'reclux.settings';
 
@@ -38,7 +36,6 @@ export function loadSettings(): Settings {
     format: s.format === 'webm' ? 'webm' : DEFAULTS.format,
     mic: typeof s.mic === 'boolean' ? s.mic : DEFAULTS.mic,
     system: systemAudioWorks && (typeof s.system === 'boolean' ? s.system : DEFAULTS.system),
-    solid: s.solid === true,
     camera: s.camera === true,
   };
 }
@@ -48,14 +45,7 @@ export function saveSettings(s: Partial<Settings>) {
   try {
     localStorage.setItem(KEY, JSON.stringify({ ...loadSettings(), ...s }));
   } catch {} // private window or blocked storage: just do not remember
-  applyLook();
 }
-
-/** Solid or glass surfaces, on every page. Also follows changes made in another Reclux page. */
-export function applyLook() {
-  document.documentElement.toggleAttribute('data-solid', loadSettings().solid);
-}
-addEventListener('storage', applyLook);
 
 /**
  * First run only: if this computer has no hardware H.264 encoder for 1080p60, start on 720p instead.

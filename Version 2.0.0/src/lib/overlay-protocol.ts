@@ -11,12 +11,15 @@ export interface OverlayState {
   pos: { x: number; y: number }; // circle centre, as a share of the window (0–1)
   bar: boolean; // show the in-page control bar (no floating window, e.g. Firefox)
   info: string; // "12 MB · 1080p · 60 fps"
+  /** The webcam's picture right now (first message only): shown in the circle until its live video starts. */
+  still?: string;
 }
 
 /** Page → recorder. */
 export type OverlayMessage =
   | { type: 'cursor'; vx: number; vy: number; sx: number; sy: number; wx: number; wy: number }
   | { type: 'pos'; x: number; y: number }
+  | { type: 'seen'; on: boolean } // the page is on screen (or not)
   | { type: 'cmd'; cmd: 'pause' | 'resume' | 'stop' | 'camera' };
 
 /** The circle's frame on a web page → recorder: "send me the camera" (Firefox, see shareCamera in overlay.ts). */

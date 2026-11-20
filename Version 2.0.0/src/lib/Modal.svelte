@@ -13,7 +13,11 @@
   let dialog: HTMLDialogElement | undefined = $state();
   $effect(() => {
     if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
+    if (open && !dialog.open) {
+      dialog.showModal();
+      // Keyboard focus on the first button, without the ring the owner saw (it shows once the keyboard is used).
+      dialog.querySelector<HTMLElement>('.actions button')?.focus({ focusVisible: false } as FocusOptions);
+    }
     if (!open && dialog.open) dialog.close();
   });
 </script>
@@ -25,6 +29,11 @@
 </dialog>
 
 <style>
+  /* A question to read: the sheet is solid, not see-through (a video behind made it hard to read). */
+  dialog.glass {
+    background: var(--glass-bg-solid);
+    backdrop-filter: none;
+  }
   dialog {
     width: min(30rem, calc(100vw - 2 * var(--s-4)));
     padding: var(--s-5);
@@ -38,7 +47,7 @@
   }
   /* The dimming layer. No blur here: one blur per modal (the sheet). */
   dialog::backdrop {
-    background: rgb(5 7 10 / 55%);
+    background: var(--dim);
   }
   h2 {
     font-size: var(--t-lg);

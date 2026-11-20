@@ -7,6 +7,44 @@ Download Reclux and see the install steps at [reclux.netlify.app](https://reclux
 - **Chrome, Edge, Brave, Opera:** extract the new .zip over the same folder, then press reload on Reclux in your browser's extensions page.
 - **Firefox:** load the new .zip the next time you add Reclux.
 
+## 2.0.0 fixes, part 3 (20 November 2026, not released yet)
+
+The version stays 2.0.0 until the owner says otherwise.
+
+### Changed
+- **New look:** Figtree and JetBrains Mono typefaces and Lucide icons, packed into Reclux (no internet needed). Frosted glass in light **and dark**, following your computer's setting.
+- **New welcome page:** the steps on the left, a moving picture of Reclux on the right that follows your choices.
+- **Logo:** the dot is now Reclux red, also in the toolbar icon.
+- **Alerts** have their own colours: red for problems, yellow for warnings (such as a recording that was never saved), green for success, blue for tips. "Recording" in the controls is green.
+- **Buttons:** second choices such as Cancel and Delete video have a red outline instead of a red fill.
+- **Header:** "Setup guide | Works offline", each with an icon. The "Reduce transparency" button is gone.
+
+### Fixed
+- The recording controls window slowly moved across the screen by itself (Chrome, Opera, with screen scaling on).
+- Opera: no webcam circle on search results pages (Opera keeps extensions off them). The circle now shows in the controls window whenever the page in front cannot show it, also on browser pages and PDFs.
+- The webcam circle went blank for a moment every time a page loaded. It now shows a picture of a moment ago until the live video starts.
+- A double click on Start recording opened two Reclux tabs.
+
+## 2.0.0 fixes, part 2 (19 November 2026, not released yet)
+
+The version stays 2.0.0 until the owner says otherwise.
+
+### Changed
+- **Start recording opens Reclux as a tab next to your page**, in the window you are working in. Your browser's share box shows right there, over a picture of your page, then a big see-through 5-second countdown. At 0 your page comes back and a small controls window sits bottom-right. Cancel at any point and you are simply back on your page. Firefox still needs one "Choose what to share" click (a Firefox rule).
+- **New look:** light mode in three colours (off-white, black, crimson red) with Apple-style liquid glass.
+- **Popup:** no empty space at the bottom, and no second rounded card inside the browser's frame.
+- **Keep on top** is now a small pin icon in the recording bar.
+- **Editor:** full width. Trim shows two arrows on the ends of the selected part: drag them to cut the start or the end. Delete is red. "+ Add zoom" is gone (the − Zoom + buttons zoom the timeline). A cursor-zoom block can be selected and deleted.
+- **Saving:** no edits → straight to export. Only the automatic cursor zoom → it is added with a progress bar, no question. Cuts → "Replace the original video?" as before.
+- **Export:** video 70 %, details 30 %, edge to edge; "Back to editing" and "New recording" on one line.
+
+### Fixed
+- The webcam circle took 30 seconds (Chrome) or a minute (Opera) to appear on busy websites, and disappeared after typing a search in a new tab. It now appears as soon as a page starts loading, also after Back and Forward.
+- "Could not start recording: the browser did not confirm it can encode MP4 video" when sharing a tab or window whose size is an odd number of pixels (seen in Firefox; also possible in Chrome).
+- Dragging the webcam circle no longer makes cursor zoom follow the drag.
+- When the webcam cannot start (blocked, or used by another app), the controls say so instead of silently showing no circle.
+- The recording controls window had scrollbars and an outline around its first button.
+
 ## 2.0.0 fixes (18 November 2026, not released yet)
 
 The version stays 2.0.0 until the owner says otherwise.

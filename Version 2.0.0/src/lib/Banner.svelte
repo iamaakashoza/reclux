@@ -1,4 +1,6 @@
 <script lang="ts">
+  // Alerts, one look per meaning (owner's call, 20 Nov 2026): Danger red (something failed), Warning yellow (needs
+  // your attention), Success green (done), Info blue (good to know). Colours come from the status tokens.
   import type { Snippet } from 'svelte';
   import Icon from './Icon.svelte';
 
@@ -8,15 +10,16 @@
     children,
     actions,
   }: {
-    kind?: 'info' | 'warn' | 'error';
+    kind?: 'danger' | 'warning' | 'success' | 'info';
     title: string;
     children?: Snippet;
     actions?: Snippet;
   } = $props();
+  const ICON = { danger: 'danger', warning: 'warn', success: 'success', info: 'info' } as const;
 </script>
 
-<div class="banner {kind}" role={kind === 'error' ? 'alert' : 'status'}>
-  <Icon name={kind === 'info' ? 'info' : 'warn'} />
+<div class="banner {kind}" role={kind === 'danger' ? 'alert' : 'status'}>
+  <span class="icon"><Icon name={ICON[kind]} /></span>
   <div class="body">
     <strong>{title}</strong>
     {#if children}<p>{@render children()}</p>{/if}
@@ -26,24 +29,54 @@
 
 <style>
   .banner {
+    --fg: var(--c-info);
+    --ic: var(--c-info-icon);
     display: flex;
     gap: var(--s-3);
     padding: var(--s-3) var(--s-4);
     border-radius: var(--r-lg);
-    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--fg);
     font-size: var(--t-sm);
   }
-  .banner > :global(svg) {
+  .info {
+    --fg: var(--c-info);
+    --ic: var(--c-info-icon);
+    --bg: var(--c-info-bg);
+    --line: var(--c-info-border);
+  }
+  .warning {
+    --fg: var(--c-warning);
+    --ic: var(--c-warning-icon);
+    --bg: var(--c-warning-bg);
+    --line: var(--c-warning-border);
+  }
+  .danger {
+    --fg: var(--c-danger);
+    --ic: var(--c-danger-icon);
+    --bg: var(--c-danger-bg);
+    --line: var(--c-danger-border);
+  }
+  .success {
+    --fg: var(--c-success);
+    --ic: var(--c-success-icon);
+    --bg: var(--c-success-bg);
+    --line: var(--c-success-border);
+  }
+  .icon {
+    display: flex;
     flex: none;
-    margin-top: 2px;
+    margin-top: 1px;
+    color: var(--ic);
   }
   .body {
     display: grid;
     gap: var(--s-1);
     min-width: 0;
   }
-  p {
-    color: inherit;
+  strong {
+    font-weight: 700;
   }
   .actions {
     display: flex;
@@ -51,16 +84,9 @@
     gap: var(--s-2);
     margin-top: var(--s-2);
   }
-  .info {
-    background: var(--c-info-bg);
-    color: var(--c-info);
-  }
-  .warn {
-    background: var(--c-warn-bg);
-    color: var(--c-warn);
-  }
-  .error {
-    background: var(--c-error-bg);
-    color: var(--c-error);
+  @media (forced-colors: active) {
+    .banner {
+      border-color: CanvasText;
+    }
   }
 </style>

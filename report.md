@@ -2763,3 +2763,124 @@ Left as known (not fixed in this phase):
 - **First frame (20 ms) shows the countdown** when recording the entire screen: the encoder warm-up frame is taken during the countdown. Hiding it needs a negative timestamp (MP4 edit list) that Windows' own players were not checked with; file compatibility comes first.
 - **No software fallback when the hardware encoder cannot start** ("Encoder initialization error", seen once in ~14 runs with five browsers recording at once; also possible with OBS/Discord holding the encoder). Pre-existing.
 - Firefox circle took 4.7–6.2 s under 100% CPU (1.1 s on a quiet PC). One Brave drag stopped following mid-drag twice under load, not reproduced in 13 retries.
+
+## 41. V2 bug fixes, phase 2 (19 Nov 2026) 🐞
+
+Owner's review of phase 1 plus the phase 2 list (screenshots 01–13): phase 1 had added things nobody asked for (a separate countdown window, a "Keep on top" button, "+ Add zoom"). Every root cause below was reproduced first, then fixed and re-tested.
+
+### Owner's choices (19 Nov 2026)
+| Question | Answer |
+|---|---|
+| Where the share box shows | Reclux opens as a **tab next to the user's page**, in their window. The share box shows there, over a picture of that page. |
+| Countdown | Big see-through numbers in the centre of that same tab. At 0 the user's page comes back and only a small controls window shows (bottom-right). |
+| Keep on top | No separate button: a **pin icon** in the bar. |
+| Save with only automatic cursor zoom | Built in without asking (progress bar), then export. Cuts still ask "Replace the original video?". |
+| Look | **Light mode only**, palette #F7F7F5 / #080808 / #F20B18, Apple-style liquid glass. The logo keeps its amber dot (brand mark). |
+| Editor / export | Full width, no rounded boxed cards; export 70 / 30; "+ Add zoom" removed; Trim = arrows on the clip's ends. |
+
+### Root causes and fixes
+| Issue | Root cause (measured) | Fix |
+|---|---|---|
+| Popup empty space (01) | Fixed 360 × 560 page from phase 1. | Height follows the content (451 px in Chromium). |
+| Popup "square artifact" corners (01, 02) | Our own 8 px rounded card sat inside the browser's frame, whose corners are drawn by the browser. Two shapes = a square behind a round one. | The page fills the frame edge to edge with no corners of its own. The outer corner is the browser's (Firefox: its 8 px panel; Chromium: its own). No extension can round the browser's popup frame. |
+| Share box in a new window (03) | The recorder was a separate popup window. | Recorder = a tab next to the user's tab (`window.ts`). Picker cancelled → the tab closes and the user's tab returns, no notice. |
+| Countdown in a new window (06) | Same. | Countdown over a picture of the user's page (`tabs.captureVisibleTab`, needs `activeTab`, no install warning). `CaptureController.setFocusBehavior('no-focus-change')` keeps the tab visible while sharing another tab. The user's tab is brought back 300 ms before recording begins. |
+| Firefox no share box until a click (05) | Firefox rule: `getDisplayMedia` requires a click on the asking page ("requires transient activation", §40). | Kept: one "Choose what to share" click, now on a glass card in the user's own window. |
+| Firefox system audio (04) | Firefox never shares sound in screen sharing (0 audio tracks, tested Firefox 160). | Cannot be fixed by an extension; the switch stays hidden. |
+| Firefox "could not encode MP4" (07) | The video library refuses H.264 for an odd width or height, and a shared tab/window is often odd (1037 × 766). Phase 1 only tested Entire screen (1920 × 1080). Also: on Firefox the library encodes a real test frame (0.25–0.4 s quiet), which can pass the 3 s limit at the busy moment sharing starts. | Size rounded down to even, frames fitted 1 px (`transform`, only when odd). Software probe: 8 s and a second try. |
+| Keep on top button, blue outline, scrollbars (08) | Extra button; the page moved focus to the first button and drew the ring; window size measured before the page knew its new size. | Pin icon in the bar; focus moved without a ring (`focusVisible: false`); the controls window is re-measured until it fits (no scrollbars). |
+| Webcam 28–30 s (Chrome), 58–60 s (Opera) (8a, 8c) | The circle was added to a page only after its **load** event (`tabs.onUpdated` "complete"). Busy sites (ads) finish loading late; Brave blocks ads, so it was fast there. Proven: a test page holding its load 25 s → circle after 25.4 s. Not the camera link: local WebRTC 1.5 s, direct stream 0 s. | Overlay registered with `scripting.registerContentScripts` at `document_start` while recording (+ injected into open tabs once). Same test page: 0.37–0.87 s. |
+| Webcam gone after typing in a new tab + Enter (8) | Same, plus pages the browser loads ahead (search from the address bar) never send "complete", and Back/Forward pages come back with their connection closed. | Registered script runs on every new page; waits for `prerenderingchange`; reconnects on `pageshow` from the back/forward cache. Browser pages (new tab page, settings, web store) can never show it: no extension may draw there. |
+| Firefox webcam never shown (8d) | Not reproduced: in a fresh Firefox the camera question shows and the circle plays in 1.1 s. On the owner's PC the camera did not start (blocked, or held by another browser), and the only sign was a notice hidden behind the countdown. | The reason ("busy: another app is using it", "blocked", "no webcam found") shows in red in the controls window. |
+| Cursor zoom while dragging the webcam | The page reported every pointer move, including the drag of the circle. | Moves during a drag, or over the circle / bar, are ignored. |
+| "+ Add zoom" (09) | Misread request: "− Zoom +" meant timeline zoom. | Zoom strip and Add zoom removed; a zoom block can be selected and deleted. |
+| Trim (09) | Trim was two "at the playhead" buttons. | Trim toggle: red arrows inside the selected part's ends; drag to cut, the cut-away part is greyed until release. I / O keys still trim at the playhead. |
+| "Replace the original video?" with no edits (Edge, Opera) | Automatic zooms counted as edits, and there were zooms only where page access existed. | No edits → export at once; zooms only → built in without asking; cuts → ask. |
+| Editor / export layout (09, 10) | Max-width page with padding and rounded cards; export a 1fr + 22rem grid. | Full-width bars; export `7fr 3fr`, no gap, glass side panel, links on one row. |
+
+### Limits (cannot be changed by an extension)
+- The popup's outer frame and corners belong to the browser.
+- Firefox needs one click to show its share box, and never records system sound.
+- The circle cannot show on browser pages (new tab page, settings, web stores, PDF viewer) or outside the browser.
+- The controls window is a normal window: without the pin it can go behind other windows.
+- Sharing a tab other than the one you were on: at 0 Reclux brings back the tab you were on (the browser does not say which tab was picked).
+
+### Verification (5 QA testers, one per browser, at once; then re-tests)
+| Browser | Result |
+|---|---|
+| Chrome 158 | All items pass. Circle on a page held 25 s: 0.3–0.4 s. Odd-size tab capture (1038 × 764 etc.) records and plays. |
+| Brave 1.99 | All pass except the controls window size: wrong in 2 of 5 runs (once 2 px tall). Fixed, below. |
+| Edge 157 | All pass. Notes: controls 1 px taller than their window; a window fit once late. Fixed, below. |
+| Opera 140 | All pass except the controls window size with the webcam inside: wrong in 4 of 8 runs. Fixed, below. |
+| Firefox 160 | All pass (one click, countdown, PiP pin works, circle 0.8–3.1 s, editor, saves, export). Its tester was cut off; the last items were re-run by hand. |
+
+| Found by | Bug | Fix |
+|---|---|---|
+| Brave, Opera, Edge | Controls window mis-sized: right after a resize the browser's window size and the page's size lag each other, so the frame (title bar + borders) was measured wrong, even negative (Chrome then throws). | The frame is measured once while the new window is still, and kept (a window's frame never changes). A resize that arrives during a fit triggers one more fit; a browser that refuses a size ends the fit. Re-test: 26 of 26 runs fit in Brave, Opera, Chrome and Edge; Firefox fits too after a 1-px scaling correction. |
+| Chrome, Edge | "00:00" on the ruler was cut off and hidden by the playhead. | It starts right of its tick. |
+
+### Code review (/code-review, then re-tested in Chrome)
+| Bug | Fix | Re-test |
+|---|---|---|
+| After a trim the playhead could land in the next part | Seek within the trimmed part | 2 parts: part 1 trimmed by the dragged amount, part 2 unchanged |
+| Dragging the out arrow to the end selected the next part mid-drag | The part is held for the whole drag | Part 1 stays selected past its end |
+| Stop within ~1 s of starting could leave a controls window over the editor | Close it if recording already ended | Stop at 0.3 s: 0 controls windows |
+| Back/Forward page kept a dead circle | The old overlay is torn down and reconnected | After Back, Hide/Show webcam reaches the page |
+| Pin from the Reclux tab cut off the camera circle | 360 px fallback height | — |
+| Quick cancel could leave the overlay registered | Wait for the registration before removing it | — |
+Kept on purpose: the export panel's glass (owner asked for it); "the tab you were on comes back, not a different shared tab" (listed limit). Pure white replaced by the palette off-white.
+
+## 42. V2 bug fixes, phase 3 (20 Nov 2026) 🐞
+
+Owner's review of phases 1–2 (screenshots 14–18 and a Chrome video of the controls window moving by itself). Every root cause was reproduced first, then fixed and re-tested.
+
+### Owner's choices (20 Nov 2026)
+| Question | Answer |
+|---|---|
+| Logo dot | Official red **#F20B18 everywhere**: extension screens, toolbar icon (16–512 px PNGs), `brand/` master files. Amber is gone. |
+| Fonts and icons | **Figtree** (text) + **JetBrains Mono** (timers), **Lucide** icons, all packed into the extension (offline, private). The system font shows while a font file loads, or if it fails. |
+| Look | Standard **glassmorphism** (not Apple liquid glass), **light and dark**, following the computer's setting. No switch. |
+| Welcome page | New split layout: steps on the left, an animated Reclux demo on the right (GSAP, already in Reclux). |
+| Alerts | Full set: Danger (red), Warning (yellow), Success (green), Info (blue). "Recording" in the controls = Success green. |
+| Buttons | Secondary actions get a **red outline**, not a red fill. |
+| Reduce transparency | Removed (never asked for), with its saved setting. The computer's own "reduce transparency" setting still works where the browser supports it. |
+
+### Root causes and fixes
+| Issue | Root cause (measured) | Fix |
+|---|---|---|
+| Controls window creeps across the screen (Chrome, Opera; video) | With screen scaling the browser rounds the window size: asked 574 × 349, Chrome gave 576 × 350, then 576 × 351. Each fit re-anchored the window to its bottom-right using the rounded size, so it moved 2 px right and 1 px down; the rounding also fired a resize, which fitted again: an endless loop (about 6 moves a second, logged). | The size the browser rounds is remembered and never asked again (`window.ts`). Logged after the fix: 2 size changes at open, then the window stays put (Chrome, Brave, Opera, 15 s each). |
+| Opera: no facecam on search results, appears after clicking a link (also for window / screen sharing) | Opera keeps every extension off search results pages unless the user ticks "Allow access to search page results" (off by default). Proven: on google.com/search `executeScript` fails with "This page cannot be scripted due to an ExtensionsSettings policy"; example.com works. | Each page reports whether it is on screen; when no page on screen can show the circle for 1 s (Opera search, browser pages, PDFs, or a start from a browser page: 2.5 s), the **controls window shows the circle**, and it goes back to the page when one can. In a recorded tab the circle can only be in the recording where the page shows it. |
+| Facecam blinks 0.1–0.3 s on every page load (all browsers) | A new page is a new document, so the circle and its frame are rebuilt; the frame's live video needs a moment for its first picture, and until then the circle showed its black background. Measured with screenshots during page loads: 2 black frames around 0.4 s in. | The recorder sends a still picture of the webcam (taken the moment the page connects, at most one per second) with the first message; the circle shows it under the frame until the live video starts. Same test after the fix: 0 of 35 frames black. |
+| Warnings shown in red (14, 17, 18) | One "warn" style made of the brand red. | Status colours: Danger / Warning / Success / Info tokens (text, icon, fill, border; light and dark). The unsaved-recording notices are Warning yellow. |
+| Delete video solid red (16) | The danger button was a red fill. | `secondary` button: red outline, red text. Used for Cancel, Delete video, Recover it, Dismiss, Back. |
+| "Reduce transparency" (16, 18) | Added in phase 2 without being asked. | Removed (`solid`, `applyLook`, `data-solid`). |
+| Logo dot amber (15) | Brand decision of 17 Nov. | Red in `Logo.svelte`, all `brand/` SVGs, and every app icon PNG (re-rendered). |
+| "Recording" label red (14) | Used the accent red. | Success green pill (the in-page bar too). |
+
+### Design audit (fixed)
+- Header: "Setup guide | Works offline", each with an icon and a thin divider.
+- Export: the five detail tiles leave none on its own (3 + 2); "New recording" uses a plus icon, not a grey dot.
+- Timeline: parts follow the theme (black in light, off-white in dark); the part's name starts after the trim arrow.
+- Welcome: the header keeps its height on the last step; the demo panel is frosted glass over soft light.
+- Every hard-coded colour that broke in dark mode now uses a token (dialog dim, trim hatching, the in-page bar).
+
+### QA (automated, the real extension)
+| Browser | Checked |
+|---|---|
+| Chrome | Drift (no moves after open), blink (0 black frames), editor regression (Trim, Undo, Delete zoom, Save paths, export 70/30), every screen in light and dark, code-review fixes below |
+| Brave, Opera | Drift, editor regression; Opera: search-results fallback |
+| Firefox | Full flow: share, countdown, controls, pin, circle on held / new / back / forward pages, editor, Save paths, export, dark palette |
+| Edge | Not automated this time: Edge updated itself to 158 today and does not start under automation on this PC until it restarts. Same Chromium code as Chrome. |
+
+### Code review (/code-review, 10 findings)
+| Finding | Done |
+|---|---|
+| In-page bar showed (and was recorded) while the controls window was opening | Fixed: counted as open from the moment it starts opening; tested: hidden in 31 of 31 looks |
+| Closing the controls window while paused did not bring the in-page bar | Fixed (the overlay update now follows it); tested |
+| Started from a browser page with no web page open: circle nowhere | Fixed: 2.5 s check at start; tested: circle in the controls window |
+| Double click on Start recording opened two tabs | Fixed; tested: one tab |
+| Still picture made for every tab at once | Fixed: one per second, none when the circle is off |
+| Longer software encoder check applied to every browser | Fixed: Firefox only, as intended |
+| Odd sizes are scaled 1 px instead of cropped | Kept: a crop is a fixed rectangle, so a window resized while recording would be cut off; the scale keeps fitting it |
+| Return to the original tab, not the shared one | Known limit (§41) |
+| Dark mode / Reduce transparency against CLAUDE.md | Owner's new call; CLAUDE.md updated |

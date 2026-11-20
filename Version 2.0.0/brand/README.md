@@ -2,8 +2,8 @@
 
 One idea: **Rec + Lux**: you choose what to capture, and the light stays with you.
 
-- **Frame R.** The R is built from a screen-selection corner (stem and arm), an amber light (the bowl) and a 45° capsule (the leg).
-- **Light, not a red dot.** The amber disc is the "lux". Red is no longer a brand colour; it only means "recording now" in the app.
+- **Frame R.** The R is built from a screen-selection corner (stem and arm), a red light (the bowl) and a 45° capsule (the leg).
+- **The light is official red.** The disc is the "lux", in Vibrant Crimson Red `#F20B18` (owner's call, 20 Nov 2026; it was amber until then).
 - **The mark replaces the capital R** in the wordmark, so the name reads "Reclux", not "R Reclux" (same rule as V1).
 
 Chosen on 17 Nov 2026 from four directions (see `concepts/v2-logo-concepts.html`). Research: report §35.
@@ -20,8 +20,8 @@ Chosen on 17 Nov 2026 from four directions (see `concepts/v2-logo-concepts.html`
 
 | File ending | Background |
 |---|---|
-| `-on-light` | White or light. Ink letters, deep amber light |
-| `-on-dark` | Black or dark. White letters, bright amber light |
+| `-on-light` | White or light. Ink letters, red light |
+| `-on-dark` | Black or dark. White letters, red light |
 | `-mono-black`, `-mono-white` | One colour for print, stamps, photos. The light is the same colour as the R |
 
 | Icon file | Sizes |
@@ -34,15 +34,15 @@ Chosen on 17 Nov 2026 from four directions (see `concepts/v2-logo-concepts.html`
 
 | Name | Hex | Use |
 |---|---|---|
-| Lux amber | `#FFB547` | The light, on dark backgrounds (`--c-lux` in dark mode) |
-| Deep amber | `#F59E0B` | The light, on light backgrounds (`--c-lux` in light mode) |
+| Vibrant Crimson Red | `#F20B18` | The light, on light and dark backgrounds (`--c-brand` in the app) |
 | Deep Ink | `#0E1116` | Letters on light, the app tile |
 | Paper | `#F6F5F2` | The R on the app tile, light surfaces |
-| Signal red | `#E5484D` | **Never in the logo.** Only the in-app "recording now" state |
+
+The app's own palette (Off-White `#F7F7F5`, Midnight Black `#080808`, the same red) and its status colours live in `src/styles/tokens.css`.
 
 ## Liquid glass
 
-Apple's icon rule: flat filled shapes on one background, the system adds light. Browsers only take flat PNGs, so the glass finish is baked into the 48 px and larger icons: one light from the top left, a soft sheen on the R, a lit "bead" for the amber light, a faint rim on the tile. The leg sits at 75% white so it reads as a second glass layer.
+Apple's icon rule: flat filled shapes on one background, the system adds light. Browsers only take flat PNGs, so the glass finish is baked into the 48 px and larger icons: one light from the top left, a soft sheen on the R, a lit "bead" for the red light, a faint rim on the tile. The leg sits at 75% white so it reads as a second glass layer.
 
 ## Type
 
@@ -50,10 +50,10 @@ The letters "eclux" are Google Sans Flex Bold, converted to shapes (kept from V1
 
 ## Rules
 
-- **Clear space:** at least the diameter of the amber light on every side.
+- **Clear space:** at least the diameter of the red light on every side.
 - **Smallest size:** logo 16 px tall, app icon 16 px. Below 24 px, prefer the app icon.
-- **Keep:** the light amber, the leg at 45° and detached from the light, the proportions as drawn.
-- **Avoid:** red in the logo, recolouring the light, outlines, stretching, the colour logo on busy photos (use mono).
+- **Keep:** the light red `#F20B18`, the leg at 45° and detached from the light, the proportions as drawn.
+- **Avoid:** recolouring the light, outlines, stretching, the colour logo on busy photos (use mono).
 
 ## Geometry
 

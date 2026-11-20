@@ -1,15 +1,21 @@
 <script lang="ts">
-  // Screen 2: the recording bar. One glass capsule: status, [pause · stop], timer, size and quality, mic.
-  // Paused: the play icon shows and the status turns into a "Paused" warning light.
+  // Screen 2: the recording bar. One glass capsule: status, [pause · stop], timer, size and quality, webcam, mic, pin.
+  // Paused: the play icon shows and the status turns into a "Paused" light.
+  // The pin keeps the controls on top of every app (owner's call, 19 Nov 2026: an icon, not a separate button).
   import Icon from './Icon.svelte';
+  import { canFloat, closeFloating, openFloating } from './pip';
   import { findPreset, fmtClock, fmtSize } from './presets';
   import { pause, resume, session, stop, toggleMute } from './session.svelte';
 
   const paused = $derived(session.phase === 'paused');
   const p = $derived(findPreset(session.presetId));
+  // The window this bar is in: the pin must be opened from it (browsers allow it only from a click there).
+  let bar: HTMLElement | undefined = $state();
+  const host = $derived(bar?.ownerDocument.defaultView ?? undefined);
+  const pin = () => (session.floating ? closeFloating() : host && openFloating(host));
 </script>
 
-<section class="bar glass" aria-label="Recording controls">
+<section class="bar glass" aria-label="Recording controls" bind:this={bar}>
   <div class="top">
     <span class="status" class:paused role="status">
       {#if session.phase === 'countdown'}
@@ -62,6 +68,16 @@
     >
       <Icon name={session.muted ? 'mic-off' : 'mic'} size={18} />
     </button>{/if}
+    {#if host && (session.floating || canFloat(host))}<button
+      class="ctl small"
+      aria-label={session.floating ? 'Stop keeping the controls on top' : 'Keep the controls on top of every window'}
+      aria-pressed={session.floating}
+      title={session.floating ? 'Unpin' : 'Keep on top'}
+      onclick={pin}
+      disabled={session.finishing}
+    >
+      <Icon name="pin" size={18} />
+    </button>{/if}
   </div>
 </section>
 
@@ -89,18 +105,21 @@
     font-size: var(--t-xs);
     font-weight: 700;
     letter-spacing: 0.02em;
-    color: var(--c-accent-text);
-    background: color-mix(in srgb, var(--c-accent) 14%, transparent);
+    /* "Recording" in the Success green: all is well (owner's call, 20 Nov 2026). Stop stays the red button. */
+    color: var(--c-success);
+    background: var(--c-success-bg);
+    border: 1px solid var(--c-success-border);
   }
   .status.paused {
     color: var(--c-paused-text);
     background: var(--c-paused-bg);
+    border-color: transparent;
   }
   .dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--c-accent);
+    background: var(--c-success-icon);
     animation: pulse 1.4s ease-in-out infinite;
   }
   @keyframes pulse {

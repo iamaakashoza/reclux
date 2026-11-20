@@ -41,7 +41,9 @@ export default defineConfig({
     // power: keeps the PC awake while recording (a hidden tab cannot use the web wake lock). No install warning.
     // Firefox has no power API, so it is left out there.
     // scripting: puts the webcam circle and cursor tracking on web pages while recording. No install warning by itself.
-    permissions: ['downloads', 'unlimitedStorage', 'scripting', ...(browser === 'firefox' ? [] : ['power'])],
+    // activeTab: one picture of the page the user is on when they press Start recording, shown behind the share box
+    // and the countdown (report §41). No install warning.
+    permissions: ['downloads', 'unlimitedStorage', 'scripting', 'activeTab', ...(browser === 'firefox' ? [] : ['power'])],
     // Web page access is asked only when the user turns on Webcam or Cursor zoom, never at install (report §37).
     optional_host_permissions: ['<all_urls>'],
     // The webcam circle is a Reclux page shown inside the web page, so the camera permission stays with Reclux,

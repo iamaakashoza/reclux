@@ -1,6 +1,6 @@
 <script lang="ts">
-  // Screen 1: the toolbar popup. Normal or Webcam, quality and sound, then Start recording opens the small Reclux
-  // window, where the browser asks what to share (a tab, a window or the screen) and the countdown runs.
+  // Screen 1: the toolbar popup. Normal or Webcam, quality and sound, then Start recording opens Reclux as a tab next
+  // to the user's page, where the browser asks what to share and the countdown runs (report §41).
   // Recording cannot start in this popup: it closes as soon as the browser's share window takes the focus.
   import Button from '../../lib/Button.svelte';
   import Icon from '../../lib/Icon.svelte';
@@ -10,7 +10,7 @@
   import Toggle from '../../lib/Toggle.svelte';
   import { loadSettings, saveSettings, suggestedPreset, systemAudioWorks } from '../../lib/settings';
   import { findUnsaved } from '../../lib/store';
-  import { openRecorder } from '../../lib/window';
+  import { BACKDROP, openRecorder } from '../../lib/window';
 
   const s = $state(loadSettings());
   void suggestedPreset().then((id) => id && (s.presetId = id)); // before the first save below
@@ -22,7 +22,20 @@
     .then((l) => (unsaved = l.length))
     .catch(() => {});
 
-  const start = () => void openRecorder().then(() => window.close());
+  let starting = false;
+  const start = async () => {
+    if (starting) return; // a double click opens one Reclux tab, not two
+    starting = true;
+    const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+    // A picture of the user's page, shown behind the share box and the countdown so Reclux looks see-through.
+    // Allowed by opening this popup (activeTab). Browser pages cannot be pictured: then a plain background.
+    const shot = await browser.tabs.captureVisibleTab({ format: 'jpeg', quality: 70 }).catch(() => '');
+    try {
+      localStorage.setItem(BACKDROP, shot);
+    } catch {} // too big for storage: a plain background
+    await openRecorder(tab);
+    window.close();
+  };
   const recover = () => void browser.tabs.create({ url: browser.runtime.getURL('/recorder.html') }).then(() => window.close());
 </script>
 
@@ -40,33 +53,29 @@
     <button class="recover" onclick={recover}><Icon name="warn" size={16} /> A recording was never saved. Recover it</button>
   {/if}
   <div class="end">
-    <Button variant="primary" size="lg" icon="record" block onclick={start}>Start recording</Button>
+    <Button variant="primary" size="lg" icon="record" block onclick={() => void start()}>Start recording</Button>
     <p class="offline"><Icon name="shield" size={14} /> Works offline · Saved on this device</p>
   </div>
 </main>
 
 <style>
-  /* One fixed size in every browser (Issue 2). Each browser sizes its popup to the page, so a page that grows
-     with its content (fonts, a hidden switch in Firefox) gave a different size in each. 600 px is the browsers' limit. */
+  /* 360 px wide, as tall as its contents: no empty space (owner's call, 19 Nov 2026).
+     The browser draws the popup's frame and its corners. The page fills that frame edge to edge with no corners of
+     its own, so there is never a second, square corner behind ours (the "square artifact", report §41). */
   :global(html),
   :global(body),
   :global(#app) {
     width: 360px;
-    height: 560px;
     min-height: 0;
     margin: 0;
     overflow: hidden;
-    /* The browser draws the popup's outer frame and its corners; the page only fills it. */
-    background: transparent;
+    background: var(--c-bg);
   }
   main {
     display: flex;
     flex-direction: column;
     gap: var(--s-3);
-    height: 100%;
     padding: var(--s-4) var(--s-5);
-    /* 8 px corners on our card. The browser's own frame around it keeps the browser's corners. */
-    border-radius: 8px;
     background: var(--backdrop);
   }
   h1 {
@@ -91,19 +100,18 @@
     gap: var(--s-2);
     min-height: 36px;
     padding: 0 var(--s-3);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--c-warning-border);
     border-radius: var(--r-pill);
-    background: var(--c-warn-bg);
-    color: var(--c-warn);
+    background: var(--c-warning-bg);
+    color: var(--c-warning);
     font-size: var(--t-xs);
     font-weight: 600;
     cursor: pointer;
   }
-  /* Start recording always sits at the bottom, so it does not move when a line above appears. */
   .end {
     display: grid;
     gap: var(--s-3);
-    margin-top: auto;
+    margin-top: var(--s-2);
   }
   .offline {
     display: flex;

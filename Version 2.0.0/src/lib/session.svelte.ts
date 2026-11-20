@@ -42,11 +42,13 @@ export const session = $state({
   lowDisk: false,
   // Webcam circle and cursor zoom (Phase 5)
   pageAccess: false, // the user allowed Reclux on web pages (circle + cursor)
-  floating: false, // the always-on-top controls window (Keep on top) is open
-  mini: false, // this page is the small Reclux window (opened by Start recording), not a tab
+  floating: false, // the always-on-top controls window (the pin) is open
+  controls: false, // the small controls window is open (Start recording opens it when recording begins)
   camVisible: true, // the circle is shown (it can be hidden while recording)
+  onPage: true, // a web page on screen shows the circle; when none can, the controls show it instead
   camPos: { x: 0.86, y: 0.8 }, // circle centre on web pages, as a share of the window (bottom-right, as in the sketch)
   cameraStream: null as MediaStream | null, // the webcam, opened once by Reclux and shown by every circle
+  cameraError: '', // why the webcam could not start (Webcam mode), shown in the controls
   zooms: [] as Zoom[], // cursor zoom blocks for the editor
 });
 
@@ -58,7 +60,7 @@ $effect.root(() => {
   });
   // Keep the web-page overlays in step with the recording.
   $effect(() => {
-    void [session.phase, session.count, session.elapsed, session.bytes, session.camVisible, session.camPos, session.floating];
+    void [session.phase, session.count, session.elapsed, session.bytes, session.camVisible, session.camPos, session.floating, session.controls];
     // A hidden circle gets no picture, which also lets the camera light go off in most browsers.
     session.cameraStream?.getVideoTracks().forEach((t) => (t.enabled = session.camVisible));
     untrack(() => overlays?.update());
@@ -137,8 +139,8 @@ function overlayState(): OverlayState {
     camera: session.camera && session.camVisible && !!session.cameraStream,
     webcam: session.camera && !!session.cameraStream,
     pos: { ...session.camPos },
-    // The bar on web pages, only where no Reclux window shows the controls (a recorder tab without Keep on top).
-    bar: !session.floating && !session.mini,
+    // The bar on web pages, only when no Reclux window shows the controls (the controls window was closed).
+    bar: !session.floating && !session.controls,
     info: `${fmtSize(session.bytes / 1e6)} · ${p.height}p · ${p.fps} fps`,
   };
 }
@@ -150,7 +152,7 @@ function onOverlay(m: OverlayMessage) {
     else if (m.cmd === 'resume') resume();
     else if (m.cmd === 'stop') void stop();
     else session.camVisible = !session.camVisible;
-  } else if (session.phase === 'recording') {
+  } else if (m.type === 'cursor' && session.phase === 'recording') {
     // Use the coordinates that match what is being recorded: a tab, a window or the whole screen.
     const surface = (cap?.video.getSettings() as { displaySurface?: string } | undefined)?.displaySurface;
     const [x, y] = surface === 'browser' ? [m.vx, m.vy] : surface === 'window' ? [m.wx, m.wy] : [m.sx, m.sy];
@@ -158,7 +160,17 @@ function onOverlay(m: OverlayMessage) {
   }
 }
 
+// No page on screen can show the circle (a browser page, a PDF, Opera's search results): the controls window shows
+// it instead. After a second, so following a link (one page goes, the next comes) does not resize the controls.
+let away: ReturnType<typeof setTimeout> | undefined;
+function onShown(yes: boolean, wait = 1000) {
+  clearTimeout(away);
+  if (yes) session.onPage = true;
+  else away = setTimeout(() => (session.onPage = false), wait);
+}
+
 function endOverlays() {
+  clearTimeout(away);
   overlays?.stop();
   overlays = undefined;
   unshareCamera?.();
@@ -195,8 +207,15 @@ async function focusMe() {
 }
 
 
-export async function start() {
-  if (busy || session.phase !== 'idle') return;
+/** Runs just before recording really begins (the Reclux tab brings the user's page back to the front). */
+export const hooks = { beforeGo: undefined as (() => Promise<void>) | undefined };
+
+/**
+ * Asks what to share, then counts down. Says how it went: 'cancelled' (the user closed the share box),
+ * 'click' (Firefox: sharing must start from a click on this page), 'failed', or 'counting'.
+ */
+export async function start(): Promise<'counting' | 'cancelled' | 'click' | 'failed' | 'busy'> {
+  if (busy || session.phase !== 'idle') return 'busy';
   busy = true;
   session.error = '';
   session.notices = [];
@@ -205,16 +224,13 @@ export async function start() {
   try {
     cap = await openCapture(preset, session.mic, session.system, session.camera, (d) => (session.ducked = d));
   } catch (e) {
-    const name = (e as DOMException).name;
-    if (name === 'NotAllowedError') {
-      session.notices = ['Screen sharing was cancelled or blocked.'];
-    } else if (name === 'InvalidStateError') {
-      // Firefox: sharing must start from a click on this page. The small window shows its button for that.
-    } else {
-      session.error = `Could not start: ${(e as Error).message}`;
-    }
     busy = false;
-    return;
+    const name = (e as DOMException).name;
+    if (name === 'NotAllowedError') return 'cancelled';
+    // Firefox: sharing must start from a click on this page. The Reclux tab shows its button for that.
+    if (name === 'InvalidStateError') return 'click';
+    session.error = `Could not start: ${(e as Error).message}`;
+    return 'failed';
   }
   busy = false;
 
@@ -228,11 +244,16 @@ export async function start() {
   await refreshPageAccess();
   session.camVisible = true;
   session.cameraStream = session.camera ? (cap.camera ?? null) : null;
+  session.cameraError = session.camera ? cap.cameraError : '';
   if (session.cameraStream && session.pageAccess) unshareCamera = shareCamera(session.cameraStream);
   cursor = [];
   session.zooms = [];
   // Page access = the circle on web pages and cursor zoom (it has no switch of its own).
-  if (session.pageAccess) overlays = startOverlays(overlayState, onOverlay);
+  session.onPage = true;
+  if (session.pageAccess) {
+    overlays = startOverlays(overlayState, onOverlay, onShown);
+    onShown(false, 2500); // until a page on screen says it shows the circle (none may: a browser page in front)
+  }
 
   activeMs = 0;
   session.elapsed = 0;
@@ -257,6 +278,7 @@ export async function start() {
     stopTimer();
     void begin();
   });
+  return 'counting';
 }
 
 async function begin() {
@@ -273,6 +295,8 @@ async function begin() {
     await started.cancel(); // the user cancelled while the encoder was getting ready
     return;
   }
+  await hooks.beforeGo?.();
+  if (session.phase !== 'countdown') return void started.cancel(); // cancelled meanwhile
   started.go();
   rec = started;
   releaseFile = rec.release;
@@ -390,6 +414,7 @@ export function reset() {
     fileName: '',
     ducked: null,
     cameraStream: null,
+    cameraError: '',
     zooms: [],
   });
   void refreshRecoverable();

@@ -47,6 +47,14 @@ function duckWhileSpeaking(ctx: AudioContext, voice: AudioNode, level: AudioPara
   return () => ticker.terminate();
 }
 
+/** The webcam failed: say why, so the user knows what to do (Firefox, Issue 8d: the circle silently stayed away). */
+const cameraProblem = (e: DOMException) =>
+  e?.name === 'NotReadableError' || e?.name === 'AbortError'
+    ? 'Webcam is busy: another app or browser is using it. Close it there, then start again.'
+    : e?.name === 'NotFoundError' || e?.name === 'OverconstrainedError'
+      ? 'No webcam found.'
+      : 'Webcam is blocked for Reclux. Allow the camera in the browser’s site settings, then start again.';
+
 /** Must be called straight from a click, so the browser allows the picker and audio. */
 export async function openCapture(
   p: Preset,
@@ -56,6 +64,10 @@ export async function openCapture(
   onDuck: (ducked: boolean) => void,
 ) {
   const ctx = new AudioContext(); // created before any await, inside the click
+  // Sharing a tab or window normally jumps to it at once. Stay on the Reclux tab instead, so the countdown is seen
+  // there; Reclux brings the user's page back when recording begins (Chromium; other browsers do not jump).
+  const Controller = (globalThis as { CaptureController?: new () => object }).CaptureController;
+  const controller = Controller ? new Controller() : undefined;
   let display: MediaStream | undefined;
   let mic: MediaStream | undefined;
   let camera: MediaStream | undefined;
@@ -73,7 +85,11 @@ export async function openCapture(
         : false,
       systemAudio: wantSystem ? 'include' : 'exclude',
       selfBrowserSurface: 'exclude', // recording the recorder page itself is never useful
+      ...(controller ? { controller } : {}),
     } as DisplayMediaStreamOptions);
+    try {
+      (controller as unknown as { setFocusBehavior?: (b: string) => void })?.setFocusBehavior?.('no-focus-change');
+    } catch {} // a whole screen has nothing to jump to
 
     const notices: string[] = [];
     const system = display.getAudioTracks();
@@ -85,6 +101,7 @@ export async function openCapture(
     const MIC = { echoCancellation: true, noiseSuppression: true, autoGainControl: true };
     const CAM = { width: { ideal: 480 }, height: { ideal: 480 }, facingMode: 'user' };
     const ask = (c: MediaStreamConstraints) => navigator.mediaDevices.getUserMedia(c);
+    let cameraError = '';
     if (wantMic || wantCamera) {
       try {
         const both = await ask({ audio: wantMic && MIC, video: wantCamera && CAM });
@@ -92,10 +109,9 @@ export async function openCapture(
         if (wantCamera) camera = new MediaStream(both.getVideoTracks());
       } catch {
         if (wantMic) mic = await ask({ audio: MIC }).catch(() => undefined);
-        if (wantCamera) camera = await ask({ video: CAM }).catch(() => undefined);
+        if (wantCamera) camera = await ask({ video: CAM }).catch((e: DOMException) => void (cameraError = cameraProblem(e)));
       }
       if (wantMic && !mic) notices.push('Microphone is blocked, so Reclux is recording without it.');
-      if (wantCamera && !camera) notices.push('Camera is blocked, so there is no webcam circle. Allow the camera for Reclux to use it.');
     }
     // With no system audio the mic is the only way sound gets in, and it can hear the speakers.
     if (!system.length && mic) {
@@ -125,6 +141,8 @@ export async function openCapture(
       video,
       /** The webcam (to ask permission once, and for the circle in the floating window). */
       camera,
+      /** Why the webcam did not start, in plain words ('' when it did or was not wanted). */
+      cameraError,
       /** True when system sound dips while the mic hears speech (both must be on). */
       ducks: !!stopDucking,
       notices,

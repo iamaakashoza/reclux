@@ -41,17 +41,22 @@ const MAX_BEHIND_SECONDS = 0.25;
 // WebM is only used with a hardware VP9 encoder: software VP9 managed about 5 fps at 1080p (report §31).
 // Firefox's hardware answer cannot be trusted before 143, so Firefox always gets MP4 (H.264 was 26+ fps there).
 // A browser's "can you encode this?" answer can stall (seen with a busy or flaky graphics driver).
-// Never wait forever: no answer in time counts as "no".
+// Never wait forever: no answer in time counts as "no". Firefox's answer is a real test frame, which took longer
+// than 3 s at the busy moment sharing starts (Issue 7, report §41), so it gets more time and a second try.
 const PROBE_MS = 3000;
-const answer = (probe: Promise<boolean>) =>
-  Promise.race([probe.catch(() => false), new Promise<boolean>((r) => setTimeout(() => r(false), PROBE_MS))]);
+const SOFTWARE_PROBE_MS = 8000;
+const answer = (probe: Promise<boolean>, ms = PROBE_MS) =>
+  Promise.race([probe.catch(() => false), new Promise<boolean>((r) => setTimeout(() => r(false), ms))]);
+/** Asked twice: the library remembers a slow answer, so the second ask gets it as soon as it arrives. */
+const answerTwice = async (ask: () => Promise<boolean>) => (await answer(ask(), SOFTWARE_PROBE_MS)) || answer(ask(), SOFTWARE_PROBE_MS);
 
 export async function pickFormat(want: Format, w: number, h: number, bitrate: number, audio: boolean) {
   for (const ext of want === 'webm' ? (['webm', 'mp4'] as const) : (['mp4'] as const)) {
     const c = CODECS[ext];
     const opts = { width: w, height: h, quality: new Quality({ bitrate }) };
     const hardware = !isPolyfill && (await answer(canEncodeVideo(c.v, { ...opts, hardwareAcceleration: 'prefer-hardware' })));
-    const video = hardware || (ext === 'mp4' && (await answer(canEncodeVideo(c.v, opts))));
+    const soft = () => canEncodeVideo(c.v, opts);
+    const video = hardware || (ext === 'mp4' && (await (isPolyfill ? answerTwice(soft) : answer(soft()))));
     let sound: AudioCodec | undefined;
     for (const a of c.a) {
       if (sound) break;
@@ -243,8 +248,13 @@ export async function startRecorder(
 ) {
   const audio = cap.stream.getAudioTracks()[0];
   const s = cap.video.getSettings();
+  // H.264 needs an even width and height, and a shared tab or window is often odd (1037 × 766): the encoder refused
+  // it and recording failed with "could not encode MP4" (Issue 7, report §41). Such a picture is scaled 1 px to fit.
+  const [w0, h0] = [s.width ?? 1920, s.height ?? 1080];
+  const [w, h] = [w0 & ~1, h0 & ~1];
+  const even = w === w0 && h === h0 ? {} : { transform: { width: w, height: h, fit: 'contain' as const } };
 
-  const { ext, hardware, sound } = await pickFormat(want, s.width ?? 1920, s.height ?? 1080, preset.mbps * 1e6, !!audio);
+  const { ext, hardware, sound } = await pickFormat(want, w, h, preset.mbps * 1e6, !!audio);
   const name = `reclux-${Date.now()}.${ext}`;
   const release = await holdStored(name);
   // The file is made during the countdown. If the window is closed before 0, it holds no recording, so it must not
@@ -264,6 +274,7 @@ export async function startRecorder(
     const videoSource = new VideoSampleSource({
       ...videoEncoding(ext, hardware, preset.fps, preset.mbps),
       sizeChangeBehavior: 'contain', // a resized window must not stop the recording
+      ...even,
       // "realtime" lets a busy encoder skip a frame instead of queueing it, so it never falls behind (report §34).
       latencyMode: 'realtime',
       onEncodedPacket: () => gotPacket(),

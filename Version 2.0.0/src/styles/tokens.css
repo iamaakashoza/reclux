@@ -1,56 +1,78 @@
-/* Reclux V2 design tokens + base reset. "Liquid glass": glass only on floating controls, content stays solid (report §36).
-   Rules: system fonts only (offline), 4px spacing grid, WCAG AA contrast, 44px tap targets (48px on touch).
-   Change values here, not in components. */
+/* Reclux V2 design tokens + base reset. Glass only on floating controls, content stays solid (report §36).
+   Rules: 4px spacing grid, WCAG AA contrast, 44px tap targets (48px on touch). Change values here, not in components. */
 
+/* Typefaces, packed into Reclux (owner's call, 20 Nov 2026, report §42): Figtree for text, JetBrains Mono for
+   numbers that tick (timers). No internet needed: the files load from the extension itself, and text shows in the
+   system font at once while they load ("swap"), so a slow computer never waits for them. */
+@import '@fontsource-variable/figtree/wght.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
+
+/* Brand palette (owner's call, 19 Nov 2026): Pure Off-White #F7F7F5 · Midnight Black #080808 · Vibrant Crimson
+   Red #F20B18, also the logo's dot. Status colours (20 Nov 2026): Danger red, Warning yellow, Success green, Info
+   blue, each as text / fill / border. Light and dark follow the computer's setting. */
 :root {
   color-scheme: light dark;
 
-  /* Surfaces + text (light) */
-  --c-bg: #f3f2ee;
+  --off-white: #f7f7f5;
+  --black: #080808;
+  --red: #f20b18;
+  --c-brand: var(--red); /* the logo's dot */
+
+  /* Surfaces + text */
+  --c-bg: var(--off-white);
   --c-surface: #ffffff;
-  --c-surface-2: #ecebe6;
-  --c-border: #dcdad3;
-  --c-text: #0e1116;
-  --c-text-muted: #545b66;
+  --c-surface-2: #efefec;
+  --c-border: rgb(8 8 8 / 10%);
+  --c-text: var(--black);
+  --c-text-muted: #5c5c5a; /* 6.4:1 on the off-white */
 
-  /* Action and "recording now" red (not the brand colour in V2, see --c-lux). White text on it = 4.9:1 */
-  --c-accent: #d7263d;
-  --c-accent-hover: #bf1f35;
-  --c-accent-text: #c01e34;
-  --c-on-accent: #ffffff;
-  /* Brand light ("lux"): the dot in the logo and "on" switches (report §35) */
-  --c-lux: #f59e0b;
-  --c-on-lux: #0e1116;
-  --c-focus: #2f6feb;
+  /* Record, Stop, Save, Export: the one action colour. Text on it is 4.3:1, so buttons use 600+ weight. */
+  --c-accent: var(--red);
+  --c-accent-hover: #d40914;
+  --c-accent-text: #d00914; /* red words and outlines: 5:1 on the off-white */
+  --c-on-accent: var(--off-white);
+  /* "On" switches and the selected segment: black, so red stays the one action colour */
+  --c-lux: var(--black);
+  --c-on-lux: var(--off-white);
+  --c-focus: var(--black);
 
-  /* Status */
-  --c-ok: #1a7f4b;
-  --c-warn: #7a5000;
-  --c-warn-bg: #fff4d6;
-  --c-info: #1f5fbf;
-  --c-info-bg: #e8f0fd;
-  --c-error: #9b1c2c;
-  --c-error-bg: #fde8ea;
-  /* "Paused": a warning light that reads on light and dark glass alike */
-  --c-paused-bg: #ffd77a;
-  --c-paused-text: #3d2a00;
+  /* Status: alerts, notices, the "Recording" light. Text colours are 4.5:1+ on their own fill. */
+  --c-danger: #b50e18;
+  --c-danger-icon: #e0101c;
+  --c-danger-bg: #fdecec;
+  --c-danger-border: #f5b5b9;
+  --c-warning: #7a4f00;
+  --c-warning-icon: #c98a00;
+  --c-warning-bg: #fff6d9;
+  --c-warning-border: #f0cf74;
+  --c-success: #0d6e37;
+  --c-success-icon: #16a34a;
+  --c-success-bg: #e7f6ed;
+  --c-success-border: #a6dcbb;
+  --c-info: #1b4fb8;
+  --c-info-icon: #2f6fe4;
+  --c-info-bg: #eaf1fd;
+  --c-info-border: #b3cbf5;
+  --c-paused-bg: var(--black);
+  --c-paused-text: var(--off-white);
 
-  /* The backdrop glass sits on: a still gradient (glass over flat colour reads as a grey card) */
-  --backdrop: radial-gradient(70% 55% at 10% 0%, rgb(127 211 230 / 45%), transparent 70%),
-    radial-gradient(55% 45% at 100% 100%, rgb(255 181 71 / 30%), transparent 70%), var(--c-bg);
+  /* The backdrop glass sits on: off-white with two soft washes, so the glass has something to blur */
+  --backdrop: radial-gradient(60% 50% at 0% 0%, rgb(242 11 24 / 9%), transparent 70%),
+    radial-gradient(55% 45% at 100% 100%, rgb(8 8 8 / 7%), transparent 70%), var(--c-bg);
 
-  /* Glass (Regular). One blur knob. Fairly opaque, like Apple's 2026 default, so text stays readable. */
+  /* Glassmorphism: a frosted, see-through panel with a thin edge, a faint top light and a soft shadow */
   --glass-blur: 16px;
-  --glass-saturate: 170%;
-  --glass-bg: rgb(255 255 255 / 66%);
-  --glass-bg-solid: rgb(252 252 250 / 97%);
-  --glass-border: rgb(14 17 22 / 10%);
-  --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 70%);
-  --glass-shadow: 0 1px 2px rgb(14 17 22 / 6%), 0 10px 30px rgb(14 17 22 / 12%);
+  --glass-saturate: 120%;
+  --glass-bg: rgb(255 255 255 / 58%);
+  --glass-bg-solid: rgb(252 252 251 / 97%);
+  --glass-border: rgb(8 8 8 / 9%);
+  --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 60%);
+  --glass-shadow: 0 8px 32px rgb(8 8 8 / 10%);
   /* A plain fill for controls sitting ON glass (never glass on glass) */
-  --fill: rgb(14 17 22 / 6%);
-  --fill-hover: rgb(14 17 22 / 11%);
+  --fill: rgb(8 8 8 / 5%);
+  --fill-hover: rgb(8 8 8 / 9%);
   --fill-strong: #ffffff;
+  --dim: rgb(8 8 8 / 32%); /* behind a dialog */
 
   /* Space (4px grid) */
   --s-1: 4px;
@@ -59,29 +81,82 @@
   --s-4: 16px;
   --s-5: 24px;
   --s-6: 32px;
+  --s-7: 48px;
 
-  /* Shape: capsules for bars and buttons; nested corners are concentric (inner = outer - padding) */
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 20px;
-  --r-xl: 28px;
+  /* Shape: 8 px corners (owner's call), capsules for buttons and bars */
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 8px;
+  --r-xl: 16px;
   --r-pill: 999px;
 
-  /* Type */
-  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: ui-monospace, 'SF Mono', Consolas, monospace;
+  /* Type: one scale. Figtree first, the system font if it is missing. */
+  --font: 'Figtree Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Consolas, monospace;
   --t-xs: 0.75rem;
   --t-sm: 0.875rem;
   --t-md: 1rem;
   --t-lg: 1.25rem;
   --t-xl: 1.75rem;
-  --t-timer: 2.25rem;
+  --t-2xl: 2.5rem;
 
   /* Touch */
   --tap: 44px;
 
-  --shadow: 0 1px 2px rgb(14 17 22 / 8%), 0 4px 16px rgb(14 17 22 / 8%);
-  --ease: 150ms ease-out;
+  --shadow: 0 1px 2px rgb(8 8 8 / 6%), 0 4px 16px rgb(8 8 8 / 6%);
+  --ease: 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Dark: Midnight Black ground, Off-White text, the same red. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: var(--black);
+    --c-surface: #141414;
+    --c-surface-2: #1c1c1b;
+    --c-border: rgb(247 247 245 / 12%);
+    --c-text: var(--off-white);
+    --c-text-muted: #a3a3a0; /* 8:1 on black */
+
+    --c-accent-hover: #ff2a36;
+    --c-accent-text: #ff5a63; /* 6.3:1 on black */
+    --c-lux: var(--off-white);
+    --c-on-lux: var(--black);
+    --c-focus: var(--off-white);
+
+    --c-danger: #ff8a90;
+    --c-danger-icon: #ff5a63;
+    --c-danger-bg: rgb(242 11 24 / 14%);
+    --c-danger-border: rgb(255 90 99 / 38%);
+    --c-warning: #ffd36b;
+    --c-warning-icon: #f5b800;
+    --c-warning-bg: rgb(245 184 0 / 13%);
+    --c-warning-border: rgb(245 184 0 / 38%);
+    --c-success: #6ee69b;
+    --c-success-icon: #3fcf76;
+    --c-success-bg: rgb(34 197 94 / 13%);
+    --c-success-border: rgb(63 207 118 / 36%);
+    --c-info: #9cc0ff;
+    --c-info-icon: #6fa2ff;
+    --c-info-bg: rgb(59 130 246 / 15%);
+    --c-info-border: rgb(138 180 255 / 38%);
+    --c-paused-bg: var(--off-white);
+    --c-paused-text: var(--black);
+
+    --backdrop: radial-gradient(60% 50% at 0% 0%, rgb(242 11 24 / 16%), transparent 70%),
+      radial-gradient(55% 45% at 100% 100%, rgb(247 247 245 / 6%), transparent 70%), var(--c-bg);
+
+    --glass-bg: rgb(28 28 27 / 55%);
+    --glass-bg-solid: rgb(22 22 21 / 97%);
+    --glass-border: rgb(247 247 245 / 12%);
+    --glass-highlight: inset 0 1px 0 rgb(247 247 245 / 8%);
+    --glass-shadow: 0 8px 32px rgb(0 0 0 / 45%);
+    --fill: rgb(247 247 245 / 7%);
+    --fill-hover: rgb(247 247 245 / 12%);
+    --fill-strong: #2a2a29;
+    --dim: rgb(0 0 0 / 55%);
+
+    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 35%);
+  }
 }
 
 @media (pointer: coarse) {
@@ -90,43 +165,9 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --c-bg: #0b0e13;
-    --c-surface: #151a22;
-    --c-surface-2: #1f2530;
-    --c-border: #2c333e;
-    --c-text: #eef0f4;
-    --c-text-muted: #a3acba;
-    --c-accent-text: #ff6b7a;
-    --c-lux: #ffb547;
-    --c-focus: #7fd3e6;
-    --c-ok: #5fd397;
-    --c-warn: #f2c14e;
-    --c-warn-bg: #2d2410;
-    --c-info: #8ab4ff;
-    --c-info-bg: #14233f;
-    --c-error: #ff8a96;
-    --c-error-bg: #331519;
-    --backdrop: radial-gradient(70% 55% at 10% 0%, rgb(58 123 213 / 30%), transparent 70%),
-      radial-gradient(55% 45% at 100% 100%, rgb(255 181 71 / 14%), transparent 70%), var(--c-bg);
-    --glass-bg: rgb(24 28 36 / 62%);
-    --glass-bg-solid: rgb(22 26 33 / 97%);
-    --glass-border: rgb(255 255 255 / 12%);
-    --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 14%);
-    --glass-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px rgb(0 0 0 / 45%);
-    --fill: rgb(255 255 255 / 8%);
-    --fill-hover: rgb(255 255 255 / 14%);
-    --fill-strong: rgb(255 255 255 / 16%);
-    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 4px 16px rgb(0 0 0 / 30%);
-  }
-}
-
-/* Lite glass: while recording (the screen behind moves, so blur would be redrawn every frame),
-   and the in-app "Reduce transparency" switch. */
+/* Lighter glass while recording: the screen behind moves, so a strong blur would be redrawn every frame. */
 :root[data-recording] {
   --glass-blur: 8px;
-  --glass-saturate: 140%;
   --glass-bg: var(--glass-bg-solid);
 }
 
@@ -160,7 +201,7 @@ input {
   color: inherit;
 }
 
-/* .glass: floating controls only. Solid first; glass where the browser can blur. */
+/* .glass: floating controls only. Solid first; frosted glass where the browser can blur. */
 .glass {
   background: var(--glass-bg-solid);
   border: 1px solid var(--glass-border);
@@ -172,11 +213,7 @@ input {
     backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   }
 }
-/* Reduce transparency: the system setting (Chromium) or Reclux's own switch (every browser, incl. Firefox) */
-:root[data-solid] .glass {
-  background: var(--glass-bg-solid);
-  backdrop-filter: none;
-}
+/* The computer's "reduce transparency" setting (Chromium): solid panels. */
 @media (prefers-reduced-transparency: reduce) {
   .glass {
     background: var(--glass-bg-solid);

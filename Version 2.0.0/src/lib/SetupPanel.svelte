@@ -48,12 +48,12 @@
   </div>
 
   {#if session.lowDisk}
-    <Banner kind="warn" title="Low disk space">
+    <Banner kind="warning" title="Low disk space">
       {#if session.free !== null}Only {fmtSize(session.free / 1e6)} is free for recordings.{/if}
       2 hours at this quality could need about {need}. Free up space on the drive that holds your browser
       (usually C:) or lower the quality. When it is done, you can save the file to another drive like D: or E:.
       {#snippet actions()}
-        <Button onclick={() => (session.presetId = presetId(720, preset.fps))}>Lower quality</Button>
+        <Button variant="secondary" onclick={() => (session.presetId = presetId(720, preset.fps))}>Lower quality</Button>
       {/snippet}
     </Banner>
   {/if}
