@@ -12,10 +12,10 @@
   --line: #dcdad3;
   --ink: #0e1116;
   --ink-2: #545b66;
-  --red: #d7263d; /* actions and "recording now", as in the app. White text on it = 4.9:1 */
-  --red-hover: #bf1f35;
-  --lux: #f59e0b; /* the light in the logo */
-  --lux-ink: #7a4b00; /* lux as text on light surfaces (AA) */
+  --red: #f20b18; /* Reclux red: actions, as in the app. White text on it needs 600+ weight */
+  --red-hover: #d40914;
+  --lux: #f20b18; /* the light in the logo: Reclux red (owner's call, 20 Nov 2026) */
+  --lux-ink: #c40d18; /* red as text on light surfaces (AA) */
   --glacier: #3a7bd5;
   --focus: #2f6feb;
   --ok: #1a7f4b;
@@ -50,8 +50,8 @@
     --line: #2c333e;
     --ink: #eef0f4;
     --ink-2: #a3acba;
-    --lux: #ffb547;
-    --lux-ink: #ffb547;
+    --lux: #f20b18;
+    --lux-ink: #ff5a63;
     --glacier: #7fd3e6;
     --focus: #7fd3e6;
     --ok: #5fd397;
@@ -79,7 +79,7 @@ h1, h2, h3, h4, p, ul, ol, figure { margin: 0; padding: 0; }
 ul, ol { list-style: none; }
 button { font: inherit; color: inherit; cursor: pointer; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 6px; }
-::selection { background: var(--lux); color: #0e1116; }
+::selection { background: var(--lux); color: #fff; }
 
 .wrap { width: min(100% - 2 * var(--gutter), var(--wrap)); margin-inline: auto; }
 .skip { position: absolute; left: 1rem; top: -5rem; z-index: 100; padding: 0.75rem 1rem; background: var(--ink); color: var(--bg); border-radius: var(--r-sm); }
@@ -127,7 +127,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* Hero */
 .hero { padding: clamp(7.5rem, 17vh, 10.5rem) 0 clamp(2rem, 5vw, 4rem); text-align: center; }
 .pill { display: inline-flex; align-items: center; gap: 0.6rem; padding: 0.3rem 0.9rem 0.3rem 0.3rem; border: 1px solid var(--glass-border); border-radius: 999px; background: var(--fill); font: 500 0.8125rem var(--mono); }
-.pill-new { padding: 0.15rem 0.6rem; border-radius: 999px; background: var(--lux); color: #0e1116; font-weight: 600; }
+.pill-new { padding: 0.15rem 0.6rem; border-radius: 999px; background: var(--lux); color: #fff; font-weight: 600; }
 .hero h1 { margin-top: 1.25rem; font-size: clamp(2.6rem, 7.4vw, 5.75rem); line-height: 1.02; font-weight: 650; letter-spacing: -0.04em; }
 .lede { max-width: 42rem; margin: 1.5rem auto 0; font-size: clamp(1.0625rem, 1.6vw, 1.25rem); line-height: 1.55; color: var(--ink-2); }
 .cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 2rem; }
@@ -177,7 +177,7 @@ section:not(.hero) { padding-block: clamp(3.5rem, 6vw, 5.5rem); }
 .zscreen, .cscreen { position: relative; width: 100%; max-width: 15rem; aspect-ratio: 16 / 9; border-radius: var(--r-md); background: #fff; border: 1px solid var(--line); overflow: hidden; box-shadow: var(--shadow); }
 .zcontent { position: absolute; inset: 0; display: flex; align-items: flex-end; gap: 7%; padding: 14% 12% 12%; transform-origin: 72% 40%; }
 .zbar { flex: 1; border-radius: 4px; background: #3a7bd5; }
-.b1 { height: 40%; } .b2 { height: 62%; } .b3 { height: 52%; } .b4 { height: 88%; background: #ffb547; }
+.b1 { height: 40%; } .b2 { height: 62%; } .b3 { height: 52%; } .b4 { height: 88%; background: var(--lux); }
 .zcursor { position: absolute; left: 70%; top: 34%; width: 10px; height: 14px; background: #0e1116; clip-path: polygon(0 0, 100% 70%, 45% 70%, 30% 100%, 0 60%); }
 
 /* Webcam card */
@@ -235,7 +235,7 @@ section:not(.hero) { padding-block: clamp(3.5rem, 6vw, 5.5rem); }
 .tour-tabs span { display: grid; font-size: 0.8125rem; line-height: 1.35; }
 .tour-tabs strong { font-size: 1rem; color: var(--ink); }
 .tour-tabs [aria-selected='true'] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
-.tour-tabs [aria-selected='true'] b { background: var(--lux); border-color: var(--lux); color: #0e1116; }
+.tour-tabs [aria-selected='true'] b { background: var(--lux); border-color: var(--lux); color: #fff; }
 .tour-stage { border-radius: var(--r-xl); border: 1px solid var(--line); background: var(--surface); box-shadow: var(--shadow); overflow: hidden; }
 .tour-panel { display: grid; }
 .tour-panel[hidden] { display: none; }
