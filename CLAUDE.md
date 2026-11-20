@@ -29,6 +29,8 @@ There is no test suite. Verify with `npm run check` plus a manual load of `.outp
 
 Automated runs: Google Chrome 137+ ignores `--load-extension`, but **headless Brave still loads an unpacked extension** (`brave.exe --headless=new --load-extension=<dir> --remote-debugging-port=…`), so the real extension (popup, recorder, floating window, page overlay) can be driven over CDP. Page access cannot be clicked there: test on a copy of the build with `host_permissions: ["<all_urls>"]` added. Headless screenshots do not paint CSS transforms on `<video>` (the zoom preview), so check those by measuring boxes, not pixels.
 
+The test PC runs in dark mode: force a theme with `--blink-settings=preferredColorScheme=1` (light) or `=0` (dark). Headless tabs do not advance CSS animations, so emulate `prefers-reduced-motion: reduce` before screenshots of pages that fade in (website, welcome).
+
 When testing a recording automatically, do not use `--use-fake-device-for-media-stream`: it also replaces the screen with a fake 20 fps video. Report §31 lists what is and is not covered.
 
 ## Architecture
@@ -69,7 +71,9 @@ UI: shared components in `src/lib/*.svelte` (`Logo.svelte` is the logo), design 
 
 - `report.md` — the research report and decision log (presets, bitrates, browser minimums, 2-hour rules). Code comments cite it as "report §N". Update it when decisions change.
 - `brand/` — logo master files (SVG), app icons and usage rules. `public/icon/` and `Logo.svelte` are copied from here.
-- Website: the `website` branch, which Netlify deploys on every push (report §30, §33). Privacy page: the separate `reclux-privacy` repo.
+- Website: the `website` branch, which Netlify deploys on every push (report §30, §33), checked out as a git worktree at `spike/website`. Its `download/` holds the v2 zips; the same zips are the assets of the GitHub Release `v2.0.0` (`gh release upload v2.0.0 <zip> --clobber`), so a rebuilt zip goes to both.
+- Privacy page: the separate `reclux-privacy` repo (GitHub Pages, branch `main`), cloned at `spike/reclux-privacy`, one `index.html`. Its permissions table must match `permissions` in `wxt.config.ts`.
+- Both pages copy the extension's look by hand (Figtree + JetBrains Mono woff2 from `node_modules/@fontsource-variable/*`, colours from `src/styles/tokens.css`); update them when `tokens.css` changes.
 - `docs/`, `spike/`, `reports/`, `research_notes/` are local-only (gitignored).
 
 ## Conventions
