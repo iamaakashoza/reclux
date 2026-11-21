@@ -75,6 +75,7 @@ UI: shared components in `src/lib/*.svelte` (`Logo.svelte` is the logo), design 
 - Website: the `website` branch, which Netlify deploys on every push (report §30, §33), checked out as a git worktree at `spike/website`. Its `download/` holds the v2 zips; the same zips are the assets of the GitHub Release `v2.0.0` (`gh release upload v2.0.0 <zip> --clobber`), so a rebuilt zip goes to both.
 - Privacy page: the separate `reclux-privacy` repo (GitHub Pages, branch `main`), cloned at `spike/reclux-privacy`, one `index.html`. Its permissions table must match `permissions` in `wxt.config.ts`.
 - Both pages copy the extension's look by hand (Figtree + JetBrains Mono woff2 from `node_modules/@fontsource-variable/*`, colours from `src/styles/tokens.css`); update them when `tokens.css` changes.
+- `audits/<date>/` — published audit (`audit.md`) and review (`review.md`) of each release round. Working drafts stay in `reports/`.
 - `docs/`, `spike/`, `reports/`, `research_notes/` are local-only (gitignored).
 
 ## Conventions
