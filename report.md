@@ -2884,3 +2884,36 @@ Owner's review of phases 1–2 (screenshots 14–18 and a Chrome video of the co
 | Odd sizes are scaled 1 px instead of cropped | Kept: a crop is a fixed rectangle, so a window resized while recording would be cut off; the scale keeps fitting it |
 | Return to the original tab, not the shared one | Known limit (§41) |
 | Dark mode / Reduce transparency against CLAUDE.md | Owner's new call; CLAUDE.md updated |
+
+## 43. V2 bug fixes, phase 4 (21 Nov 2026) 🐞
+
+Owner's final review: Opera (webcam inside the controls window, screenshot 01) and Firefox (webcam blinks on page loads and when switching to other apps). Both reproduced first.
+
+### Root causes and fixes
+| Issue | Root cause (measured) | Fix |
+|---|---|---|
+| Opera: the webcam circle sits inside the controls window (01, Google open) | Not a Reclux fault: Opera keeps **every** extension off search engines unless the user turns on **"Allow access to search page results"** (off by default) on the extension's details page (`opera://extensions` → Reclux → Details). Re-proven with page access granted: google.com, Google search, bing.com and duckduckgo.com all fail with "This page cannot be scripted due to an ExtensionsSettings policy"; example.com works. With no page on screen able to show the circle, the controls window shows it (the §42 fallback), so the webcam stays in a screen or window recording. | No code change. On normal sites Opera shows the circle on the page (tested: 0 black frames in 40 page loads, hide/show work). To have it on Google too: turn on that Opera switch. In a recorded **tab** of a search page the circle cannot be in the recording at all (Opera blocks it there). |
+| Firefox: circle blinks / reloads when a tab is shown again or another app was in front | Firefox gives the circle's frame no direct way to reach the Reclux tab's camera (`extension.getViews` is undefined there), so each circle gets its picture over a WebRTC link inside the computer. That link was **closed whenever the page was hidden** (another tab, or another app covering Firefox: Windows tells Firefox its window is covered) and rebuilt when shown. Screenshots: last frame → a flash of the old still picture from when the page opened → live after 300–750 ms (quiet PC; §41 measured 1–6 s under load). Chromium shares the stream directly, so it never had this. | The link is made once per page and **kept**. While the page is hidden the Reclux tab sends nothing on it (`replaceTrack(null)`, no encoding cost) and resumes when it is back. After: live again in 56–88 ms (about two frames), no flash in the screenshots. |
+| Firefox: on a new page the circle was black for a moment | Firefox draws the still picture a moment after the circle appears. | The circle appears only once its still picture is decoded. After: 0 black frames (Firefox screenshots; Brave and Opera 0 of 40). |
+| Firefox: new page slow to go live | A new page is a new document, so it needs a new link. Each side waited for all its network addresses before answering. | Addresses are sent as they are found (trickle ICE): 300–430 ms → ~290 ms in a lab test; real pages 480–630 ms → 400–540 ms. A short still picture on a new page remains (Firefox only; it has no direct camera sharing). |
+
+### QA (automated, the real extension)
+| Browser | Checked |
+|---|---|
+| Firefox 160 | Tab shown again ×4 (65–81 ms), new page ×4, Back / Forward, hide / show webcam from the controls window, tab switch after show, Stop → editor, overlay gone |
+| Brave | Circle on page, 0 black of 40 page-load screenshots, hide / show, Stop → editor, overlay gone |
+| Opera | Search engines blocked by Opera's policy (above); example.com and local pages: circle on page, 0 black of 40, hide / show |
+| Logic checks | `zoom.check.mjs`, `edit.check.mjs` pass; `npm run check` 0 errors |
+
+### Code review (/code-review, 7 findings)
+| Finding | Done |
+|---|---|
+| A link that broke (or that the Reclux tab ended) was never made again: before, hiding the page rebuilt it by chance | Fixed: a failed link is made again at once; an ended one the next time the page is shown |
+| One paused link stays open per page visited while recording | Kept (`ponytail:` note): a paused link costs a tiny check every few seconds; close long-hidden links if many tabs ever prove costly |
+| The frame's address sending had no guard after the recording ended | Fixed |
+| The still picture was decoded in a throwaway image, so Firefox might decode it again when drawing | Fixed: the circle shows it as a real image and waits for that one |
+| Showing the webcam again shows the still from when the page opened, until live | Kept: as before, in every browser; the alternative is a black circle |
+| Address sending written on both sides | Kept: 3 lines each, the only difference was the guard above |
+| An address sent before the offer/answer is dropped | Not a bug: the browser adds each address to the description before announcing it, so it is in the offer/answer already |
+
+Re-tested after the fixes: Firefox (all rows above, screenshots smooth: no flash, no black), Brave (0 black of 40, hide / show / Stop).

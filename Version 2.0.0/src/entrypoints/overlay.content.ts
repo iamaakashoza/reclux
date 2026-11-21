@@ -46,10 +46,11 @@ function boot() {
     * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; }
     .cam { position: absolute; left: 0; top: 0; width: 180px; height: 180px; border-radius: 50%;
       border: 3px solid #f7f7f5; box-shadow: 0 8px 28px rgb(8 8 8 / 30%); pointer-events: auto;
-      cursor: grab; touch-action: none; background: #080808 center / cover no-repeat; user-select: none; -webkit-user-select: none;
+      cursor: grab; touch-action: none; background: #080808; user-select: none; -webkit-user-select: none;
       will-change: transform; }
     .cam.drag { cursor: grabbing; }
-    .cam iframe { width: 100%; height: 100%; border: 0; border-radius: 50%; pointer-events: none; display: block; }
+    .cam iframe { position: relative; width: 100%; height: 100%; border: 0; border-radius: 50%; pointer-events: none; display: block; }
+    .still { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; pointer-events: none; }
     .hide { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border: 0; border-radius: 50%;
       background: rgb(8 8 8 / 75%); color: #f7f7f5; font-size: 16px; line-height: 28px; cursor: pointer; opacity: 0;
       transition: opacity 120ms; }
@@ -72,7 +73,7 @@ function boot() {
     button:focus-visible { outline: 3px solid var(--fg); outline-offset: 2px; }
     [hidden] { display: none !important; }
   </style>
-  <div class="cam" hidden><iframe title="Your webcam" allow="camera"></iframe><button class="hide" aria-label="Hide webcam" title="Hide webcam">×</button></div>
+  <div class="cam" hidden><img class="still" alt=""><iframe title="Your webcam" allow="camera"></iframe><button class="hide" aria-label="Hide webcam" title="Hide webcam">×</button></div>
   <div class="bar" role="toolbar" aria-label="Reclux recording controls" hidden>
     <span class="status"></span><span class="time">00:00:00</span>
     <button class="pause"></button>
@@ -83,6 +84,7 @@ function boot() {
 
   const cam = root.querySelector<HTMLDivElement>('.cam')!;
   const frame = cam.querySelector('iframe')!;
+  const stillImg = cam.querySelector<HTMLImageElement>('.still')!;
   const bar = root.querySelector<HTMLDivElement>('.bar')!;
   const pauseBtn = bar.querySelector<HTMLButtonElement>('.pause')!;
   const PAUSE = iconSvg('pause', 18);
@@ -97,11 +99,16 @@ function boot() {
     cam.style.transform = `translate(${at.x - 90}px, ${at.y - 90}px)`;
   };
 
+  let still: Promise<unknown> = Promise.resolve();
   port.onMessage.addListener((s: OverlayState) => {
     state = s;
     // The webcam picture of a moment ago, under the live video until that starts (no empty flash on a new page).
-    if (s.still) cam.style.backgroundImage = `url("${s.still}")`;
-    cam.hidden = !s.camera;
+    // The circle waits until that picture is ready to draw: Firefox decodes it a moment later, a black flash.
+    if (s.still) {
+      stillImg.src = s.still;
+      still = stillImg.decode().catch(() => {});
+    }
+    void still.then(() => (cam.hidden = !state?.camera));
     // Only load the circle's page while the circle is shown.
     if (s.camera && !frame.src) frame.src = browser.runtime.getURL('/bubble.html');
     if (!s.camera && frame.src) frame.removeAttribute('src');

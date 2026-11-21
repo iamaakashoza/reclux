@@ -1,6 +1,6 @@
 // Recorder side of the web-page overlay: asks for page access, puts the overlay into open tabs while recording,
 // sends it the live state, and receives cursor positions and button presses.
-import { CAMERA_PORT, OVERLAY_PORT, gathered, type OverlayMessage, type OverlayState } from './overlay-protocol';
+import { CAMERA_PORT, OVERLAY_PORT, type CameraMessage, type OverlayMessage, type OverlayState } from './overlay-protocol';
 
 const ACCESS = { origins: ['<all_urls>'] };
 const SCRIPT = '/content-scripts/overlay.js';
@@ -121,17 +121,31 @@ export function shareCamera(stream: MediaStream) {
   const links = new Set<RTCPeerConnection>();
   const onConnect = (port: Port) => {
     if (port.name !== CAMERA_PORT) return;
+    // ponytail: one paused link stays open per page visited while recording (a tiny check every few seconds each),
+    // close links hidden for minutes if many tabs ever prove costly.
     const pc = new RTCPeerConnection();
     links.add(pc);
-    stream.getTracks().forEach((t) => pc.addTrack(t, stream));
-    port.onMessage.addListener((answer: RTCSessionDescriptionInit) => void pc.setRemoteDescription(answer).catch(() => {}));
+    const sending = stream.getTracks().map((t) => [pc.addTrack(t, stream), t] as const);
+    // Addresses go as they are found (see link in bubble/main.ts). One found before the offer is sent is in it too.
+    pc.onicecandidate = (e) => {
+      try {
+        if (e.candidate) port.postMessage(e.candidate.toJSON());
+      } catch {} // the page went away
+    };
+    let answered: Promise<void> | undefined;
+    port.onMessage.addListener((m: CameraMessage) => {
+      // Its page is hidden: send nothing (no cost), on the same link, until it is back (report §43).
+      if ('on' in m) sending.forEach(([s, t]) => void s.replaceTrack(m.on ? t : null).catch(() => {}));
+      else if ('sdp' in m) answered = pc.setRemoteDescription(m).catch(() => {});
+      // An address sent before the answer is in the answer already.
+      else if ('candidate' in m) void answered?.then(() => pc.addIceCandidate(m)).catch(() => {});
+    });
     port.onDisconnect.addListener(() => {
       pc.close();
       links.delete(pc);
     });
     void pc
       .setLocalDescription()
-      .then(() => gathered(pc))
       .then(() => port.postMessage(pc.localDescription!.toJSON()))
       .catch(() => port.disconnect());
   };

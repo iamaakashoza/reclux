@@ -25,9 +25,5 @@ export type OverlayMessage =
 /** The circle's frame on a web page → recorder: "send me the camera" (Firefox, see shareCamera in overlay.ts). */
 export const CAMERA_PORT = 'reclux-camera';
 
-/** A WebRTC link inside this computer, ready once it has found its local addresses. */
-export const gathered = (pc: RTCPeerConnection) =>
-  new Promise<void>((done) => {
-    if (pc.iceGatheringState === 'complete') return done();
-    pc.addEventListener('icegatheringstatechange', () => pc.iceGatheringState === 'complete' && done());
-  });
+/** Over CAMERA_PORT, both ways: the link's offer/answer and addresses; from the frame also "my page is (not) on screen". */
+export type CameraMessage = RTCSessionDescriptionInit | RTCIceCandidateInit | { on: boolean };
