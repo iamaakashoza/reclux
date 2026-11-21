@@ -48,23 +48,26 @@ export function saveSettings(s: Partial<Settings>) {
 }
 
 /**
- * First run only: if this computer has no hardware H.264 encoder for 1080p60, start on 720p instead.
- * Software encoding at 1080p60 is what dropped frames in V1 (report §34). The user can still pick 1080p.
- * Firefox 140–142 always answers "yes" here, so it simply keeps 1080p.
+ * Does this computer have a hardware H.264 encoder for 1080p at this frame rate? Software encoding at 1080p is
+ * what dropped frames in V1 (report §34) and in Firefox here (report §45). "Do not know" counts as yes.
+ * Firefox 140–142 always answers "yes".
  */
+const asked = new Map<number, Promise<boolean>>();
+export const hardware1080 = (fps: number) => {
+  if (typeof VideoEncoder === 'undefined') return Promise.resolve(true);
+  if (!asked.has(fps)) {
+    const config = { codec: 'avc1.64002a', width: 1920, height: 1080, framerate: fps, bitrate: 20e6, hardwareAcceleration: 'prefer-hardware' as const };
+    asked.set(fps, VideoEncoder.isConfigSupported(config).then((r) => !!r.supported, () => true)); // avc1.64002a: H.264 High 4.2
+  }
+  return asked.get(fps)!;
+};
+
+/** First run only: with no hardware encoder for 1080p60, start on 720p instead. The user can still pick 1080p. */
 export async function suggestedPreset(): Promise<string | undefined> {
   try {
-    if (localStorage.getItem(KEY) !== null || typeof VideoEncoder === 'undefined') return;
-    const { supported } = await VideoEncoder.isConfigSupported({
-      codec: 'avc1.64002a', // H.264 High, level 4.2: enough for 1080p60
-      width: 1920,
-      height: 1080,
-      framerate: 60,
-      bitrate: 20e6,
-      hardwareAcceleration: 'prefer-hardware',
-    });
-    return supported ? undefined : '720p60';
+    if (localStorage.getItem(KEY) !== null) return;
   } catch {
-    return;
+    return; // blocked storage: keep the default
   }
+  return (await hardware1080(60)) ? undefined : '720p60';
 }

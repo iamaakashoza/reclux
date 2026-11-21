@@ -40,7 +40,8 @@
     >
       <Icon name={paused ? 'play' : 'pause'} size={22} />
     </button>
-    <button class="ctl stop" aria-label="Stop and edit" title="Stop and edit" onclick={stop} disabled={session.finishing}>
+    <!-- Not in the countdown: Cancel is in the Reclux tab, which is in front then. -->
+    <button class="ctl stop" aria-label="Stop and edit" title="Stop and edit" onclick={stop} disabled={session.finishing || session.phase === 'countdown'}>
       <Icon name="stop" size={20} />
     </button>
     <time class="timer" role="timer" aria-label="Recorded time">{fmtClock(session.elapsed)}</time>

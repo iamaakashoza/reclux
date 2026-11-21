@@ -38,3 +38,5 @@ export const fmtClock = (s: number) =>
 
 export const MAX_SECONDS = 2 * 60 * 60;
 export const WARN_SECONDS = MAX_SECONDS - 15 * 60;
+/** Free space a full 2 hours needs: the recording, plus a second copy while Stop finishes it (finishFile). */
+export const needMB = (p: Preset) => 2 * sizeMB(p, MAX_SECONDS);

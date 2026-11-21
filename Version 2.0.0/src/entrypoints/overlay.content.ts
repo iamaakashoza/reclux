@@ -109,9 +109,9 @@ function boot() {
       still = stillImg.decode().catch(() => {});
     }
     void still.then(() => (cam.hidden = !state?.camera));
-    // Only load the circle's page while the circle is shown.
+    // Load the circle's page the first time the circle is shown, then keep it: removing it on Hide webcam stalled
+    // this page (and so the recording of it) for up to a second in Brave (report §45.4). Hidden, it gets no picture.
     if (s.camera && !frame.src) frame.src = browser.runtime.getURL('/bubble.html');
-    if (!s.camera && frame.src) frame.removeAttribute('src');
     if (!drag) place(s.pos.x * innerWidth, s.pos.y * innerHeight);
     bar.hidden = !s.bar;
     bar.querySelector<HTMLButtonElement>('.camera')!.hidden = !s.webcam;

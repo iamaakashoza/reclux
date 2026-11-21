@@ -7,6 +7,31 @@ Download Reclux and see the install steps at [reclux.netlify.app](https://reclux
 - **Chrome, Edge, Brave, Opera:** extract the new .zip over the same folder, then press reload on Reclux in your browser's extensions page.
 - **Firefox:** load the new .zip the next time you add Reclux.
 
+## 2.0.0 fixes, part 4 (21 November 2026)
+
+The version stays 2.0.0 until the owner says otherwise.
+
+### Changed
+- **The controls window opens when the countdown starts** and shows "Starting in 3…", so it is ready before recording begins (Firefox stuttered while it opened, and its empty window could end up in the video).
+- **1080p on a computer without a hardware video encoder** (for example Firefox on many PCs): a short note under the quality choice says 1080p may skip frames and 720p is smoother. 1080p can still be chosen.
+- Encoding and saving now run apart from the Reclux page, so a busy moment on the page no longer makes the video skip frames (Chrome, Brave, Edge, Opera; Firefox is not helped by this, see report §45.3).
+
+### Fixed
+- A WebM recording cut short by a crash could look empty to players. It now plays, and "Recover it" fills in its length.
+- "Recover it" now finishes the file the same way Stop does, so Windows shows its right length and frame rate.
+- The low-disk warning now counts the room needed to finish the file. If finishing still fails, a note says the file is kept in its crash-safe form.
+- After a failed Stop, the page said "Use Recover it below" but showed no button. The recording to recover now shows.
+- Recording a browser tab lost most of its frames at 1080p and with the webcam on (the video stuttered and froze for up to 2 s). Every frame is kept now.
+- The first moment of a recording could show the countdown (Firefox, the whole screen) or the small control bar with "Starting in 5". It now starts on your page.
+- Reloading or closing the Reclux tab during a recording left the controls window open and frozen. It now closes too.
+- Brave: pressing Cancel in the Save As window showed "Something went wrong". Cancel is now silent, and a later export clears an old error. "Export again" no longer says "Exported" while it is still saving.
+- A video edited from a recording that had skipped frames got an odd frame rate (such as 27 fps). It keeps the frame rate it was recorded at.
+- A quick double or triple click on Start recording in the welcome page started several recordings.
+- Firefox: on a busy computer the recording controls window could close by itself before it appeared, leaving no controls.
+- Firefox: a very fast triple click on Start recording in the welcome page still opened two tabs.
+- Brave: hiding the webcam circle on a web page made the recorded page freeze for up to a second. It no longer does.
+- Brave: a 1080p recording of a browser tab could stutter for its whole length (15–26 fps, the webcam even 3–5 fps). It now starts at the right size and keeps every frame.
+
 ## 2.0.0 fixes, part 3 (20 November 2026, not released yet)
 
 The version stays 2.0.0 until the owner says otherwise.

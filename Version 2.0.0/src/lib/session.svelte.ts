@@ -2,8 +2,8 @@
 import { openCapture, type Capture, type Format } from './capture';
 import { keepAwake } from './awake';
 import { STOP_FREE, freeBytes } from './disk';
-import { MAX_SECONDS, findPreset, fmtSize, sizeMB } from './presets';
-import { startRecorder, type Recorder } from './recorder';
+import { findPreset, fmtSize, needMB } from './presets';
+import { finishFile, startRecorder, type Recorder } from './recorder';
 import { loadSettings, saveSettings } from './settings';
 import { findUnsaved, getStored, holdStored, markSaved, removeStored, type Stored } from './store';
 import { hasPageAccess, shareCamera, startOverlays } from './overlay';
@@ -77,7 +77,7 @@ addEventListener('storage', () => {
 export async function refreshDisk() {
   session.free = await freeBytes();
   if (session.phase === 'idle' && session.free !== null) {
-    session.lowDisk = session.free < sizeMB(findPreset(session.presetId), MAX_SECONDS) * 1e6;
+    session.lowDisk = session.free < needMB(findPreset(session.presetId)) * 1e6;
   }
 }
 let diskTimer: ReturnType<typeof setInterval> | undefined;
@@ -139,8 +139,9 @@ function overlayState(): OverlayState {
     camera: session.camera && session.camVisible && !!session.cameraStream,
     webcam: session.camera && !!session.cameraStream,
     pos: { ...session.camPos },
-    // The bar on web pages, only when no Reclux window shows the controls (the controls window was closed).
-    bar: !session.floating && !session.controls,
+    // The bar on web pages, only when no Reclux window shows the controls (the controls window was closed). Never in
+    // the countdown: it stayed on the page into the first frames of the recording.
+    bar: session.phase !== 'countdown' && !session.floating && !session.controls,
     info: `${fmtSize(session.bytes / 1e6)} · ${p.height}p · ${p.fps} fps`,
   };
 }
@@ -297,7 +298,8 @@ async function begin() {
   }
   await hooks.beforeGo?.();
   if (session.phase !== 'countdown') return void started.cancel(); // cancelled meanwhile
-  started.go();
+  await started.go();
+  if (session.phase !== 'countdown') return void started.cancel();
   rec = started;
   releaseFile = rec.release;
   session.fileName = rec.name;
@@ -325,6 +327,10 @@ export function resume() {
   runClock();
 }
 
+const KEPT_CRASH_SAFE =
+  'Reclux could not finish tidying this file (most likely the disk is nearly full), so it is kept in its crash-safe form. ' +
+  'It plays in browsers and VLC, but some Windows players show the wrong length.';
+
 export async function stop() {
   const live = session.phase === 'recording' || session.phase === 'paused';
   if (rec && live) {
@@ -335,10 +341,10 @@ export async function stop() {
     clearInterval(diskTimer);
     // No "your computer is struggling" warning in V2: V1's rule mostly measured the browser's change-driven
     // screen capture, not the computer (report §34). Frames the pump had to skip are only logged, for testing.
-    const { fresh, lost } = rec.stats();
-    console.info(`Reclux: ${fresh} new pictures from the capture, ${lost} frames skipped.`);
     try {
-      const file = await rec.stop((share) => (session.finishShare = share));
+      const { file, regular, fresh, lost } = await rec.stop((share) => (session.finishShare = share));
+      console.info(`Reclux: ${fresh} new pictures from the capture, ${lost} frames skipped.`);
+      if (!regular) session.notices = [...session.notices, KEPT_CRASH_SAFE];
       show(file);
     } catch (e) {
       session.error ||= `Could not finish the file: ${(e as Error).message}. What was recorded so far is kept. Use "Recover it" below.`;
@@ -447,11 +453,14 @@ export async function save() {
   const filename = `${clean}.${session.ext}`;
   if (session.exporting) return;
   session.exporting = true;
+  session.error = ''; // an old failure must not stay up after this try works
   try {
     const id = await browser.downloads.download({ url: session.url, filename, saveAs: true });
     // download() returns when copying STARTS. A 2-hour file takes a while, and deleting it from Reclux
     // before then would break the copy, so wait until the browser says it is done.
-    if ((await downloadEnd(id)) !== 'complete') throw new Error('the copy was interrupted. Please try again.');
+    const end = await downloadEnd(id);
+    if (end === 'USER_CANCELED') return; // Cancel in the Save As window (Brave reports it this way): not an error
+    if (end !== 'complete') throw new Error('the copy was interrupted. Please try again.');
     session.saved = true;
     // So the next launch does not offer this recording again as "unsaved".
     if (session.fileName) markSaved(session.fileName);
@@ -463,19 +472,19 @@ export async function save() {
   }
 }
 
-/** Resolves with "complete" or "interrupted" when the browser has finished the download. */
+/** Resolves with "complete", or why it stopped ("USER_CANCELED"…), when the browser has finished the download. */
 const downloadEnd = (id: number) =>
   new Promise<string>((resolve) => {
-    const done = (state?: string) => {
+    const done = (state?: string, error?: string) => {
       if (!state || state === 'in_progress') return;
       browser.downloads.onChanged.removeListener(onChanged);
-      resolve(state);
+      resolve(state === 'interrupted' ? (error ?? state) : state);
     };
-    const onChanged = (d: { id: number; state?: { current?: string } }) => {
-      if (d.id === id) done(d.state?.current);
+    const onChanged = (d: { id: number; state?: { current?: string }; error?: { current?: string } }) => {
+      if (d.id === id) done(d.state?.current, d.error?.current);
     };
     browser.downloads.onChanged.addListener(onChanged);
-    void browser.downloads.search({ id }).then(([d]) => done(d?.state)); // it may already be finished
+    void browser.downloads.search({ id }).then(([d]) => done(d?.state, d?.error)); // it may already be finished
   });
 
 /** Look for recordings left behind by a crash or a closed tab. */
@@ -489,11 +498,18 @@ export async function refreshRecoverable() {
 
 /** Bring a left-behind recording back to the Finished screen. */
 export async function recover(item: Stored) {
-  if (session.phase !== 'idle') return;
+  if (session.phase !== 'idle' || session.finishing) return;
   try {
     releaseFile = await holdStored(item.name);
+    session.fileName = item.name; // also tells the page which "Recover it" shows the progress
+    session.finishShare = 0;
+    session.finishing = true;
+    // A file left by a crash is still in its crash-safe form: finish it like Stop does (report §44).
+    // shortcut: also re-copies a file that was already finished (closed unsaved after Stop), lossless, just slower.
+    const regular = await finishFile(item.name, (share) => (session.finishShare = share));
+    session.finishing = false;
+    if (!regular) session.notices = [...session.notices, KEPT_CRASH_SAFE];
     const file = await getStored(item.name);
-    session.fileName = item.name;
     session.ext = item.name.endsWith('.webm') ? 'webm' : 'mp4';
     cursor = []; // a recovered file has no cursor path (the last one belongs to another recording)
     show(file);
@@ -503,6 +519,12 @@ export async function recover(item: Stored) {
     session.recoverable = session.recoverable.filter((r) => r.name !== item.name);
   } catch (e) {
     session.error = `Could not open the recording: ${(e as Error).message}`;
+    session.finishing = false;
+    if (session.phase === 'idle') {
+      session.fileName = '';
+      releaseFile?.(); // let go, so it can be tried again
+      releaseFile = undefined;
+    }
   }
 }
 

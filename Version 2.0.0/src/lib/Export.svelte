@@ -39,10 +39,11 @@
       <div><dt>Size</dt><dd>{fmtSize(session.bytes / 1e6)}</dd></div>
     </dl>
 
-    {#if session.saved}
-      <p class="ok" role="status"><Icon name="check" /> Exported to your computer</p>
-    {:else if session.exporting}
+    <!-- Exporting first: during "Export again" it said "Exported" while the new copy was still being written. -->
+    {#if session.exporting}
       <p class="busy" role="status">Exporting… keep this tab open until it finishes.</p>
+    {:else if session.saved}
+      <p class="ok" role="status"><Icon name="check" /> Exported to your computer</p>
     {:else}
       <p class="hint">You choose the folder next: Downloads, or another drive like D: or E:.</p>
     {/if}

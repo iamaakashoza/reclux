@@ -42,8 +42,9 @@ export async function renderEdit(
     const audio = await input.getPrimaryAudioTrack();
     const W = video.displayWidth;
     const H = video.displayHeight;
-    // The file's own frame rate (a recovered file may not match today's setting).
-    const fps = Math.round((await video.computePacketStats(120)).averagePacketRate) || preset.fps;
+    // The file's own frame rate (a recovered file may not match today's setting). The rate it was recorded at, not
+    // the average: a file that skipped frames averaged 27 fps where it was made at 60 (report §45).
+    const fps = Math.round((await video.computeFrameRateMetrics()).bestGuessFrameRate) || preset.fps;
     const want: Format = from.endsWith('.webm') ? 'webm' : 'mp4';
     const { ext, hardware, sound } = await pickFormat(want, W, H, preset.mbps * 1e6, !!audio);
     const name = `${tmpName}.${ext}`;

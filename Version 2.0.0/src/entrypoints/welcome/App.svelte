@@ -36,6 +36,17 @@
     heading?.focus({ focusVisible: false } as FocusOptions);
   }
 
+  // A double click opens one Reclux tab, not two (each one recorded). Free again a second after it opened: Firefox
+  // brings the new tab to the front a moment after it is made, and a fast third click landed in between. This page
+  // may start another recording later.
+  let starting = false;
+  const start = async () => {
+    if (starting) return;
+    starting = true;
+    await openRecorder(await browser.tabs.getCurrent()).catch(() => {});
+    setTimeout(() => (starting = false), 1000);
+  };
+
   const FEATURES = [
     { icon: 'camera', title: 'Webcam circle', text: 'Your face in a round bubble you can drag anywhere.' },
     { icon: 'zoom', title: 'Cursor zoom', text: 'Zooms in where you work, by itself.' },
@@ -130,7 +141,7 @@
               Click the puzzle piece in your browser’s toolbar, then the pin next to Reclux.
             </Banner>
             <div class="cta">
-              <Button variant="primary" size="lg" icon="record" onclick={() => void browser.tabs.getCurrent().then((t) => openRecorder(t))}>Start recording</Button>
+              <Button variant="primary" size="lg" icon="record" onclick={start}>Start recording</Button>
             </div>
           {/if}
         </div>

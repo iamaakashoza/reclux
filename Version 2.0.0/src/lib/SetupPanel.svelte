@@ -4,7 +4,7 @@
   import QualityPicker from './QualityPicker.svelte';
   import PageFeatures from './PageFeatures.svelte';
   import Toggle from './Toggle.svelte';
-  import { MAX_SECONDS, findPreset, fmtSize, presetId, sizeMB } from './presets';
+  import { MAX_SECONDS, findPreset, fmtSize, needMB, presetId, sizeMB } from './presets';
   import { systemAudioWorks } from './settings';
   import { refreshDisk, session } from './session.svelte';
 
@@ -50,7 +50,7 @@
   {#if session.lowDisk}
     <Banner kind="warning" title="Low disk space">
       {#if session.free !== null}Only {fmtSize(session.free / 1e6)} is free for recordings.{/if}
-      2 hours at this quality could need about {need}. Free up space on the drive that holds your browser
+      2 hours at this quality could need about {fmtSize(needMB(preset))} (the recording, plus room to finish it). Free up space on the drive that holds your browser
       (usually C:) or lower the quality. When it is done, you can save the file to another drive like D: or E:.
       {#snippet actions()}
         <Button variant="secondary" onclick={() => (session.presetId = presetId(720, preset.fps))}>Lower quality</Button>

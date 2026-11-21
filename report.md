@@ -2917,3 +2917,89 @@ Owner's final review: Opera (webcam inside the controls window, screenshot 01) a
 | An address sent before the offer/answer is dropped | Not a bug: the browser adds each address to the description before announcing it, so it is in the offer/answer already |
 
 Re-tested after the fixes: Firefox (all rows above, screenshots smooth: no flash, no black), Brave (0 black of 40, hide / show / Stop).
+
+## 44. Crash-safe WebM, finishing recovered files (21 Nov 2026) 🛟
+
+From the ponytail audit (`reports/ponytail-audit-2026-11-21.md`, findings 1–3). Not yet tested in a browser.
+
+| Issue | Root cause | Fix |
+|---|---|---|
+| A WebM recording cut short by a crash could look empty to players | Mediabunny writes the WebM's total length at the start, where it covers only the header, and corrects it at Stop. A crash leaves "the file ends after the header". The last open section (~2 s) was also not readable. Lab test, 10 s cut short: 400 of 500 frames readable by Mediabunny (browsers not tested) | The live WebM is written as **"length unknown"** (`appendOnly`, the normal way to write a live WebM): 500 of 500 readable. On Stop it is rebuilt like the MP4 (`finishFile`), which adds the length and the seek index back (rebuilt test file: 9.98 s, 500 frames) |
+| Recovered recordings stayed in the crash-safe form (Windows shows a fragmented MP4's length and frame rate wrong, §31) | "Recover it" did not run the rebuild that Stop runs | Recover runs `finishFile` too, with its progress on the "Recover it" button. Shortcut: a file that was already finished is copied again (lossless, only slower) |
+| The rebuild failed silently on a nearly full disk | It needs a second full copy (18 GB for 2 h at 1080p60) but the low-disk warning counted one; failure only went to the console | Low-disk warning counts both copies (`needMB`). A failed rebuild shows a notice: the file is kept in its crash-safe form |
+| After a failed Stop, "Use Recover it below" showed no button | A recording started from the popup stayed in its start mode (picture backdrop, "Choose what to share") until it finished normally | Start mode ends as soon as recording begins |
+
+## 45. Lost frames, first frame, frozen controls (21 Nov 2026) 🎞️
+
+From the tester run `spike/bench/runs/2026-11-21-1244/` (Brave 158, Firefox 160, Intel UHD) and audit finding 4. Root causes reproduced in headless Brave (tab capture, the tester's harness), then re-tested there and in Firefox (entire screen).
+
+| Issue | Root cause | Fix |
+|---|---|---|
+| Brave tab recordings lost most frames: 1080p60 17.6 real fps, Webcam 1080p60 5.0, freezes up to 2.3 s | **Not the encoder.** The encoder takes its size from the first frame it gets, and that frame came from the countdown (the warm-up, §31). A shared tab is shorter once it is back in front (the browser's "sharing this tab" bar: 1892×980 in the countdown, 1892×896 after), so every later frame went through Mediabunny's canvas resize (`sizeChangeBehavior: 'contain'`), which took longer than a frame. Measured: one frame cost 22 ms on average at 1080p60, 61 ms with the webcam; 2 ms after the fix | The warm-up frame is taken when recording starts (`go`, after the user's tab is back), not during the countdown. After: 720p50/60, 1080p50/60, WebM 1080p60, Webcam 720p50 and 1080p60 all record exactly 50/60 fps, 0 frames skipped. No change to the default quality: with frames no longer resized, this PC keeps up with 1080p60 (§31 measured the real screen at 60.000 too) |
+| Frame 0 showed the countdown (Firefox, the whole screen, §40 "known"), or the page bar "Starting in 5" | Same warm-up frame. The page bar also showed during the countdown, and stayed into the first ~0.3 s until the page heard a controls window was opening | Same fix. The page bar never shows in the countdown, and the controls window counts as open from the moment recording begins (`begin()`). Cost: the encoder now starts after 0 ("Starting…" for a moment: 0.1–0.25 s for a first frame in the encoder tests here) instead of during the countdown |
+| After a reload or close of the Reclux tab mid-recording, the controls window stayed, frozen (Firefox: "can't access dead object") | The controls run on the Reclux tab (`mountControls`); nothing closed their window when that tab went | The Reclux tab closes both control windows on `pagehide`. A real crash takes both pages down together (one process), so nothing is left to close |
+| Brave: Cancel in Save As showed "Could not save: the copy was interrupted", kept after a later export | Brave reports Cancel as a started download that ends "interrupted" (`USER_CANCELED`), not as a refused one | `downloadEnd` says why a download stopped; `USER_CANCELED` is silent. Each export clears the old error. The status shows "Exporting…" before "Exported" |
+| Editing a file with skipped frames gave 27 fps (source 60/1, 35.7 real) | `render.ts` used the average packet rate | Mediabunny's `computeFrameRateMetrics().bestGuessFrameRate` (the grid the frames sit on). Tester files: 60, 60, 60, 50, 60 (WebM) instead of 27, 5, 16, 28, 24 |
+| Welcome "Start recording" ×3 = 3 recordings | No double-click guard (the popup has one) | Same guard, freed once the tab is open |
+| Two Firefox audio readers (audit 4) | `track-processor.ts` patched the global, so Mediabunny's own audio fallback was skipped | The stand-in is video only (`VideoProcessor`), used by the pump when the browser has no `MediaStreamTrackProcessor`. Firefox audio re-tested: present |
+
+### 45.1 Firefox re-test (round 2)
+
+Re-test `spike/bench/runs/2026-11-21-1354/`: Brave 7/7 pass; Firefox (entire screen) skipped frames. Measured with a timed build, a raw encoder test and the Firefox profiler (`MOZ_PROFILER_STARTUP`).
+
+| Issue | What was measured | Root cause | Done |
+|---|---|---|---|
+| N1: Firefox 1080p skips frames (1080p60 46 fps, 1080p50 45–48) | Firefox 160 has **no hardware H.264** here (`prefer-hardware` answers "not supported"). Its software encoder manages 63–70 fps at 1920×1080 with nothing else running; during a recording each frame took 26 ms (≈ 38 fps). 720p: 143 fps alone, 1.4 ms per frame while recording, 60.0 fps files | **This PC cannot encode 1080p60 in Firefox in real time**; 1080p50 is borderline. Not the frame reader (0.3 ms per frame) | Nothing to change in code: on first run Firefox here already starts on **720p60** (`suggestedPreset`: no hardware encoder for 1080p60). The tester picked 1080p by hand. Owner's call: keep 1080p selectable in Firefox, or warn / hide it where only software encoding exists |
+| N1: Webcam 720p60 (and once Normal with page access) skips frames | With the tester's camera stand-in (a canvas): profiler shows "Canvas CaptureStream" tasks of 40–118 ms, 9 in 8 s, on the main thread Reclux records on. With Firefox's own fake camera instead: 4 of 5 Webcam takes had holes only in the first 2 s (N2), Normal with page access 4 of 4 clean | Mostly the **test's camera stand-in** (a real camera does not draw on that thread); the rest is N2 | None. Re-test Webcam with Firefox's fake camera (`media.navigator.streams.fake`) or a real one |
+| N2: one 267–367 ms hole 0.5–1.5 s into Firefox recordings; the blank controls window is recorded | Firefox runs every Reclux page (the Reclux tab, the controls window, the webcam frame on pages) on **one main thread**, the one that reads and encodes frames. Opening the controls window (a new window and page) blocked it 150 + 178 ms back to back in the profiler; the window takes ~1.7 s to be ready (blank meanwhile). Any stall over 0.25 s becomes a hole (§34) | Loading a new Reclux window during the recording | **Not changed: owner's call.** Options: (a) open the controls window at the start of the countdown (paid before recording, the blank window is never recorded; it shows 5 s earlier), (b) start recording only once the controls window is ready (no hole; recording starts ~1.7 s after 0 in Firefox) |
+| N3: once, no controls window at all; often still `about:blank` 1.5 s in | Not reproduced (24 Firefox takes here, Stop pressed in the controls window each time) | `openControls` waited at most 3 s for the page, then closed the window as "never found" (and with no page access there is no page bar either). The only path that closes it while recording | Waits up to 15 s (`window.ts`) |
+
+### 45.2 Firefox: webcam circle on pages (round 3, not fixed)
+
+Re-test `spike/bench/runs/2026-11-21-1451/firefox-webcam/` (Firefox's own fake camera): holes after the first 2 s in 5 of 6 takes with the circle on the page, none with the camera off or the circle hidden.
+
+What was measured (timed build, Firefox profiler, switching parts off halfway through a take):
+- **Stopping the picture sent to the circle** (`replaceTrack(null)` on the link from `shareCamera`) made the pauses on the recording thread stop (2 takes: 12 → 1 late encoder hand-offs, 5 → 0 thread pauses). Emptying the circle's video alone only partly helped.
+- **The link's own work is not on that thread:** the profiler shows no WebRTC code on Firefox's extension main thread. That thread is 2/3 busy with recording work itself (frame hand-offs, encoder and sound callbacks, the muxer, the controls). With the circle there is more garbage collection (≈ 100 extra samples in 10 s, none without the camera). The pauses come from that extra load on an already busy thread, not from one per-frame step that could be removed.
+- **Sending a smaller, slower picture** (half size, 15 fps, confirmed 240×240 at 15 fps): quiet takes still had 7, 9 and 1 holes (before: 9 and 6). No clear gain, so **not kept** (no guessed fixes).
+
+Options for the owner:
+
+| Option | Effect | Cost |
+|---|---|---|
+| A. In Firefox, show the circle only in the controls window | Removes the cost (camera-on, circle-off takes were clean) | Product change: no circle on web pages in Firefox |
+| B. In Firefox, show a still picture of the webcam on pages, refreshed every second or so | Most of the cost gone (to be measured) | The circle on pages is not live in Firefox |
+| C. Move muxing and encoding into a worker | Frees the thread the circle competes with, also helps 1080p | Large change to `recorder.ts`; Firefox still reads frames on the page |
+| D. Leave as is | Webcam on pages in Firefox: about 45–58 fps with short freezes | Known limit |
+
+### 45.3 Round 4: owner's decisions and the final-test bugs (21 Nov 2026)
+
+Final test `spike/bench/runs/2026-11-21-1538/`. Owner's decisions: keep 1080p everywhere with a note where there is no hardware encoder; open the controls window at the start of the countdown (§45.1 option a); move encoding off the page (§45.2 option C).
+
+| Item | Change | Measured |
+|---|---|---|
+| Encoding in a worker (option C) | `encoder.worker.ts` now holds the frame clock (§31/§34 rules unchanged), Mediabunny's encoders and the muxer; it writes through the same writer worker (OPFS, flushed sections, §33). The page only reads the screen (MediaStreamTrackProcessor, or the Firefox stand-in, which must stay on the page) and hands each new picture over (moved, not copied). The sound goes from the audio thread straight to the worker (`public/tap.worklet.js`, an AudioWorklet on the existing mix), so ducking and mute are unchanged. The Web Lock, recovery and `finishFile` stay on the page | Brave 1080p60: 0 skipped (5 takes, MP4 + WebM + pause). Crash (reload) + Recover: regular 6.02 s file. A/V offset 71–95 ms (old build 21–286 ms). Firefox: sound present, offset −61…−111 ms (old −63…−97) |
+| Firefox: did the worker help? | No. Side by side on the same PC (4 Normal + 2 Webcam quiet takes each): old build 8/5/1/0 and 9/13 holes, new 11/7/2/5 and 6/7. The worker's own clock pauses (up to 330 ms) at the same moments as the page's, so in Firefox the whole Reclux process stalls, not just the page. Cause not found (not the page's main thread, as §45.1/45.2 assumed). Firefox 1080p60: 31–36 fps (software encoder, §45.1) | Known limit stays: Firefox Webcam on pages and 1080p skip frames on this PC |
+| Bug 1 (Brave): Hide webcam put 0.27–0.6 s holes in the file (15–67 skipped) | Covered by the worker: the page's stall (the circle's frame being removed from the page, ~1.5 s after the click) no longer stops the frame clock | 4 takes: 0 skipped, 0 holes; one still picture of ~0.2 s remains where the page stalls |
+| First frame after the countdown | The worker waits for one picture taken after Go (max 1 s): in a fresh browser the first picture could still be the shared tab's old size (1892×980), which brought back §45's resize cost (195 skipped once) | 1080p60 first take in a fresh Brave: 0 skipped, right size |
+| N2: controls window opens at the start of the countdown | Shows "Starting in 3…" (Pause and Stop greyed: Cancel is in the Reclux tab, in front then). Counted as open from the moment it opens, so the page bar never shows (B3); still closes when the tab reloads (B6) | Brave: the Reclux tab keeps focus and stays in front; frame 0 shows the page and circle, no bar; reload closes it. Firefox: no hole in the first 2 s in 3 of 4 takes (old 2 of 4) |
+| 1080p note | `hardware1080` (settings.ts, the existing check, now per frame rate) is shared by the first-run choice and `QualityPicker`, so the note shows in the popup, the welcome page and the Reclux tab, only at 1080p and only without a hardware encoder | Firefox here: shown at 1080p, gone at 720p. Brave: never shown |
+| Bug 2 (Firefox): 40 ms triple click opened 2 tabs | The guard is freed 1 s after the tab opens (Firefox brings it to the front a moment later) | 2 tries with three clicks 40 ms apart (WebDriver clicks, not the tester's OS clicks): 1 tab each |
+| Bug 3 (Firefox): later holes in Normal takes | Not fixed: same Firefox stall as above | see the side-by-side row |
+| Bug 4: "GSAP target .circle not found" | The circle only moves in Webcam mode, where it exists | not re-run in a browser |
+
+Review fixes (round 4, step 6):
+- **A failed encoder worker was never heard.** Only its messages were listened to, so a worker that failed to load or threw outside its own error handling left the countdown at 0 or Stop on "finishing" for ever. `worker.onerror` / `onmessageerror` now end it like an error message: a pending step fails, otherwise the session stops and the file stays recoverable.
+- **Sound drifting from the picture over long recordings.** Sound was timed by counting samples (the sound card's clock), the picture by the computer's clock: 50 ppm apart is 0.36 s after 2 hours. Old Chromium recordings used the capture timestamps, so this was a regression there. `sound-clock.ts` keeps counting but checks each block against the picture's clock: behind by more than 40 ms over a whole ~2 s window → moved forward; ahead by more than 40 ms → one ~20 ms block dropped (never back in time). The window's smallest lag is used, so a late message (a busy moment) does not count as drift. Check: `node src/lib/sound-clock.check.mjs` (±50/100 ppm over 2 h stays within 70 ms; 0.4 s late messages move nothing). Brave 1080p60 with pause: offset steady at 103–108 ms, 0 frames skipped.
+
+### 45.4 Round 5: final-test bugs after the worker move (21 Nov 2026)
+
+Final test `spike/bench/runs/2026-11-21-1744/`. Measured headed in Brave (maximised window, `NOWINSIZE=1`), 1080p60.
+
+| Bug | Root cause (measured) | Fix | Before → after |
+|---|---|---|---|
+| 3: some 1080p60 takes collapse for the whole take (Normal 15–26 fps, Webcam 3–5 fps), always 1618×932 | Not PC load: B1's mechanism again. Pictures seen by the worker: 1618×1020 during the countdown, then **1–2 pictures at 1618×932** as the shared tab comes back, then 1876×1080. Round 4's "wait for a picture taken after Go" picked exactly that in-between picture (2 of 6 takes), so every later frame was resized (264–314 skipped) | At Go the worker also waits until the picture size has not changed for 200 ms (at most 1 s more). A still screen sends no new pictures, so it counts as settled at once | 10 Normal + 6 Webcam takes: all 1876×1080, Normal 0 skipped in 8 of 10 (15 and 30 in two), Webcam 30–45 skipped (2–3 holes of 267 ms, the same as the Mute control takes: background, not this bug). Before: 6 of 17 and 5 of 13 collapsed |
+| 2: "A VideoFrame was garbage collected without being closed" after every Stop | The page kept handing pictures over while the worker finished the file, and the worker was stopped holding some | The page stops reading at Stop/Cancel (a picture already on its way is closed), and the worker closes any picture that arrives after Stop/Cancel | Not in the console after Stop (12 s wait, the tester's `sizegc.js`) |
+| 1: Hide webcam on a page froze the recorded page ~1.3 s later (0.9–1.1 s here) | Hide removed the circle's frame from the page (its page was unloaded), which stalled the page's drawing | The circle's page is loaded the first time it shows and then kept; Hide only hides it (its camera picture is off anyway). Showing it again is instant. Keeping it hidden with `visibility` instead of `display: none` made no difference | 3 quiet takes each: before 883–1100 ms freeze after Hide in 3 of 3; after none over 267 ms (Mute control: same 267 ms holes). Firefox: hide and show still work (circle found, video plays again) |
+
+Not changed: a size change **during** recording (the user resizes a shared window, or the browser lowers the tab's capture size under load) still sends every later frame through Mediabunny's resize (`sizeChangeBehavior: 'contain'`) and can skip frames. Chromium's encoder can scale by itself (`passThrough`), but a different shape would then be stretched, not letterboxed; the owner's call.

@@ -40,7 +40,8 @@
             if (t) t.textContent = `00:00:${String(Math.floor(clock.s)).padStart(2, '0')}`;
           },
         });
-      gsap.to('.circle', { x: -26, y: -14, duration: 3, ease: 'sine.inOut', yoyo: true, repeat: -1 });
+      // Only in Webcam mode: there is no circle otherwise (GSAP warned "target .circle not found").
+      if (camera) gsap.to('.circle', { x: -26, y: -14, duration: 3, ease: 'sine.inOut', yoyo: true, repeat: -1 });
     },
     // 3. Start → share → 3·2·1 → record with cursor zoom → trim → export.
     () => {

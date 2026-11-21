@@ -53,7 +53,9 @@ export async function openControls(width: number, height: number): Promise<Windo
   const win = await browser.windows.create({ ...opts, focused: false }).catch(() => browser.windows.create(opts));
   controls = win?.id;
   rounded = '';
-  for (let i = 0; i < 60 && controls !== undefined; i++) {
+  // Up to 15 s: a busy Firefox once took over 3 s (the old limit) to load it, and the window was closed as "never
+  // found", so there were no controls at all (report §45).
+  for (let i = 0; i < 300 && controls !== undefined; i++) {
     const view = (browser.extension.getViews({ windowId: controls }) as unknown as Window[])[0];
     if (view?.document.readyState === 'complete') {
       await measureFrame(view);

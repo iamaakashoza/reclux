@@ -1,16 +1,13 @@
-// Firefox (and Safari on a normal page) have no MediaStreamTrackProcessor, which Mediabunny uses to read
-// frames and sound from a live stream. This stand-in provides the same thing. Chrome never uses it.
-//   Video: a hidden <video> is read on a steady clock, at a fixed frame rate. The page's own frame
-//          callbacks stop in a hidden tab, so they cannot be used. A still screen repeats frames.
-//   Audio: a ScriptProcessor turns the sound into AudioData.
-// ponytail: ScriptProcessor is deprecated but works everywhere. Move to an AudioWorklet if browsers drop it.
+// Firefox (and Safari on a normal page) have no MediaStreamTrackProcessor, which the frame pump (recorder.ts) uses
+// to read frames from a live stream. This stand-in provides it for video. Chrome never uses it.
+// A hidden <video> is read on a steady clock, at a fixed frame rate. The page's own frame callbacks stop in a
+// hidden tab, so they cannot be used. A still screen repeats frames.
+// Sound needs no stand-in: Mediabunny reads it its own way where the browser has no MediaStreamTrackProcessor.
 
-type Frame = VideoFrame | AudioData;
-
-function videoFrames(track: MediaStreamTrack): ReadableStream<Frame> {
+function videoFrames(track: MediaStreamTrack): ReadableStream<VideoFrame> {
   const video = document.createElement('video');
   const ticker = new Worker(new URL('./ticker.worker.ts', import.meta.url), { type: 'module' });
-  return new ReadableStream<Frame>(
+  return new ReadableStream<VideoFrame>(
     {
       start(ctl) {
         video.muted = true;
@@ -33,50 +30,13 @@ function videoFrames(track: MediaStreamTrack): ReadableStream<Frame> {
   );
 }
 
-function audioFrames(track: MediaStreamTrack): ReadableStream<Frame> {
-  let ctx: AudioContext | undefined;
-  let node: ScriptProcessorNode | undefined;
-  return new ReadableStream<Frame>({
-    async start(ctl) {
-      ctx = new AudioContext({ sampleRate: track.getSettings().sampleRate });
-      const source = ctx.createMediaStreamSource(new MediaStream([track]));
-      node = ctx.createScriptProcessor(4096, 2, 2);
-      node.onaudioprocess = (e) => {
-        const b = e.inputBuffer;
-        const data = new Float32Array(b.length * b.numberOfChannels);
-        for (let c = 0; c < b.numberOfChannels; c++) data.set(b.getChannelData(c), c * b.length);
-        ctl.enqueue(
-          new AudioData({
-            format: 'f32-planar',
-            sampleRate: b.sampleRate,
-            numberOfFrames: b.length,
-            numberOfChannels: b.numberOfChannels,
-            timestamp: Math.round(e.playbackTime * 1e6),
-            data,
-          }),
-        );
-      };
-      source.connect(node);
-      node.connect(ctx.destination); // needed for the node to run. It outputs silence.
-      await ctx.resume();
-    },
-    cancel() {
-      node?.disconnect();
-      void ctx?.close();
-    },
-  });
-}
-
-class TrackProcessor {
-  readable: ReadableStream<Frame>;
+/** The video frame reader, for browsers without MediaStreamTrackProcessor. */
+export class VideoProcessor {
+  readable: ReadableStream<VideoFrame>;
   constructor({ track }: { track: MediaStreamTrack }) {
-    this.readable = track.kind === 'video' ? videoFrames(track) : audioFrames(track);
+    this.readable = videoFrames(track);
   }
 }
 
-const g = globalThis as unknown as { MediaStreamTrackProcessor?: unknown };
 /** True where the stand-in is in use (Firefox). */
-export const isPolyfill = !g.MediaStreamTrackProcessor;
-if (isPolyfill && typeof VideoFrame !== 'undefined' && typeof AudioData !== 'undefined') {
-  g.MediaStreamTrackProcessor = TrackProcessor;
-}
+export const isPolyfill = !(globalThis as { MediaStreamTrackProcessor?: unknown }).MediaStreamTrackProcessor;

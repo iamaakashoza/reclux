@@ -81,17 +81,21 @@
     document.documentElement.toggleAttribute('data-recording', live);
   });
 
-  // While recording: the small controls window, bottom-right, sized to the controls (no scrollbars).
-  let controlsFor = '';
+  // While recording: the small controls window, bottom-right, sized to the controls (no scrollbars). Opened when the
+  // countdown starts (owner's call, 21 Nov 2026), so its page is ready before recording: opening it during the
+  // recording stalled Firefox ~0.3 s and its blank window was recorded (report §45). It shows "Starting in 3…".
+  const wanted = $derived(session.phase === 'countdown' || live);
+  let opened = false;
   $effect(() => {
-    if (!live || controlsFor === session.fileName) return;
-    controlsFor = session.fileName;
-    // Counted as open while it opens, so the bar on web pages does not show (and get recorded) meanwhile.
+    if (!wanted) return void (opened = false);
+    if (opened) return;
+    opened = true;
+    // Counted as open from now, so the bar on web pages never shows (and gets recorded) meanwhile.
     session.controls = true;
     void (async () => {
       const win = await openControls(560, 120);
-      // Never found its page (a blank window), or Stop came while it was opening: it must not stay behind.
-      if (!win || !live) {
+      // Never found its page (a blank window), or cancelled while it was opening: it must not stay behind.
+      if (!win || !wanted) {
         session.controls = false; // the bar on web pages takes over
         return closeControls();
       }
@@ -110,8 +114,15 @@
       closeFloating();
       closeControls();
     }
-    // After the first recording this tab is a normal Reclux tab (New recording shows the start card).
-    if (session.phase === 'finished') flow = false;
+    // Once recording has begun this tab is a normal Reclux tab (New recording shows the start card). Also when
+    // finishing the file failed: then the start card must show, with the recording to recover.
+    if (live || session.phase === 'finished') flow = false;
+  });
+  // The controls run on this page. Reloaded or closed mid-recording, it must take their window along: left behind,
+  // it stayed frozen, and its Pause and Stop did nothing.
+  addEventListener('pagehide', () => {
+    closeFloating();
+    closeControls();
   });
 
   // When the screen changes, move keyboard focus to its first button, so it is not lost when the old one disappears.
@@ -189,8 +200,11 @@
           From {new Date(item.modified).toLocaleString()} · {fmtSize(item.size / 1e6)}. It may have been cut short by a
           crash or a closed tab.
           {#snippet actions()}
-            <Button variant="secondary" onclick={() => recover(item)}>Recover it</Button>
-            <Button variant="ghost" onclick={() => discardRecoverable(item)}>Delete</Button>
+            {@const busy = session.finishing && session.fileName === item.name}
+            <Button variant="secondary" disabled={session.finishing} onclick={() => recover(item)}>
+              {busy ? `Getting it ready… ${Math.round(session.finishShare * 100)}%` : 'Recover it'}
+            </Button>
+            <Button variant="ghost" disabled={session.finishing} onclick={() => discardRecoverable(item)}>Delete</Button>
           {/snippet}
         </Banner>
       {/each}

@@ -118,26 +118,29 @@ export async function openCapture(
       notices.push('System audio is off, but your microphone can still pick up sound from your speakers. Use headphones to keep it out.');
     }
 
-    // One mixed audio track, so every player hears both sources.
-    const stream = new MediaStream(display.getVideoTracks());
+    // One mixed sound, so every player hears both sources. A listener on the audio thread (the tap) hands it to the
+    // encoder worker directly, never through this page (report §45).
+    let tap: AudioWorkletNode | undefined;
     let micGain: GainNode | undefined;
     let stopDucking: (() => void) | undefined;
     if (system.length || mic) {
       await ctx.resume();
-      const out = ctx.createMediaStreamDestination();
+      await ctx.audioWorklet.addModule(browser.runtime.getURL('/tap.worklet.js')); // public/, a file of its own
+      tap = new AudioWorkletNode(ctx, 'reclux-tap', { channelCount: 2, channelCountMode: 'explicit' });
+      tap.connect(ctx.destination); // it outputs silence; a node must lead somewhere for the browser to run it
       const systemGain = ctx.createGain();
-      if (system.length) ctx.createMediaStreamSource(new MediaStream(system)).connect(systemGain).connect(out);
+      if (system.length) ctx.createMediaStreamSource(new MediaStream(system)).connect(systemGain).connect(tap);
       if (mic) {
         micGain = ctx.createGain();
-        ctx.createMediaStreamSource(mic).connect(micGain).connect(out);
+        ctx.createMediaStreamSource(mic).connect(micGain).connect(tap);
         if (system.length) stopDucking = duckWhileSpeaking(ctx, micGain, systemGain.gain, onDuck);
       }
-      out.stream.getAudioTracks().forEach((t) => stream.addTrack(t));
     }
 
     const video = display.getVideoTracks()[0]!;
     return {
-      stream,
+      /** The mixed sound (undefined: no sound). */
+      tap,
       video,
       /** The webcam (to ask permission once, and for the circle in the floating window). */
       camera,
