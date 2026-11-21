@@ -21,7 +21,7 @@ The version stays 2.0.0 until the owner says otherwise.
 - "Recover it" now finishes the file the same way Stop does, so Windows shows its right length and frame rate.
 - The low-disk warning now counts the room needed to finish the file. If finishing still fails, a note says the file is kept in its crash-safe form.
 - After a failed Stop, the page said "Use Recover it below" but showed no button. The recording to recover now shows.
-- Recording a browser tab lost most of its frames at 1080p and with the webcam on (the video stuttered and froze for up to 2 s). Every frame is kept now.
+- Recording a browser tab lost most of its frames at 1080p and with the webcam on (the video stuttered and froze for up to 2 s). Fixed. On slower computers, 1080p at 60 fps with the webcam on, or a long recording, can still skip a short moment now and then; 1080p at 50 fps or 720p is smooth there.
 - The first moment of a recording could show the countdown (Firefox, the whole screen) or the small control bar with "Starting in 5". It now starts on your page.
 - Reloading or closing the Reclux tab during a recording left the controls window open and frozen. It now closes too.
 - Brave: pressing Cancel in the Save As window showed "Something went wrong". Cancel is now silent, and a later export clears an old error. "Export again" no longer says "Exported" while it is still saving.
@@ -29,7 +29,7 @@ The version stays 2.0.0 until the owner says otherwise.
 - A quick double or triple click on Start recording in the welcome page started several recordings.
 - Firefox: on a busy computer the recording controls window could close by itself before it appeared, leaving no controls.
 - Firefox: a very fast triple click on Start recording in the welcome page still opened two tabs.
-- Brave: hiding the webcam circle on a web page made the recorded page freeze for up to a second. It no longer does.
+- Brave: hiding the webcam circle on a web page also skipped frames in the recording. It no longer skips frames, but the recorded page can still freeze for under a second when the circle is hidden or shown again (known limit).
 - Brave: a 1080p recording of a browser tab could stutter for its whole length (15–26 fps, the webcam even 3–5 fps). It now starts at the right size and keeps every frame.
 
 ## 2.0.0 fixes, part 3 (20 November 2026, not released yet)
