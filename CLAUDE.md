@@ -19,7 +19,7 @@ npm run dev             # Chromium dev build. Load .output/reclux-extension-all-
 npm run dev:firefox
 npm run build           # -> .output/reclux-extension-all-in-one (Chrome, Brave, Edge, Opera)
 npm run build:firefox   # -> .output/reclux-firefox-extension
-npm run zip / zip:firefox
+npm run zip / zip:firefox   # zip:firefox also makes reclux-sources-v2.zip: never published
 npm run check           # svelte-check type check
 node src/lib/zoom.check.mjs   # assert-based check of the cursor-zoom logic
 node src/lib/edit.check.mjs   # assert-based check of the cut list (split / trim / delete)
@@ -75,6 +75,14 @@ UI: shared components in `src/lib/*.svelte` (`Logo.svelte` is the logo), design 
 - `report.md` — the research report and decision log (presets, bitrates, browser minimums, 2-hour rules). Code comments cite it as "report §N". Update it when decisions change.
 - `brand/` — logo master files (SVG), app icons and usage rules. `public/icon/` and `Logo.svelte` are copied from here.
 - Website: the `website` branch, which Netlify deploys on every push (report §30, §33), checked out as a git worktree at `spike/website`. Its `download/` holds the v2 zips; the same zips are the assets of the GitHub Release `v2.0.0` (`gh release upload v2.0.0 <zip> --clobber`), so a rebuilt zip goes to both.
+- Releasing a rebuilt 2.0.0 (only after the owner says yes):
+  1. Inside `Version 2.0.0`: `npm run zip` and `npm run zip:firefox`.
+  2. In `CHANGELOG.md`, replace "not released yet" in the newest section with the date.
+  3. Commit only `Version 2.0.0/`, `report.md`, `CHANGELOG.md` and `CLAUDE.md`, then push `main` (never force-push or move a tag).
+  4. `gh release upload v2.0.0 "Version 2.0.0/.output/reclux-extension-v2.zip" "Version 2.0.0/.output/reclux-firefox-extension-v2.zip" --clobber`.
+  5. Copy both zips into `spike/website/download/`, update each "Download .zip · N KB" in `spike/website/index.html` (1000-byte KB), commit and push `website`.
+  6. Check that `gh release view v2.0.0 --json assets` and `curl -sI https://reclux.netlify.app/download/<zip>` (content-length; Netlify takes about a minute) both match the local zip sizes.
+  If `permissions` in `wxt.config.ts` changed, update the privacy page first.
 - Privacy page: the separate `reclux-privacy` repo (GitHub Pages, branch `main`), cloned at `spike/reclux-privacy`, one `index.html`. Its permissions table must match `permissions` in `wxt.config.ts`.
 - Both pages copy the extension's look by hand (Figtree + JetBrains Mono woff2 from `node_modules/@fontsource-variable/*`, colours from `src/styles/tokens.css`); update them when `tokens.css` changes.
 - `docs/`, `spike/`, `reports/`, `research_notes/` are local-only (gitignored).
